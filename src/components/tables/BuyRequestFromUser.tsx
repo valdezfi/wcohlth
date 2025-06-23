@@ -11,8 +11,9 @@ import {
   TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
-
+import CancelConfirmationModal from "../ui/modal/CancelConfirmation"
 import { Chatting } from "@/components/Message/Chating";
+import { toast } from "sonner";
 
 interface BuyRequest {
   requestId: string;
@@ -42,6 +43,8 @@ export default function BuyRequestFromUser({
   const [buyRequests, setBuyRequests] = useState<BuyRequest[]>([]);
   const [approvedTransactions, setApprovedTransactions] = useState<BuyRequest[]>([]);
   const [loading, setLoading] = useState(true);
+const [showCancelModal, setShowCancelModal] = useState(false);
+const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
   const [selectedApprovedRequestId, setSelectedApprovedRequestId] = useState<string | null>(null);
 
@@ -273,18 +276,20 @@ export default function BuyRequestFromUser({
                     </Badge>
                   </TableCell>
                   <TableCell className="px-6 py-4 text-center">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="primary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        updateStatus(tx.requestId, "deny");
-                      }}
-                    >
-                      Cancel
-                    </Button>
+                  <Button
+  type="button"
+  size="sm"
+  variant="primary"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPendingCancelId(tx.requestId);
+    setShowCancelModal(true);
+  }}
+>
+  Cancel
+</Button>
+
                   </TableCell>
                 </TableRow>
               ))
@@ -298,6 +303,21 @@ export default function BuyRequestFromUser({
           </TableBody>
         </Table>
       </div>
+<CancelConfirmationModal
+  isOpen={showCancelModal}
+  onClose={() => {
+    setShowCancelModal(false);
+    setPendingCancelId(null);
+  }}
+  onConfirm={async () => {
+    if (pendingCancelId) {
+      await updateStatus(pendingCancelId, "deny");
+      toast.success("Transaction canceled successfully");
+      setPendingCancelId(null);
+      setShowCancelModal(false);
+    }
+  }}
+/>
 
       {selectedApprovedTx && (
         <div className="mt-10 rounded-xl border bg-white dark:bg-white/[0.03] p-6 shadow-sm">
