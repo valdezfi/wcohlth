@@ -14,6 +14,10 @@ import Badge from "../ui/badge/Badge";
 import CancelConfirmationModal from "../ui/modal/CancelConfirmation"
 import { Chatting } from "@/components/Message/Chating";
 import { toast } from "sonner";
+import CreateEVMEscrow from "@/components/tracking/DeployEVM";
+import { useSession } from "next-auth/react";
+import  { CheckBalance }  from "@/components/tracking/CheckEVMBalance";
+
 
 interface BuyRequest {
   requestId: string;
@@ -45,6 +49,9 @@ export default function BuyRequestFromUser({
   const [loading, setLoading] = useState(true);
 const [showCancelModal, setShowCancelModal] = useState(false);
 const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+
+  const email = session.user?.email;
 
   const [selectedApprovedRequestId, setSelectedApprovedRequestId] = useState<string | null>(null);
 
@@ -327,6 +334,23 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
           <Chatting transaction={{ cryptoExchange_id: cryptoExchange_id }} />
         </div>
       )}
+
+
+ <CreateEVMEscrow
+  depositAmount={selectedApprovedTx?.amount || ""}
+  request_id={selectedApprovedTx?.requestId || ""}
+  buyerEmail={selectedApprovedTx?.buyerFullName ? selectedApprovedTx.buyerFullName : ""}
+  sellerEmail={email} // pass this from your parent component or context
+/>
+
+
+<CheckBalance
+  requestId={selectedApprovedTx?.requestId || ""}
+  cryptouserEmail={email}
+/>
+
+
+
     </div>
   );
 }
