@@ -5,7 +5,8 @@ interface InputProps {
   id?: string;
   name?: string;
   placeholder?: string;
-  defaultValue?: string | number;
+  value?: string | number;        // controlled value
+  defaultValue?: string | number; // uncontrolled initial value
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
   min?: string;
@@ -22,6 +23,7 @@ const Input: FC<InputProps> = ({
   id,
   name,
   placeholder,
+  value,
   defaultValue,
   onChange,
   className = "",
@@ -54,7 +56,8 @@ const Input: FC<InputProps> = ({
         id={id}
         name={name}
         placeholder={placeholder}
-        defaultValue={defaultValue}
+        value={value}              // Controlled input value (if provided)
+        defaultValue={defaultValue} // Fallback uncontrolled initial value
         onChange={onChange}
         min={min}
         max={max}
