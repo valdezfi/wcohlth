@@ -5,19 +5,19 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
+  // BoxCubeIcon,
+  // CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
+  // ListIcon,
+  // PageIcon,
+  // PieChartIcon,
+  // PlugInIcon,
   TableIcon,
   UserCircleIcon,
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
+// import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -30,68 +30,68 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    subItems: [{ name: "Lisitings", path: "/listing", pro: false }],
   },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
+  // {
+  //   icon: <CalenderIcon />,
+  //   name: "Calendar",
+  //   path: "/calendar",
+  // },
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
   },
 
+  // {
+  //   name: "Forms",
+  //   icon: <ListIcon />,
+  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+  // },
   {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
+    name: "Your Liquid",
     icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+    subItems: [{ name: "Liquid", path: "/liquid", pro: false }],
   },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
-  },
+  // {
+  //   name: "Pages",
+  //   icon: <PageIcon />,
+  //   subItems: [
+  //     { name: "Blank Page", path: "/blank", pro: false },
+  //     { name: "404 Error", path: "/error-404", pro: false },
+  //   ],
+  // },
 ];
 
 const othersItems: NavItem[] = [
-  {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-    ],
-  },
+  // {
+  //   icon: <PieChartIcon />,
+  //   name: "Charts",
+  //   subItems: [
+  //     { name: "Line Chart", path: "/line-chart", pro: false },
+  //     { name: "Bar Chart", path: "/bar-chart", pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <BoxCubeIcon />,
+  //   name: "UI Elements",
+  //   subItems: [
+  //     { name: "Alerts", path: "/alerts", pro: false },
+  //     { name: "Avatar", path: "/avatars", pro: false },
+  //     { name: "Badge", path: "/badge", pro: false },
+  //     { name: "Buttons", path: "/buttons", pro: false },
+  //     { name: "Images", path: "/images", pro: false },
+  //     { name: "Videos", path: "/videos", pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <PlugInIcon />,
+  //   name: "Authentication",
+  //   subItems: [
+  //     { name: "Sign In", path: "/signin", pro: false },
+  //     { name: "Sign Up", path: "/signup", pro: false },
+  //   ],
+  // },
 ];
 
 const AppSidebar: React.FC = () => {
@@ -275,7 +275,9 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
+  // const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
+      const handleSubmenuToggle = (index: number, menuType: "main" ) => {
+
     setOpenSubmenu((prevOpenSubmenu) => {
       if (
         prevOpenSubmenu &&
@@ -313,14 +315,14 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="/images/logo/logoo.png"
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <Image
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src="/images/logo/logoo.png"
                 alt="Logo"
                 width={150}
                 height={40}
@@ -328,7 +330,7 @@ const AppSidebar: React.FC = () => {
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              src="/images/logo/logoo.png"
               alt="Logo"
               width={32}
               height={32}
@@ -365,7 +367,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  ""
                 ) : (
                   <HorizontaLDots />
                 )}
@@ -374,7 +376,7 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+        {/* {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null} */}
       </div>
     </aside>
   );

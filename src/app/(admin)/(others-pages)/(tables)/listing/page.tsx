@@ -1,10 +1,8 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import YourLiquid from "@/components/liquid/Liquid";
+import Tether from "@/components/tables/Tether";
 import { Metadata } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "Numerobook | Instantly Buy & Sell Crypto",
@@ -90,11 +88,11 @@ export const metadata: Metadata = {
     "crypto vc",
     "crypto asset fund",
     "blockchain vc",
-    "blockchain fund",
+    "blockchain fund"
   ],
   openGraph: {
     type: "website",
-    url: "https://numerobook.com/liquid",
+    url: "https://numerobook.com",
     title: "Numerobook | Instantly Buy & Sell Crypto",
     description:
       "Buy and sell Bitcoin, Monero, and stablecoins instantly. Trusted by users across LATAM, SEA, MENA, and Africa.",
@@ -116,7 +114,7 @@ export const metadata: Metadata = {
     images: ["https://numerobook.com/images/logoo.png"],
   },
   alternates: {
-    canonical: "https://numerobook.com/liquid",
+    canonical: "https://numerobook.com",
   },
   robots: {
     index: true,
@@ -125,19 +123,16 @@ export const metadata: Metadata = {
   authors: [{ name: "Numerobook Team" }],
 };
 
-export default async function BasicTables() {
-  const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/signin");
-  }
+export default function BasicTables() {
 
+ 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Your Liquid" />
+      <PageBreadcrumb pageTitle="Tether" />
       <div className="space-y-6">
-        <ComponentCard title="Listings">
-          <YourLiquid />
+        <ComponentCard title="Tether Market">
+          <Tether />
         </ComponentCard>
       </div>
     </div>

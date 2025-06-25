@@ -11,13 +11,13 @@ import {
   TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
-import CancelConfirmationModal from "../ui/modal/CancelConfirmation"
+import CancelConfirmationModal from "../ui/modal/CancelConfirmation";
 import { Chatting } from "@/components/Message/Chating";
 import { toast } from "sonner";
 import CreateEVMEscrow from "@/components/tracking/DeployEVM";
 import { useSession } from "next-auth/react";
-import  { CheckBalance }  from "@/components/tracking/CheckEVMBalance";
-
+import CheckBalance from "@/components/tracking/CheckEVMBalance";
+import { ReleaseEvmButton } from "@/components/tracking/ReleaseEvmButton";
 
 interface BuyRequest {
   requestId: string;
@@ -38,20 +38,23 @@ interface BuyRequest {
 interface BuyRequestFromUserProps {
   cryptoExchange_id: string;
   onApprove?: (requestId: string) => void;
+  sellerEmail: string;
 }
 
 export default function BuyRequestFromUser({
   cryptoExchange_id,
   onApprove,
+  sellerEmail,
 }: BuyRequestFromUserProps) {
   const [buyRequests, setBuyRequests] = useState<BuyRequest[]>([]);
   const [approvedTransactions, setApprovedTransactions] = useState<BuyRequest[]>([]);
   const [loading, setLoading] = useState(true);
-const [showCancelModal, setShowCancelModal] = useState(false);
-const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
-  const { data: session, status } = useSession();
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const { data: session } = useSession();
 
-  const email = session.user?.email;
+  const email = session?.user?.email ?? null;
+  const isOwner = email && sellerEmail && email.toLowerCase() === sellerEmail.toLowerCase();
 
   const [selectedApprovedRequestId, setSelectedApprovedRequestId] = useState<string | null>(null);
 
@@ -60,15 +63,10 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
     const fetchBuyRequests = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/crypto/getSellerBuyRequests/${cryptoExchange_id}`
-        );
+        const res = await fetch(`http://localhost:5000/api/crypto/getSellerBuyRequests/${cryptoExchange_id}`);
         if (!res.ok) throw new Error("Failed to fetch buy requests");
         const data = await res.json();
-
-        const unapproved = (Array.isArray(data) ? data : []).filter(
-          (r) => r.status !== "approve"
-        );
+        const unapproved = (Array.isArray(data) ? data : []).filter((r) => r.status !== "approve");
         setBuyRequests(unapproved);
       } catch (err) {
         console.error("Buy requests error:", err);
@@ -77,58 +75,35 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
     const fetchApprovedTransactions = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/crypto/myapprovedTransactions/${cryptoExchange_id}`
-        );
+        const res = await fetch(`http://localhost:5000/api/crypto/myapprovedTransactions/${cryptoExchange_id}`);
         if (!res.ok) throw new Error("Failed to fetch approved transactions");
         const data = await res.json();
 
-        // Map `request_id` from backend to `requestId` used in frontend
         const mapped = (Array.isArray(data) ? data : []).map((item) => ({
           ...item,
           requestId: item.request_id,
         }));
 
         setApprovedTransactions(mapped);
-
-        if (mapped.length > 0) {
-          setSelectedApprovedRequestId(mapped[0].requestId);
-        } else {
-          setSelectedApprovedRequestId(null);
-        }
+        setSelectedApprovedRequestId(mapped.length > 0 ? mapped[0].requestId : null);
       } catch (err) {
         console.error("Approved transactions error:", err);
       }
     };
 
-    Promise.all([fetchBuyRequests(), fetchApprovedTransactions()]).finally(() =>
-      setLoading(false)
-    );
+    Promise.all([fetchBuyRequests(), fetchApprovedTransactions()]).finally(() => setLoading(false));
   }, [cryptoExchange_id]);
 
-  const updateStatus = async (
-    requestId: string,
-    status: "approve" | "deny"
-  ) => {
+  const updateStatus = async (requestId: string, status: "approve" | "deny") => {
     try {
-      const url = `http://localhost:5000/api/crypto/updateBuyRequestStatus/${encodeURIComponent(
-        requestId
-      )}`;
-
+      const url = `http://localhost:5000/api/crypto/updateBuyRequestStatus/${encodeURIComponent(requestId)}`;
       const res = await fetch(url, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(
-          `Failed to update status: ${res.status} ${res.statusText} - ${errorText}`
-        );
-      }
+      if (!res.ok) throw new Error(`Failed to update status: ${res.statusText}`);
 
       if (status === "approve") {
         const approvedReq = buyRequests.find((r) => r.requestId === requestId);
@@ -138,16 +113,10 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
           onApprove?.(requestId);
           setSelectedApprovedRequestId(requestId);
         }
-      } else if (status === "deny") {
-        const isInApproved = approvedTransactions.find((r) => r.requestId === requestId);
-        if (isInApproved) {
-          setApprovedTransactions((prev) => prev.filter((r) => r.requestId !== requestId));
-          if (selectedApprovedRequestId === requestId) {
-            setSelectedApprovedRequestId(null);
-          }
-        } else {
-          setBuyRequests((prev) => prev.filter((r) => r.requestId !== requestId));
-        }
+      } else {
+        setApprovedTransactions((prev) => prev.filter((r) => r.requestId !== requestId));
+        setBuyRequests((prev) => prev.filter((r) => r.requestId !== requestId));
+        if (selectedApprovedRequestId === requestId) setSelectedApprovedRequestId(null);
       }
     } catch (err) {
       console.error("Failed to update request status:", err);
@@ -156,9 +125,7 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
   if (loading) return <p>Loading...</p>;
 
-  const selectedApprovedTx = approvedTransactions.find(
-    (tx) => tx.requestId === selectedApprovedRequestId
-  );
+  const selectedApprovedTx = approvedTransactions.find((tx) => tx.requestId === selectedApprovedRequestId);
 
   return (
     <div className="space-y-10">
@@ -168,25 +135,18 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell className="px-6 py-3">Buyer</TableCell>
-              <TableCell className="px-6 py-3">Offer</TableCell>
-              <TableCell className="px-6 py-3 text-center">Actions</TableCell>
+              <TableCell>Buyer</TableCell>
+              <TableCell>Offer</TableCell>
+              <TableCell className="text-center">Actions</TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {buyRequests.length > 0 ? (
               buyRequests.map((req) => (
-                <TableRow
-                  key={req.requestId}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  <TableCell className="px-6 py-4">
+                <TableRow key={req.requestId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <TableCell>
                     <div className="flex items-center gap-4">
-                      <img
-                        src={req.buyerImageUrl}
-                        alt={req.buyerFullName}
-                        className="w-12 h-12 rounded-md object-cover"
-                      />
+                      <img src={req.buyerImageUrl} alt={req.buyerFullName} className="w-12 h-12 rounded-md object-cover" />
                       <div>
                         <p className="font-semibold">{req.buyerFullName}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -194,33 +154,23 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
                         </p>
                         <p className="text-xs text-gray-400">
                           {req.lastActive
-                            ? `Seen ${formatDistanceToNow(new Date(req.lastActive), {
-                                addSuffix: true,
-                              })}`
+                            ? `Seen ${formatDistanceToNow(new Date(req.lastActive), { addSuffix: true })}`
                             : "Last seen: N/A"}
                         </p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="px-6 py-4">
+                  <TableCell>
                     {req.amount} {req.cryptoType} {req.currency}{" "}
                     <Badge size="sm" color="info" className="ml-2">
                       {req.paymentMethod}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-6 py-4 text-center space-x-3">
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => updateStatus(req.requestId, "approve")}
-                    >
+                  <TableCell className="text-center space-x-3">
+                    <Button size="sm" variant="primary" onClick={() => updateStatus(req.requestId, "approve")}>
                       Approve
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => updateStatus(req.requestId, "deny")}
-                    >
+                    <Button size="sm" variant="secondary" onClick={() => updateStatus(req.requestId, "deny")}>
                       Deny
                     </Button>
                   </TableCell>
@@ -243,9 +193,9 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell className="px-6 py-3">Buyer</TableCell>
-              <TableCell className="px-6 py-3">Amount</TableCell>
-              <TableCell className="px-6 py-3 text-center">Actions</TableCell>
+              <TableCell>Buyer</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell className="text-center">Actions</TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -253,21 +203,13 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
               approvedTransactions.map((tx) => (
                 <TableRow
                   key={tx.requestId}
-                  className={`hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
-                    selectedApprovedRequestId === tx.requestId
-                      ? " "
-                      : ""
-                  }`}
                   onClick={() => setSelectedApprovedRequestId(tx.requestId)}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                   title="Click to open chat"
                 >
-                  <TableCell className="px-6 py-4">
+                  <TableCell>
                     <div className="flex items-center gap-4">
-                      <img
-                        src={tx.buyerImageUrl}
-                        alt={tx.buyerFullName}
-                        className="w-12 h-12 rounded-md object-cover"
-                      />
+                      <img src={tx.buyerImageUrl} alt={tx.buyerFullName} className="w-12 h-12 rounded-md object-cover" />
                       <div>
                         <p className="font-semibold">{tx.buyerFullName}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -276,27 +218,26 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="px-6 py-4">
+                  <TableCell>
                     {tx.amount} {tx.cryptoType} for ${tx.offerPrice} {tx.currency}{" "}
                     <Badge size="sm" color="info" className="ml-2">
                       {tx.paymentMethod}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-6 py-4 text-center">
-                  <Button
-  type="button"
-  size="sm"
-  variant="primary"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPendingCancelId(tx.requestId);
-    setShowCancelModal(true);
-  }}
->
-  Cancel
-</Button>
-
+                  <TableCell className="text-center">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setPendingCancelId(tx.requestId);
+                        setShowCancelModal(true);
+                      }}
+                    >
+                      Cancel
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -310,47 +251,46 @@ const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
           </TableBody>
         </Table>
       </div>
-<CancelConfirmationModal
-  isOpen={showCancelModal}
-  onClose={() => {
-    setShowCancelModal(false);
-    setPendingCancelId(null);
-  }}
-  onConfirm={async () => {
-    if (pendingCancelId) {
-      await updateStatus(pendingCancelId, "deny");
-      toast.success("Transaction canceled successfully");
-      setPendingCancelId(null);
-      setShowCancelModal(false);
-    }
-  }}
-/>
+
+      <CancelConfirmationModal
+        isOpen={showCancelModal}
+        onClose={() => {
+          setShowCancelModal(false);
+          setPendingCancelId(null);
+        }}
+        onConfirm={async () => {
+          if (pendingCancelId) {
+            await updateStatus(pendingCancelId, "deny");
+            toast.success("Transaction canceled successfully");
+            setPendingCancelId(null);
+            setShowCancelModal(false);
+          }
+        }}
+      />
 
       {selectedApprovedTx && (
-        <div className="mt-10 rounded-xl border bg-white dark:bg-white/[0.03] p-6 shadow-sm">
-          <h3 className="text-lg font-semibold mb-6">
-            Chatting with {selectedApprovedTx.buyerFullName}
-          </h3>
-          <Chatting transaction={{ cryptoExchange_id: cryptoExchange_id }} />
-        </div>
+        <>
+          <div className="mt-10 rounded-xl border bg-white dark:bg-white/[0.03] p-6 shadow-sm">
+            <h3 className="text-lg font-semibold mb-6">
+              Chatting with {selectedApprovedTx.buyerFullName}
+            </h3>
+            <Chatting transaction={{ cryptoExchange_id }} />
+          </div>
+
+          <CreateEVMEscrow
+            depositAmount={selectedApprovedTx.amount || ""}
+            request_id={selectedApprovedTx.requestId || ""}
+            buyerEmail={selectedApprovedTx.buyerFullName || ""}
+            sellerEmail={email || ""}
+          />
+
+          <CheckBalance requestId={selectedApprovedTx.requestId || ""} />
+
+          {isOwner && (
+            <ReleaseEvmButton requestId={selectedApprovedTx.requestId} />
+          )}
+        </>
       )}
-
-
- <CreateEVMEscrow
-  depositAmount={selectedApprovedTx?.amount || ""}
-  request_id={selectedApprovedTx?.requestId || ""}
-  buyerEmail={selectedApprovedTx?.buyerFullName ? selectedApprovedTx.buyerFullName : ""}
-  sellerEmail={email} // pass this from your parent component or context
-/>
-
-
-<CheckBalance
-  requestId={selectedApprovedTx?.requestId || ""}
-  cryptouserEmail={email}
-/>
-
-
-
     </div>
   );
 }

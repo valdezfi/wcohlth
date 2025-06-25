@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react"; // explicitly import React
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Badge from "@/components/ui/badge/Badge";
+import Button from "@/components/ui/button/Button";
 
 interface CheckEvmBalanceProps {
   requestId: string;
@@ -25,12 +27,12 @@ const statusMap: Record<string, string> = {
   waiting_deposit: "❌ Not Funded",
 };
 
-const statusColor: Record<string, string> = {
-  released: "green",
-  pending_release: "orange",
-  processing_release: "orange",
-  funded: "blue",
-  waiting_deposit: "red",
+const statusColor: Record<string, "success" | "warning" | "info" | "error"> = {
+  released: "success",
+  pending_release: "warning",
+  processing_release: "warning",
+  funded: "info",
+  waiting_deposit: "error",
 };
 
 export default function CheckBalance({ requestId, cryptouserEmail }: CheckEvmBalanceProps) {
@@ -39,7 +41,7 @@ export default function CheckBalance({ requestId, cryptouserEmail }: CheckEvmBal
   const [voteStatus, setVoteStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const backendURL = "http://localhost:5000"; // Change this to your production backend
+  const backendURL = "http://localhost:5000";
 
   useEffect(() => {
     if (!requestId) return;
@@ -47,13 +49,12 @@ export default function CheckBalance({ requestId, cryptouserEmail }: CheckEvmBal
     const fetchBalance = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const res = await axios.get(`${backendURL}/api/escrow/check-funded`, {
           params: { request_id: requestId },
         });
 
-        const data = res.data as BalanceInfo;
+        const data = res.data;
         const finalStatuses = ["processing_release", "pending_release", "released"];
         if (!(data.pol && finalStatuses.includes(data.escrowStatus))) {
           setBalanceInfo(data);
@@ -69,7 +70,7 @@ export default function CheckBalance({ requestId, cryptouserEmail }: CheckEvmBal
     fetchBalance();
   }, [requestId]);
 
-  async function sendVote(vote: "up" | "down") {
+  const sendVote = async (vote: "up" | "down") => {
     try {
       await axios.post(`${backendURL}/api/escrow/cryptouser/vote`, {
         email: cryptouserEmail,
@@ -79,38 +80,39 @@ export default function CheckBalance({ requestId, cryptouserEmail }: CheckEvmBal
     } catch {
       setVoteStatus("Failed to vote ❌");
     }
-  }
-
-  if (loading) return <p>Checking Tether balance...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!balanceInfo) return <p>No balance info available.</p>;
-
-  const { escrowAddress, balance, required, escrowStatus, exchangeStatus } = balanceInfo;
-  const statusLabel = statusMap[escrowStatus] || "❓ Unknown";
-  const statusTextColor = statusColor[escrowStatus] || "gray";
+  };
 
   return (
-    <div style={{ border: "1px solid #ddd", padding: 20, borderRadius: 8, maxWidth: 400 }}>
-      <h3>Escrow Wallet Tether Status</h3>
-      <p><strong>Address:</strong> {escrowAddress}</p>
-      <p><strong>Balance:</strong> {balance} USDT</p>
-      <p><strong>Required:</strong> {required} USDT</p>
-      <p>
-        <strong>Status:</strong>{" "}
-        <span style={{ color: statusTextColor, fontWeight: "bold" }}>
-          {statusLabel}
-        </span>
-      </p>
-      <p><strong>Exchange Status:</strong> {exchangeStatus}</p>
+    <div className="mt-8 mb-8 p-6 border rounded-xl bg-white dark:bg-white/[0.03] shadow-sm space-y-4">
+      <h3 className="text-lg font-bold">Escrow Wallet Tether Status</h3>
 
-      {escrowStatus === "released" && (
+      {loading && <p>🔄 Checking Tether balance...</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">❌ {error}</p>}
+      {!loading && !error && !balanceInfo && <p>No balance info available.</p>}
+
+      {balanceInfo && (
         <>
-          <h4>Was this transaction successful?</h4>
-          <button onClick={() => sendVote("up")} style={{ marginRight: 10 }}>
-            👍 Yes
-          </button>
-          <button onClick={() => sendVote("down")}>👎 No</button>
-          {voteStatus && <p>{voteStatus}</p>}
+          <p><strong>Address:</strong> {balanceInfo.escrowAddress}</p>
+          <p><strong>Balance:</strong> {balanceInfo.balance} USDT</p>
+          <p><strong>Required:</strong> {balanceInfo.required} USDT</p>
+          <p className="flex items-center gap-2">
+            <strong>Status:</strong>
+            <Badge size="sm" color={statusColor[balanceInfo.escrowStatus]}>
+              {statusMap[balanceInfo.escrowStatus] || "❓ Unknown"}
+            </Badge>
+          </p>
+          <p><strong>Exchange Status:</strong> {balanceInfo.exchangeStatus}</p>
+
+          {balanceInfo.escrowStatus === "released" && (
+            <div className="space-y-2">
+              <h4>Was this transaction successful?</h4>
+              <div className="flex gap-3">
+                <Button onClick={() => sendVote("up")} size="sm" variant="success">👍 Yes</Button>
+                <Button onClick={() => sendVote("down")} size="sm" variant="destructive">👎 No</Button>
+              </div>
+              {voteStatus && <p>{voteStatus}</p>}
+            </div>
+          )}
         </>
       )}
     </div>

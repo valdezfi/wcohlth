@@ -42,7 +42,7 @@ export function ReleaseEvmButton({ requestId }: ReleaseEvmButtonProps) {
   };
 
   return (
-    <div className="mt-8 mb-8 p-6 border rounded-xl bg-white dark:bg-white/[0.03] shadow-sm space-y-4">
+    <div className="mt-8 mb-8 p-6 border rounded-xl bg-white dark:bg-white/[0.03] shadow-sm space-y-4 text-center">
       <Button
         variant="primary"
         size="sm"

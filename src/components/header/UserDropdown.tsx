@@ -396,9 +396,11 @@ export default function UserDropdown() {
             </DropdownItem>
           </li>
           <li>
-            <DropdownItem tag="a" href="/support" onItemClick={closeDropdown}>
-              Support
-            </DropdownItem>
+       <DropdownItem style={{ color: "#1a73e8", textDecoration: "none" }}>
+  support@numerobook.com
+</DropdownItem>
+
+
           </li>
         </ul>
 

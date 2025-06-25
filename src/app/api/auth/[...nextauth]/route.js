@@ -10,7 +10,8 @@ const db = mysql.createPool({
   database: process.env.NEXT_PUBLIC_DB_NAME,
 });
 
-const handler = NextAuth({
+// Extract auth options to reuse in session checks
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -21,37 +22,30 @@ const handler = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        try {
-          const [rows] = await db.query(
-            "SELECT * FROM cryptouser WHERE email = ?",
-            [credentials.email]
-          );
+        const [rows] = await db.query(
+          "SELECT * FROM cryptouser WHERE email = ?",
+          [credentials.email]
+        );
 
-          if (!rows || rows.length === 0) return null;
+        if (!rows || rows.length === 0) return null;
 
-          const user = rows[0];
-          const isValid = await bcrypt.compare(credentials.password, user.password);
-          if (!isValid) return null;
+        const user = rows[0];
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isValid) return null;
 
-          return {
-            id: user.id.toString(),
-            email: user.email,
-            username: user.username ?? undefined,
-            status: user.status ?? undefined,
-          };
-        } catch (error) {
-          console.error("Login error:", error.message);
-          return null;
-        }
+        return {
+          id: user.id.toString(),
+          email: user.email,
+          username: user.username ?? undefined,
+          status: user.status ?? undefined,
+        };
       },
     }),
   ],
   pages: {
     signIn: "/signin",
   },
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -73,6 +67,8 @@ const handler = NextAuth({
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
