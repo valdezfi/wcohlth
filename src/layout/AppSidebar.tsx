@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
   // BoxCubeIcon,
-  // CalenderIcon,
+  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  // ListIcon,
+  ListIcon,
   // PageIcon,
   // PieChartIcon,
   // PlugInIcon,
@@ -30,26 +30,27 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Lisitings", path: "/listing", pro: false }],
+    subItems: [{ name: "Campaigns", path: "/allcampaigns", pro: false }],
   },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
+  {
+    icon: <CalenderIcon />,
+    name: "UGC",
+    path: "/calendar",
+  },
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
   },
 
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
+ 
+    {
+    name: "Podcast",
+    icon: <ListIcon />,
+    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+  },
   {
-    name: "Your Liquid",
+    name: "Influencers",
     icon: <TableIcon />,
     subItems: [{ name: "Liquid", path: "/liquid", pro: false }],
   },
@@ -313,28 +314,32 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logoo.png"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logoo.png"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
+          <div className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-md">
+  <Image
+    className="rounded-xl dark:hidden"
+    src="/images/logo/logoo.png"
+    alt="Logo"
+    width={150}
+    height={40}
+  />
+  <Image
+    className="rounded-xl hidden dark:block"
+    src="/images/logo/logoo.png"
+    alt="Logo"
+    width={150}
+    height={40}
+  />
+</div>
+
             </>
           ) : (
-            <Image
-              src="/images/logo/logoo.png"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+             <Image
+    className="rounded-xl hidden dark:block"
+    src="/images/logo/logoo.png"
+    alt="Logo"
+    width={150}
+    height={40}
+  />
           )}
         </Link>
       </div>

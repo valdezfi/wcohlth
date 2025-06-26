@@ -8,18 +8,28 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
+// Country and Industry options
+const countryOptions = [
+  "United States", "Mexico", "Dominican Republic", "Argentina", "Brazil", "Colombia", "Chile", "Venezuela",
+  "Canada", "Spain", "France", "Italy",
+];
+
+const industryOptions = [
+  "Consumer Tech", "Beauty & Personal Care", "Fashion & Apparel", "Food & Beverage",
+  "Health & Wellness", "Finance & Fintech", "Entertainment & Media", "Real Estate", "Education",
+];
+
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
   const { data: session } = useSession();
   const user = session?.user;
 
-  // Added evmwallet and btcwallet
   const [info, setInfo] = useState({
-    fullname: "",
     email: "",
+    industry: "",
+    role: "",
     country: "",
-    EVMwallet: "",
-    BTCwallet: "",
+    website: "",
   });
 
   useEffect(() => {
@@ -27,19 +37,16 @@ export default function UserInfoCard() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/crypto/getgeneralinfo/${user.email}`
-        );
+        const res = await fetch(`http://localhost:5000/brand/getgeneralinfo/${user.email}`);
         const data = await res.json();
-
         const userData = data.user || data;
 
         setInfo({
-          fullname: userData.fullname || "",
           email: userData.email || user.email,
+          industry: userData.industry || "",
+          role: userData.role || "",
           country: userData.country || "",
-          EVMwallet: userData.EVMwallet || "",
-          BTCwallet: userData.BTCwallet || "",
+          website: userData.website || "",
         });
       } catch (err) {
         console.error("Failed to fetch user info:", err);
@@ -58,17 +65,11 @@ export default function UserInfoCard() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/crypto/updategeneralinfo/${user.email}`,
+        `http://localhost:5000/brand/updategeneralinfo/${user.email}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fullname: info.fullname,
-            email: info.email,
-            country: info.country,
-            EVMwallet: info.EVMwallet,
-            BTCwallet: info.BTCwallet,
-          }),
+          body: JSON.stringify(info),
         }
       );
 
@@ -88,45 +89,20 @@ export default function UserInfoCard() {
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
+            Brand Info
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                Email Address
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {info.email || "—"}
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                Country
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {info.country || "—"}
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                EVM Wallet
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {info.EVMwallet || "—"}
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                BTC Wallet
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {info.BTCwallet || "—"}
-              </p>
-            </div>
+            {["email", "industry", "role", "country", "website"].map((field) => (
+              <div key={field}>
+                <p className="mb-2 text-xs text-gray-500 dark:text-gray-400 capitalize">
+                  {field}
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {info[field as keyof typeof info] || "—"}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -142,10 +118,10 @@ export default function UserInfoCard() {
         <div className="relative w-full p-4 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Info
+              Edit Brand Info
             </h4>
-            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              You can update your basic info here.
+            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+              Update your brand info below.
             </p>
           </div>
 
@@ -167,29 +143,52 @@ export default function UserInfoCard() {
               </div>
 
               <div>
-                <Label>Country</Label>
+                <Label>Website</Label>
                 <Input
                   type="text"
+                  value={info.website}
+                  onChange={(e) => handleChange("website", e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Country</Label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   value={info.country}
                   onChange={(e) => handleChange("country", e.target.value)}
-                />
+                >
+                  <option value="">Select Country</option>
+                  {countryOptions.map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <Label>EVM Wallet</Label>
-                <Input
-                  type="text"
-                  value={info.EVMwallet}
-                  onChange={(e) => handleChange("EVMwallet", e.target.value)}
-                />
+                <Label>Industry</Label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  value={info.industry}
+                  onChange={(e) => handleChange("industry", e.target.value)}
+                >
+                  <option value="">Select Industry</option>
+                  {industryOptions.map((ind) => (
+                    <option key={ind} value={ind}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div>
-                <Label>BTC Wallet</Label>
+              <div className="col-span-2">
+                <Label>Role</Label>
                 <Input
                   type="text"
-                  value={info.BTCwallet}
-                  onChange={(e) => handleChange("BTCwallet", e.target.value)}
+                  value={info.role}
+                  onChange={(e) => handleChange("role", e.target.value)}
                 />
               </div>
             </div>

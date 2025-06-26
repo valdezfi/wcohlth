@@ -1,6 +1,6 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import YourLiquid from "@/components/liquid/Liquid";
+import CampaignListTable from "@/components/tables/CampaignListTable";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -134,10 +134,10 @@ export default async function BasicTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Your Liquid" />
+      <PageBreadcrumb pageTitle="All Your Campaigns " />
       <div className="space-y-6">
-        <ComponentCard title="Listings">
-          <YourLiquid />
+        <ComponentCard title="Campaigns">
+          <CampaignListTable />
         </ComponentCard>
       </div>
     </div>

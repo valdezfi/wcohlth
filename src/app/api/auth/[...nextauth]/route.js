@@ -23,7 +23,7 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         const [rows] = await db.query(
-          "SELECT * FROM cryptouser WHERE email = ?",
+          "SELECT * FROM Brand WHERE email = ?",
           [credentials.email]
         );
 
