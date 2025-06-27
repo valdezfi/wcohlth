@@ -6,6 +6,7 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import TextArea from "../form/input/TextArea";
+import Link from "next/link";
 
 type CampaignDetails = {
   campaignName: string;
@@ -162,6 +163,18 @@ export default function CampaignMetaCard({ campaignName }: { campaignName: strin
           <Button variant="outline" size="md" onClick={handleDelete}>
             Delete
           </Button>
+
+<Link
+  href={`/camp/${encodeURIComponent(campaign?.campaignName || "")}`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Button variant="outline" size="md">
+    Public Campaign
+  </Button>
+</Link>
+
+
         </div>
       </div>
 
@@ -171,7 +184,12 @@ export default function CampaignMetaCard({ campaignName }: { campaignName: strin
           <h2 className="text-xl font-semibold mb-4">Edit Campaign</h2>
           <div className="grid grid-cols-1 gap-4">
             <Label>Campaign Name</Label>
-            <Input name="campaignName" value={campaign.campaignName} onChange={handleChange} required />
+<Input
+  name="campaignName"
+  value={campaign.campaignName}
+  readOnly
+  required
+/>
 
             <Label>Industry</Label>
             <Input name="industry" value={campaign.industry} onChange={handleChange} />

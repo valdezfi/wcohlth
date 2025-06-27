@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
   // BoxCubeIcon,
-  CalenderIcon,
+  // CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
@@ -32,27 +32,28 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     subItems: [{ name: "Campaigns", path: "/allcampaigns", pro: false }],
   },
-  {
-    icon: <CalenderIcon />,
-    name: "UGC",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
+  // {
+  //   icon: <CalenderIcon />,
+  //   name: "UGC",
+  //   path: "/calendar",
+  // },
+ 
 
  
     {
-    name: "Podcast",
+    name: "Ai",
     icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+    subItems: [{ name: "Marketing Manager", path: "/ai", pro: false }],
   },
   {
-    name: "Influencers",
+    name: "Creators",
     icon: <TableIcon />,
-    subItems: [{ name: "Liquid", path: "/liquid", pro: false }],
+    subItems: [{ name: "Discover", path: "/creators", pro: false }],
+  },
+   {
+    icon: <UserCircleIcon />,
+    name: "User Profile",
+    path: "/profile",
   },
   // {
   //   name: "Pages",
@@ -333,6 +334,7 @@ const AppSidebar: React.FC = () => {
 
             </>
           ) : (
+            
              <Image
     className="rounded-xl hidden dark:block"
     src="/images/logo/logoo.png"
@@ -381,6 +383,16 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
+        {(isExpanded || isHovered || isMobileOpen) && (
+  <div className="mt-auto mb-6 px-2">
+    <Link href="/upgrade">
+      <button className="w-full py-3 px-4 text-white bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow hover:brightness-110 transition">
+        Upgrade Account
+      </button>
+    </Link>
+  </div>
+)}
+
         {/* {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null} */}
       </div>
     </aside>
