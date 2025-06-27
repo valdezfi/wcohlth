@@ -48,7 +48,7 @@ const navItems: NavItem[] = [
   {
     name: "Creators",
     icon: <TableIcon />,
-    subItems: [{ name: "Discover", path: "/creators", pro: false }],
+    subItems: [{ name: "Discover", path: "/discover", pro: false }],
   },
    {
     icon: <UserCircleIcon />,

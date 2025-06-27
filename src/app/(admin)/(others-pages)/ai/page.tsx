@@ -27,7 +27,7 @@ export default function AiPage() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-black p-6">
       <h1 className="text-3xl font-bold mb-4 text-center text-gray-800 dark:text-white">
-        AI Campaign Manager
+     Marketing Manager
       </h1>
       <CampaignAIChat email={session.user.email} />
     </div>
