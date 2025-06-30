@@ -7,11 +7,9 @@ import {
   FaTiktok,
   FaTwitch,
   FaGlobe,
-  FaEnvelope,
   FaComments,
 } from "react-icons/fa";
 import { ChattingWithCreator } from "@/components/Message/Chating";
-import { useSession } from "next-auth/react";
 
 type Creator = {
   creatorName: string;
@@ -54,6 +52,7 @@ function clean(val: string | undefined | null) {
     return null;
   return val;
 }
+
 export default function CreatorGeneralPublicProfileCard({
   email,
 }: {
@@ -82,17 +81,13 @@ export default function CreatorGeneralPublicProfileCard({
   const [loading, setLoading] = useState(true);
   const [showChat, setShowChat] = useState(false);
 
-  // Modal state for campaign request
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [amount, setAmount] = useState("");
   const [details, setDetails] = useState("");
+  const [publicEmail, setPublicEmail] = useState("");
   const [sending, setSending] = useState(false);
-
-  // Success modal state
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-const { data: session } = useSession();
-const senderEmail = session?.user?.email || "";
   useEffect(() => {
     if (!email) return;
 
@@ -106,7 +101,6 @@ const senderEmail = session?.user?.email || "";
         if (!res.ok) throw new Error("Failed to fetch creator info");
 
         const data = await res.json();
-
         const fixUrl = (url: string) => {
           if (!url) return "";
           if (url.startsWith("http")) return url;
@@ -144,15 +138,16 @@ const senderEmail = session?.user?.email || "";
           creatorEmail: creator.email,
           amount,
           details,
-          senderEmail:senderEmail , // Replace with your or user's email
+          senderEmail: publicEmail || "anonymous@platform.com",
         }),
       });
+
       const data = await res.json();
       if (data.success) {
-        // Close request modal and open success modal
         setShowEmailModal(false);
         setAmount("");
         setDetails("");
+        setPublicEmail("");
         setShowSuccessModal(true);
       } else {
         alert("Failed to send request.");
@@ -175,7 +170,6 @@ const senderEmail = session?.user?.email || "";
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-blue-800 flex flex-col items-center p-6 sm:p-12">
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl max-w-md w-full p-8 flex flex-col items-center border border-blue-500">
-        {/* Profile Image */}
         <img
           src={imageUrl}
           alt={clean(creator.creatorName) || "Creator"}
@@ -186,45 +180,39 @@ const senderEmail = session?.user?.email || "";
           className="w-32 h-32 rounded-full border-4 border-indigo-600 mb-6 object-cover bg-gray-200"
         />
 
-        {/* Name */}
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-1 text-center">
           {clean(creator.creatorName) || "Unknown Creator"}
         </h1>
 
-        {/* Agency */}
         {clean(creator.agency) && (
           <p className="text-indigo-500 text-sm mb-4">{creator.agency}</p>
         )}
 
-        {/* About */}
         {clean(creator.about) && (
           <p className="text-gray-700 dark:text-gray-300 mb-8 text-center px-6">
             {creator.about}
           </p>
         )}
 
-        {/* Contact Buttons */}
         <div className="flex gap-4 flex-wrap justify-center mb-8">
-       
+       <button
+  onClick={() => (window.location.href = "https://grandeapp.com")}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
+>
+  <FaComments />
+  Chat
+</button>
+
 
           <button
-            onClick={() => setShowChat(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
-          >
-            <FaComments />
-            Chat
-          </button>
+  onClick={() => (window.location.href = "https://grandeapp.com")}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition"
+>
+  Join My Campaign
+</button>
 
-          {/* New button to open campaign request modal */}
-          <button
-            onClick={() => setShowEmailModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition"
-          >
-            Join My Campaign
-          </button>
         </div>
 
-        {/* Social Media Buttons */}
         <div className="flex flex-col gap-4 w-full">
           {isValidUrl(creator.instagram) && (
             <SocialBtn
@@ -269,7 +257,6 @@ const senderEmail = session?.user?.email || "";
         </div>
       </div>
 
-      {/* Chat Modal */}
       {showChat && clean(creator.email) && (
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
@@ -292,7 +279,6 @@ const senderEmail = session?.user?.email || "";
         </div>
       )}
 
-      {/* Campaign Request Modal */}
       {showEmailModal && (
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
@@ -309,7 +295,18 @@ const senderEmail = session?.user?.email || "";
               ×
             </button>
 
-            <h2 className="text-2xl font-bold mb-4 text-white text-center">Request Campaign</h2>
+            <h2 className="text-2xl font-bold mb-4 text-white text-center">
+              Request Campaign
+            </h2>
+
+            <label className="block mb-2 text-white font-semibold">Your Email</label>
+            <input
+              type="email"
+              className="w-full mb-4 p-2 border rounded"
+              value={publicEmail}
+              onChange={(e) => setPublicEmail(e.target.value)}
+              placeholder="Optional: Your email address"
+            />
 
             <label className="block mb-2 text-white font-semibold">Amount</label>
             <input
@@ -345,7 +342,6 @@ const senderEmail = session?.user?.email || "";
         </div>
       )}
 
-      {/* Success Modal */}
       {showSuccessModal && (
         <div
           className="fixed inset-0 z-60 bg-black/60 flex items-center justify-center p-4"
@@ -363,9 +359,7 @@ const senderEmail = session?.user?.email || "";
             </button>
 
             <h3 className="text-xl font-bold mb-2">Request Sent!</h3>
-            <p className="mb-4">
-              We will send you a payment link soon.
-            </p>
+            <p className="mb-4">We will send you a payment link soon.</p>
             <button
               onClick={() => setShowSuccessModal(false)}
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded"

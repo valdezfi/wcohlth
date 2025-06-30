@@ -8,15 +8,31 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-// Country and Industry options
 const countryOptions = [
-  "United States", "Mexico", "Dominican Republic", "Argentina", "Brazil", "Colombia", "Chile", "Venezuela",
-  "Canada", "Spain", "France", "Italy",
+  "United States",
+  "Mexico",
+  "Dominican Republic",
+  "Argentina",
+  "Brazil",
+  "Colombia",
+  "Chile",
+  "Venezuela",
+  "Canada",
+  "Spain",
+  "France",
+  "Italy",
 ];
 
 const industryOptions = [
-  "Consumer Tech", "Beauty & Personal Care", "Fashion & Apparel", "Food & Beverage",
-  "Health & Wellness", "Finance & Fintech", "Entertainment & Media", "Real Estate", "Education",
+  "Consumer Tech",
+  "Beauty & Personal Care",
+  "Fashion & Apparel",
+  "Food & Beverage",
+  "Health & Wellness",
+  "Finance & Fintech",
+  "Entertainment & Media",
+  "Real Estate",
+  "Education",
 ];
 
 export default function UserInfoCard() {
@@ -26,10 +42,9 @@ export default function UserInfoCard() {
 
   const [info, setInfo] = useState({
     email: "",
-    industry: "",
-    role: "",
+    niche: "",
     country: "",
-    website: "",
+    creatorName: "",
   });
 
   useEffect(() => {
@@ -37,16 +52,19 @@ export default function UserInfoCard() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/brand/getgeneralinfo/${user.email}`);
+        const res = await fetch(
+          `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(user.email)}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch brand info");
+
         const data = await res.json();
-        const userData = data.user || data;
+        const brand = data.user || data;
 
         setInfo({
-          email: userData.email || user.email,
-          industry: userData.industry || "",
-          role: userData.role || "",
-          country: userData.country || "",
-          website: userData.website || "",
+          email: brand.email || user.email,
+          niche: brand.niche || "",
+          country: brand.country || "",
+          creatorName: brand.creatorName || "",
         });
       } catch (err) {
         console.error("Failed to fetch user info:", err);
@@ -65,7 +83,7 @@ export default function UserInfoCard() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/brand/updategeneralinfo/${user.email}`,
+        `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(user.email)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,11 +107,11 @@ export default function UserInfoCard() {
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Brand Info
+            Creator Info
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            {["email", "industry", "role", "country", "website"].map((field) => (
+            {["email", "niche", "country"].map((field) => (
               <div key={field}>
                 <p className="mb-2 text-xs text-gray-500 dark:text-gray-400 capitalize">
                   {field}
@@ -103,6 +121,22 @@ export default function UserInfoCard() {
                 </p>
               </div>
             ))}
+
+            {info.creatorName && (
+              <div className="lg:col-span-2 mt-4">
+                <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">
+                  Public Profile
+                </p>
+                <a
+                  href={`http://localhost:3000/c/${encodeURIComponent(info.creatorName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-blue-600 dark:text-blue-400 underline break-all"
+                >
+                  📣 http://localhost:3000/c/{info.creatorName}
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -136,18 +170,10 @@ export default function UserInfoCard() {
               <div>
                 <Label>Email</Label>
                 <Input
-                  type="text"
+                  type="email"
                   value={info.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label>Website</Label>
-                <Input
-                  type="text"
-                  value={info.website}
-                  onChange={(e) => handleChange("website", e.target.value)}
+                  readOnly
+                  className="bg-gray-100 cursor-not-allowed dark:bg-gray-700"
                 />
               </div>
 
@@ -168,28 +194,19 @@ export default function UserInfoCard() {
               </div>
 
               <div>
-                <Label>Industry</Label>
+                <Label>Niche</Label>
                 <select
                   className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  value={info.industry}
-                  onChange={(e) => handleChange("industry", e.target.value)}
+                  value={info.niche}
+                  onChange={(e) => handleChange("niche", e.target.value)}
                 >
-                  <option value="">Select Industry</option>
+                  <option value="">Select niche</option>
                   {industryOptions.map((ind) => (
                     <option key={ind} value={ind}>
                       {ind}
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div className="col-span-2">
-                <Label>Role</Label>
-                <Input
-                  type="text"
-                  value={info.role}
-                  onChange={(e) => handleChange("role", e.target.value)}
-                />
               </div>
             </div>
 
