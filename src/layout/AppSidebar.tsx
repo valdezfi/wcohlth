@@ -385,7 +385,7 @@ const AppSidebar: React.FC = () => {
         </nav>
         {(isExpanded || isHovered || isMobileOpen) && (
   <div className="mt-auto mb-6 px-2">
-    <Link href="/upgrade">
+    <Link href="/billing">
       <button className="w-full py-3 px-4 text-white bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow hover:brightness-110 transition">
         Upgrade Account
       </button>

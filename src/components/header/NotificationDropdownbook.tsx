@@ -1,31 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useBuyRequestNotifications } from "@/components/notification/BuyRequestWatcher";
+import { useSession } from "next-auth/react";
 
-// Make sure these are real components, or replace with div/li equivalents
-import { Dropdown, DropdownItem } from "@/components/ui/dropdown"; // ← update the path as needed
-
-interface Props {
-  cryptoExchange_id: string;
+interface CampaignNotification {
+  id: number;
+  campaignName: string;
+  brandname: string | null;
+  brandImageUrl: string | null;
+  startDate: string;
+  endDate: string;
+  compensation: string;
+  targetCountry: string;
+  imageUrl?: string | null;
 }
 
-export default function NotificationDropdown({ cryptoExchange_id }: Props) {
+export default function CampaignNotificationDropdown() {
+  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, newNotification, clearNotification } =
-    useBuyRequestNotifications(cryptoExchange_id);
+  const [notifications, setNotifications] = useState<CampaignNotification[]>([]);
+  const [newNotification, setNewNotification] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleDropdown = () => {
+  const fetchCampaigns = useCallback(async () => {
+    if (status !== "authenticated" || !session?.user?.email) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/campaign/getcampaigns?email=${encodeURIComponent(session.user.email)}`
+      );
+      if (!res.ok) {
+        setNotifications([]);
+        return;
+      }
+      const data: CampaignNotification[] = await res.json();
+      setNotifications(data);
+      if (data.length > 0) setNewNotification(true);
+    } catch (err) {
+      console.error("Failed to fetch campaigns:", err);
+      setNotifications([]);
+    }
+  }, [session?.user?.email, status]);
+
+  const toggleDropdown = useCallback(() => {
     setIsOpen((prev) => !prev);
-    clearNotification();
-  };
+    if (!isOpen) {
+      setNewNotification(false); // Clear notification indicator on open
+    }
+  }, [isOpen]);
+
+  // Fetch campaigns on mount and when session changes
+  useEffect(() => {
+    fetchCampaigns();
+  }, [fetchCampaigns]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-label="Campaign Notifications"
         onClick={toggleDropdown}
-        className="relative dropdown-toggle flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+        className="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
       >
         {newNotification && (
           <span className="absolute top-0.5 right-0 h-2 w-2 z-10 rounded-full bg-orange-400">
@@ -38,6 +88,8 @@ export default function NotificationDropdown({ cryptoExchange_id }: Props) {
           height="20"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          focusable="false"
         >
           <path
             fillRule="evenodd"
@@ -51,39 +103,35 @@ export default function NotificationDropdown({ cryptoExchange_id }: Props) {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-[350px] rounded-md shadow-lg bg-white dark:bg-gray-800 z-50 p-3">
           <h4 className="mb-2 text-sm font-semibold text-gray-800 dark:text-white">
-            Buy Requests
+            Campaign Notifications
           </h4>
           <ul className="space-y-3 max-h-[300px] overflow-y-auto">
             {notifications.length > 0 ? (
-              notifications.map((req) => (
-                <li key={req.requestId}>
-                  <button
-                    onClick={toggleDropdown}
-                    className="flex items-center gap-3 w-full text-left"
-                  >
-                    <Image
-                      width={40}
-                      height={40}
-                      src={req.buyerImageUrl || "/images/default-user.png"}
-                      alt={req.buyerFullName}
-                      className="rounded-full"
-                    />
-                    <div className="text-sm text-gray-700 dark:text-white">
-                      <span className="font-medium">{req.buyerFullName}</span> wants to buy{" "}
-                      <strong>
-                        {req.amount} {req.cryptoType}
-                      </strong>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {req.paymentMethod} • {req.country}
-                      </div>
-                    </div>
-                  </button>
+              notifications.map((campaign) => (
+                <li key={campaign.id} className="flex gap-3 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+                  <img
+                    src={campaign.brandImageUrl || campaign.imageUrl || "/images/default-campaign.png"}
+                    alt={campaign.brandname || campaign.campaignName}
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover"
+                  />
+                  <div className="text-gray-700 dark:text-white text-sm flex flex-col">
+                    <span className="font-semibold">{campaign.campaignName}</span>
+                    {campaign.brandname && (
+                      <span className="text-xs text-gray-400 dark:text-gray-300">{campaign.brandname}</span>
+                    )}
+                    <span className="text-xs mt-1">
+                      {campaign.compensation} • {campaign.targetCountry}
+                    </span>
+                    <span className="text-xs mt-1 text-gray-400 dark:text-gray-500">
+                      {new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}
+                    </span>
+                  </div>
                 </li>
               ))
             ) : (
-              <li className="text-sm text-center text-gray-400 p-4">
-                No new buy requests
-              </li>
+              <li className="text-sm text-center text-gray-400 p-4">No new campaigns</li>
             )}
           </ul>
         </div>

@@ -55,14 +55,15 @@ export default function CreatorDiscovery() {
         {visibleCreators.map((creator) => (
           <a
             key={creator.id}
-            href={`/creator/${creator.id}`}
+            href={`/c/${creator.creatorName}`}
             className="border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-900 text-center transition hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer block"
           >
-            <img
-              src={creator.imageUrl?.trim() || "/placeholder.jpg"}
-              alt={creator.creatorName}
-              className="w-32 h-32 mx-auto object-cover rounded-full mb-3"
-            />
+          <img
+  src={creator.imageUrl?.trim() || "/images/brand/placeholder.svg"}
+  alt={creator.creatorName}
+  className="w-32 h-32 mx-auto object-cover rounded-full mb-3 bg-gray-300"
+/>
+
             <h3 className="text-xl font-semibold">{creator.creatorName}</h3>
             <p className="text-gray-500 mb-2">{creator.country?.trim() || "Unknown"}</p>
 

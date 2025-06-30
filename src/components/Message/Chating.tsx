@@ -11,64 +11,59 @@ import {
   Window,
   LoadingIndicator,
 } from 'stream-chat-react';
-
 import { useSession } from 'next-auth/react';
 import { StreamChat, Channel as StreamChannel } from 'stream-chat';
 import 'stream-chat-react/dist/css/v2/index.css';
 
-const apiKey = '6ujdvzws3yau'; // Your Stream key
+const apiKey = '6ujdvzws3yau'; // Your Stream API key
 
-interface ChattingNowProps {
-  transaction: {
-    cryptoExchange_id: string;
-  };
+interface ChattingWithCreatorProps {
+  creatorEmail: string;
 }
 
-export function Chatting({ transaction }: ChattingNowProps) {
+// Sanitize for StreamChat IDs
+const safeId = (email: string) =>
+  email.toLowerCase().replace(/[^a-z0-9_\-!]/gi, '_');
+
+export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) {
   const { data: session, status } = useSession();
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
   const [channel, setChannel] = useState<StreamChannel | null>(null);
 
   useEffect(() => {
-    if (!session?.user?.email || status !== 'authenticated' || !transaction?.cryptoExchange_id) return;
+    if (!session?.user?.email || status !== 'authenticated' || !creatorEmail) return;
 
     let client: StreamChat;
     let isMounted = true;
 
-    const userId = session.user.email.replace(/\./g, '_');
+    const currentEmail = session.user.email;
+    const userId = safeId(currentEmail);
+    const targetId = safeId(creatorEmail);
 
     const setupChat = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/crypto/approvedEscrowChats/${session.user.email}`);
+        const res = await fetch(
+          `http://localhost:5000/api/chat/direct/${creatorEmail}?currentEmail=${currentEmail}`
+        );
         const data = await res.json();
 
-        console.log('API response:', data);
-
-        if (!data.success || !data.createdChats.length) return;
-
-        const chatData = data.createdChats.find(
-          (chat: any) => String(chat.transactionId) === String(transaction.cryptoExchange_id)
-        );
-
-        console.log('Found chatData:', chatData);
-
-        if (!chatData) return;
+        if (!data.success) return;
 
         client = StreamChat.getInstance(apiKey);
 
         await client.connectUser(
           {
             id: userId,
-            name: data.name || 'Anonymous',
-            image: data.image || 'https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1/default-avatar.png',
+            name: data.currentUser.name || 'User',
+            image: data.currentUser.image,
           },
           data.token
         );
 
         if (!isMounted) return;
 
-        const userChannel = client.channel('messaging', chatData.channelId, {
-          members: chatData.participants.map((p: any) => p.id),
+        const userChannel = client.channel('messaging', data.channelId, {
+          members: [userId, targetId],
         });
 
         await userChannel.watch();
@@ -78,7 +73,7 @@ export function Chatting({ transaction }: ChattingNowProps) {
           setChannel(userChannel);
         }
       } catch (error) {
-        console.error('Error setting up chat:', error);
+        console.error('Error setting up direct chat:', error);
       }
     };
 
@@ -88,7 +83,7 @@ export function Chatting({ transaction }: ChattingNowProps) {
       isMounted = false;
       if (client) client.disconnectUser();
     };
-  }, [session?.user?.email, status, transaction?.cryptoExchange_id]);
+  }, [session?.user?.email, status, creatorEmail]);
 
   if (!chatClient || !channel) return <LoadingIndicator />;
 

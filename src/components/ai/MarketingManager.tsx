@@ -9,7 +9,7 @@ type Message = {
 };
 
 const SUGGESTED_PROMPTS = [
-  "How can I improve my current influencer campaigns combined with TikTok and Facebook ads based n may latest campaign in app?", "Improve my last influencer campaign.",
+  "How much money can I save using this AI campaign assistant at $1,000/month compared to hiring a full-time marketing team?","How can I improve my current influencer campaigns combined with TikTok and Facebook ads based n may latest campaign in app?","How much money i save with ui substion 1k a month vs hiing salay", "Improve my last influencer campaign.",
   "What type of creators should I partner with to maximize ROI on a low budget using IG ads and influencer posts?",
   "Give me ideas to increase conversions from influencer marketing mixed with paid ads on TikTok and Instagram.",
   "Which platform (TikTok, Facebook, IG) should I prioritize for better campaign ROI?",
