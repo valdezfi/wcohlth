@@ -54,8 +54,6 @@ function clean(val: string | undefined | null) {
     return null;
   return val;
 }
-const { data: session } = useSession();
-const senderEmail = session?.user?.email || "";
 export default function CreatorGeneralPublicProfileCard({
   email,
 }: {
@@ -93,6 +91,8 @@ export default function CreatorGeneralPublicProfileCard({
   // Success modal state
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+const { data: session } = useSession();
+const senderEmail = session?.user?.email || "";
   useEffect(() => {
     if (!email) return;
 
