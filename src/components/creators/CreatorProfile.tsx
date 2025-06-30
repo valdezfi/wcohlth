@@ -205,15 +205,7 @@ const senderEmail = session?.user?.email || "";
 
         {/* Contact Buttons */}
         <div className="flex gap-4 flex-wrap justify-center mb-8">
-          {clean(creator.email) && (
-            <a
-              href={`mailto:${creator.email}`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition"
-            >
-              <FaEnvelope />
-              Email
-            </a>
-          )}
+       
 
           <button
             onClick={() => setShowChat(true)}
@@ -228,7 +220,7 @@ const senderEmail = session?.user?.email || "";
             onClick={() => setShowEmailModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition"
           >
-            Request Campaign
+            Join My Campaign
           </button>
         </div>
 
@@ -317,9 +309,9 @@ const senderEmail = session?.user?.email || "";
               ×
             </button>
 
-            <h2 className="text-2xl font-bold mb-4 text-center">Request Campaign</h2>
+            <h2 className="text-2xl font-bold mb-4 text-white text-center">Request Campaign</h2>
 
-            <label className="block mb-2 font-semibold">Amount</label>
+            <label className="block mb-2 text-white font-semibold">Amount</label>
             <input
               type="number"
               min={1}
@@ -329,7 +321,7 @@ const senderEmail = session?.user?.email || "";
               placeholder="Enter amount"
             />
 
-            <label className="block mb-2 font-semibold">Details</label>
+            <label className="block mb-2 text-white font-semibold">Details</label>
             <textarea
               className="w-full mb-4 p-2 border rounded"
               rows={4}

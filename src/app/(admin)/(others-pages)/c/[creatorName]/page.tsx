@@ -4,9 +4,14 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import CreatorGeneralPublicProfileCard from "@/components/creators/CreatorProfile";
 
-// Optional: Dynamic metadata using creatorName
-export const generateMetadata = ({ params }: { params: { creatorName: string } }): Metadata => {
-  const decodedName = decodeURIComponent(params.creatorName);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ creatorName: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const decodedName = decodeURIComponent(resolvedParams.creatorName);
+
   return {
     title: `${decodedName} | Creator Profile - Numerobook`,
     description: `View ${decodedName}'s public creator profile on Numerobook, including socials, country, and more.`,
@@ -27,15 +32,21 @@ export const generateMetadata = ({ params }: { params: { creatorName: string } }
       description: `Explore verified creator ${decodedName}'s public profile.`,
     },
   };
-};
+}
 
-export default async function CreatorProfilePage({ params }: { params: { creatorName: string } }) {
+export default async function CreatorProfilePage({
+  params,
+}: {
+  params: Promise<{ creatorName: string }>;
+}) {
+  const resolvedParams = await params;
+
   const session = await getServerSession(authOptions);
   if (!session) redirect("/signin");
 
   return (
     <div className="min-h-screen p-6 bg-gray-100 dark:bg-black">
-      <CreatorGeneralPublicProfileCard email={decodeURIComponent(params.creatorName)} />
+      <CreatorGeneralPublicProfileCard email={decodeURIComponent(resolvedParams.creatorName)} />
     </div>
   );
 }
