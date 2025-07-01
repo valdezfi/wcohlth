@@ -22,51 +22,54 @@ const FREE_PLAN = {
   name: "Free Plan",
   price: 0,
   benefits: [
-    "Access to 50 creators per month",
-    "2 Basic campaign creation",
+    "Create unlimited campaigns",
+  
   ],
 };
 
 const PLANS = {
   monthly: {
-    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1000!,
+    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_59!,
     name: "Pro Monthly",
-    price: 100000,
-benefits: [
-  "AI-driven campaign management",
-  "Access to Unlimited creators globally",
-  "1000+ verified influencers with high engagement",
-  "Unlimited UGC (User Generated Content) creators",
-  "Unlimited podcast creators",
-  "Smart influencer-matching powered by AI",
-  "Affiliate and promo code setup",
-  "Real-time campaign ROI and conversion tracking",
-  "Integrated content rights management",
-  "Email campaign support",
-  "Priority access to top-tier creators during launches",
-  "Smart Contract Generator: Instantly draft influencer-brand contracts tailored to campaign type (UGC, product placement, affiliate, etc.)",
-  "AI Content Briefs: Auto-generate clear, creative UGC briefs tailored to each influencer",
-  "Content Hook Recommender: AI suggests compelling intros and hooks for UGC and influencer content",
-  "Performance Predictor: AI estimates engagement and conversions per influencer before campaign launch",
-  "Follow-Up Email Writer: Auto-write professional reminders and updates to influencers",
-  "Content Rights Tracker: Automatically manage licensing and usage rights for all influencer content",
-  "Podcast Topic Generator: Get podcast topic ideas based on brand or niche",
-  "Script & Outline Assistant: Generate full podcast episode outlines with talking points and CTAs",
-],
-
-
+    price: 59.99,
     interval: "month" as const,
+ benefits: [
+  "All Free Plan features included",
+
+  // 🧠 AI & Automation
+  "Your 24/7 AI campaign strategist & talent manager",
+  "Auto-generated influencer briefs, media plans & pitch decks",
+  "AI-written content hooks to increase views, clicks & conversions",
+  "Smart Contract Builder: Generate creator agreements (UGC, affiliate, sponsorship) instantly",
+
+  // 📢 Ads Strategy & Influencer Scaling
+  "AI-Powered Ads Planner: Get ad copy, audience targeting, and campaign structure by objective",
+
+  // 🎙️ Podcast & Content Tools
+  "Podcast AI Assistant: Weekly topic ideas, full outlines, and call-to-actions",
+  "Generate compelling show notes, CTAs, and email summaries",
+
+  // 📈 Growth & Monetization
+  "AI-Powered Income Strategy Generator: Brand deals, affiliate offers, merch, paid communities",
+  "Launch & monetization playbooks tailored to your agency or creator tier",
+  "AI Idea Engine: Generate viral content angles, campaign themes, and monetizable hooks",
+
+  "Done-for-you pitch decks, contract templates, & SOPs",
+  "Priority support and early access to new tools",
+]
+
   },
   yearly: {
-    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_8000!,
+    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_399!,
     name: "Pro Yearly",
-    price: 800000,
-    benefits: [
-      "All Monthly benefits",
-      "Priority support",
-      "Exclusive early access to features",
-    ],
+    price: 399,
     interval: "year" as const,
+    benefits: [
+      "All Monthly plan benefits",
+      "Priority support",
+      "Exclusive early feature access",
+      "Save over $300/year",
+    ],
   },
 };
 
@@ -88,7 +91,7 @@ export default function Billing({ email }: { email: string }) {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/subscription?email=${email}`);
+        const res = await fetch(`http://localhost:5000/api/c/subscription?email=${email}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Subscription not found.");
         setSubscription({
@@ -114,7 +117,7 @@ export default function Billing({ email }: { email: string }) {
   const startCheckout = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/subscribe", {
+      const res = await fetch("http://localhost:5000/api/c/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +151,7 @@ export default function Billing({ email }: { email: string }) {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/cancel", {
+      const res = await fetch("http://localhost:5000/api/c/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -201,11 +204,6 @@ export default function Billing({ email }: { email: string }) {
 
       {!subscription && (
         <div className="mb-6 text-center">
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
-            You currently have a free plan. Your only access:
-                      </p>
-          {/* <h3 className="text-lg font-semibold">{FREE_PLAN.name}</h3> */}
-          {/* <p className="text-3xl font-bold mb-2">Free</p> */}
           <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300">
             {FREE_PLAN.benefits.map((b) => (
               <li key={b}>{b}</li>
@@ -246,13 +244,13 @@ export default function Billing({ email }: { email: string }) {
           onClick={() => setBillingPeriod("yearly")}
           className={`px-4 py-2 rounded ${billingPeriod === "yearly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"}`}
         >
-          Yearly (Save {formatPrice(savings)})
+          Yearly (Save {formatPrice(savings * 100)})
         </button>
       </div>
 
       <div className="text-center mb-6">
         <h3 className="text-lg font-semibold">{selectedPlan.name}</h3>
-        <p className="text-3xl font-bold">{formatPrice(selectedPlan.price)} / {selectedPlan.interval === "month" ? "mo" : "yr"}</p>
+        <p className="text-3xl font-bold">{formatPrice(selectedPlan.price * 100)} / {selectedPlan.interval === "month" ? "mo" : "yr"}</p>
         <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300">
           {selectedPlan.benefits.map((b) => (
             <li key={b}>{b}</li>

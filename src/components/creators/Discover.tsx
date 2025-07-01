@@ -59,7 +59,7 @@ export default function CreatorDiscovery() {
             className="border p-4 rounded-xl shadow-sm bg-white dark:bg-gray-900 text-center transition hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer block"
           >
           <img
-  src={creator.imageUrl?.trim() || "/images/brand/placeholder.svg"}
+  src={creator.imageUrl?.trim() || "/images/user/placeholder.svg"}
   alt={creator.creatorName}
   className="w-32 h-32 mx-auto object-cover rounded-full mb-3 bg-gray-300"
 />

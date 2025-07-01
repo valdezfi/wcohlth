@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import CampaignAIChat from "@/components/ai/MarketingManager";
+import CampaignAIChat from "@/components/ai/creatorManager";
 
 export default function AiPage() {
   const { data: session, status } = useSession();
@@ -18,7 +18,7 @@ export default function AiPage() {
 
       try {
         // 1. Check subscription status
-        const subRes = await fetch(`http://localhost:5000/api/subscription?email=${email}`);
+        const subRes = await fetch(`http://localhost:5000/api/c/subscription?email=${email}`);
         const subData = await subRes.json();
 
         const isSubscribed = subData.subscription?.status === "active";
@@ -29,12 +29,12 @@ export default function AiPage() {
         }
 
         // 2. Not subscribed? Check if trial is valid
-        const trialRes = await fetch(`http://localhost:5000/api/ai/trial-status?email=${email}`);
+        const trialRes = await fetch(`http://localhost:5000/api/c/ai/trial-status?email=${email}`);
         const trialData = await trialRes.json();
 
         if (!trialData.used) {
           // Trial unused → mark it as used
-          await fetch("http://localhost:5000/api/ai/trial-used", {
+          await fetch("http://localhost:5000/api/c/ai/trial-used", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

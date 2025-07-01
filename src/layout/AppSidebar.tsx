@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
     {
     name: "Ai",
     icon: <ListIcon />,
-    subItems: [{ name: "Marketing Manager", path: "/ai", pro: false }],
+    subItems: [{ name: "Ai Manager", path: "/ai", pro: false }],
   },
   // {
   //   name: "Creators",

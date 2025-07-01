@@ -9,22 +9,31 @@ type Message = {
 };
 
 const SUGGESTED_PROMPTS = [
-  "How much money can I save using this AI campaign assistant at $1,000/month compared to hiring a full-time marketing team?","How can I improve my current influencer campaigns combined with TikTok and Facebook ads based n may latest campaign in app?","How much money i save with ui substion 1k a month vs hiing salay", "Improve my last influencer campaign.",
-  "What type of creators should I partner with to maximize ROI on a low budget using IG ads and influencer posts?",
-  "Give me ideas to increase conversions from influencer marketing mixed with paid ads on TikTok and Instagram.",
-  "Which platform (TikTok, Facebook, IG) should I prioritize for better campaign ROI?",
-  "What kind of micro-influencers work best for beauty brands alongside paid ads?",
-  "How can I optimize my TikTok influencer campaigns with targeted Facebook and Instagram ads?",
-  "What is the best way to integrate influencer content with paid social ads for small businesses?",
-  "How can I balance spending between influencer marketing and paid ads for maximum growth?",
-  "Suggest cost-effective strategies mixing influencer marketing and paid ads for local brand awareness.",
-  "What metrics should I track to measure success when combining influencer campaigns with Facebook and TikTok ads?"
+  "How can I position myself as a premium creator and start landing paid brand deals?",
+  "I’m a UGC creator with under 5K followers — what are the best ways to get brands to pay me?",
+  "What should be in my media kit to attract top brands?",
+  "How much should I charge for a UGC video, story, and rights usage?",
+  "How do I professionally respond to a brand that says 'we don’t have budget'?",
+  "Help me create a weekly content and outreach plan to get paid collabs faster.",
+  "What should I include in my pitch DM or email to brands?",
+  "As a podcaster, how can I grow my audience and start attracting sponsors?",
+  "What kind of brands are a good fit for my niche, and how should I approach them?",
+  "How can I balance brand deals, content creation, and personal growth without burning out?",
+  "I want to scale from micro-influencer to full-time — what’s my 90-day game plan?",
+  "What are the red flags to watch out for in brand contracts and influencer deals?",
+  "Can you help me write a rate card for UGC and sponsored posts?",
+  "How can I turn one-time collabs into long-term brand partnerships?",
+  "Help me negotiate better rates and usage rights without sounding difficult.",
+  "As a beauty creator, what should my next 5 content ideas be to attract sponsors?",
+  "I'm growing fast on TikTok — how can I start monetizing without selling out?",
+  "Give me a smart way to respond to a brand offering affiliate-only deals.",
+  "What’s the best way to build a personal brand as a creator beyond just posting?",
+  "Help me craft a smart response to a brand asking for a video revision I wasn’t paid for."
 ];
-
 
 export default function CampaignAIChat({ email }: { email: string }) {
   const [messages, setMessages] = useState<Message[]>([
-    { sender: "ai", text: "Hello! I'm your AI Campaign Manager. How can I assist you today?" },
+    { sender: "ai", text: "Hello! I'm your AI Manager. How can I assist you today? I speak english and espanol." },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +43,7 @@ export default function CampaignAIChat({ email }: { email: string }) {
   const fetchAIResponse = async (text: string) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/ai/marketing-manager", {
+      const res = await fetch("http://localhost:5000/api/ai/creatormanager", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, message: text }),
@@ -43,6 +52,7 @@ export default function CampaignAIChat({ email }: { email: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Unknown error");
 
+      // FIX HERE: Use 'reply' because backend sends 'reply' now
       return data.reply as string;
     } catch (e: any) {
       console.error("AI fetch error:", e);

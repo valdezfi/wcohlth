@@ -125,7 +125,7 @@ export default function CreatorGeneralPublicProfileCard({
     fetchCreator();
   }, [email]);
 
-  const imageUrl = clean(creator.imageUrl) || "/images/brand/placeholder.svg";
+  const imageUrl = clean(creator.imageUrl) || "/images/user/placeholder.svg";
 
   async function sendEmailRequest() {
     setSending(true);
@@ -175,7 +175,7 @@ export default function CreatorGeneralPublicProfileCard({
           alt={clean(creator.creatorName) || "Creator"}
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/brand/placeholder.svg";
+            e.currentTarget.src = "/images/user/placeholder.svg";
           }}
           className="w-32 h-32 rounded-full border-4 border-indigo-600 mb-6 object-cover bg-gray-200"
         />
