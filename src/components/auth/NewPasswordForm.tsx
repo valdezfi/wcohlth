@@ -39,7 +39,7 @@ export default function NewPasswordForm() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/newpassword", {
+      const res = await fetch("http://localhost:5000/creator/api/newpassword", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),

@@ -5,7 +5,7 @@
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import CampaignNotificationDropdown from "@/components/header/NotificationDropdownbook";
 import UserDropdown from "@/components/header/UserDropdown";
-import CreateCampaignModal from "@/components/postCampaign/PostCamp";
+// import CreateCampaignModal from "@/components/postCampaign/PostCamp";
 
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
@@ -105,19 +105,19 @@ const AppHeader: React.FC = () => {
           <div className="flex items-center gap-3 2xsm:gap-3">
             <ThemeToggleButton />
             <CampaignNotificationDropdown  />
-            <button
+            {/* <button
               onClick={openModal}
               className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-full shadow-sm transition"
             >
               + Create Campaign
-            </button>
+            </button> */}
           </div>
 
           <UserDropdown />
         </div>
       </div>
 
-      <CreateCampaignModal isOpen={isOpen} onClose={closeModal} />
+      {/* <CreateCampaignModal isOpen={isOpen} onClose={closeModal} /> */}
     </header>
   );
 };

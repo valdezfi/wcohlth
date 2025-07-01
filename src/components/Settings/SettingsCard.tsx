@@ -18,7 +18,7 @@ export default function SettingsCard() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/request-password-reset", {
+      const res = await fetch("http://localhost:5000/creator/api/auth/request-password-reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),

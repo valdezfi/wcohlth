@@ -35,8 +35,8 @@ export default function UserDropdown() {
       try {
         setError(null);
         const [infoRes, imageRes] = await Promise.all([
-          fetch(`${API_BASE}/brand/getgeneralinfo/${session.user.email}`),
-          fetch(`${API_BASE}/brand/getprofileimage/${session.user.email}`),
+          fetch(`${API_BASE}/creator/getgeneralinfoemail/${session.user.email}`),
+          fetch(`${API_BASE}/creator/getprofileimage/${session.user.email}`),
         ]);
 
         if (!infoRes.ok) throw new Error("Failed to fetch user info");

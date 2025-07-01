@@ -45,11 +45,11 @@ const navItems: NavItem[] = [
     icon: <ListIcon />,
     subItems: [{ name: "Marketing Manager", path: "/ai", pro: false }],
   },
-  {
-    name: "Creators",
-    icon: <TableIcon />,
-    subItems: [{ name: "Discover", path: "/discover", pro: false }],
-  },
+  // {
+  //   name: "Creators",
+  //   icon: <TableIcon />,
+  //   subItems: [{ name: "Discover", path: "/discover", pro: false }],
+  // },
    {
     icon: <UserCircleIcon />,
     name: "User Profile",
