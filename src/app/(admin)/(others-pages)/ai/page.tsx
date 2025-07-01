@@ -89,7 +89,7 @@ export default function AiPage() {
           Subscription Required
         </h2>
         <p className="text-gray-700 dark:text-gray-300 mb-6 max-w-md">
-          Access to the AI Marketing Manager is available to Pro subscribers.
+          Access to the AI Manager is available to Pro subscribers.
           {trialUsed ? " You have already used your free 1-hour trial." : ""}
         </p>
         {error && <p className="text-red-500 dark:text-red-400 mb-4">{error}</p>}
