@@ -28,7 +28,7 @@ export default function CampaignListTable() {
 
     const fetchCampaigns = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/campaign/getallcampaigns/${email}`);
+        const res = await fetch(`http://localhost:5000/creator/allcampaigns`);
         if (!res.ok) throw new Error("Failed to fetch campaigns");
         const data = await res.json();
         setCampaigns(data);

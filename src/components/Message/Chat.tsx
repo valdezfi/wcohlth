@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Chat,
   Channel,
@@ -10,28 +10,28 @@ import {
   Thread,
   Window,
   LoadingIndicator,
-} from 'stream-chat-react';
-import { useSession } from 'next-auth/react';
-import { StreamChat, Channel as StreamChannel } from 'stream-chat';
-import 'stream-chat-react/dist/css/v2/index.css';
+} from "stream-chat-react";
+import { useSession } from "next-auth/react";
+import { StreamChat, Channel as StreamChannel } from "stream-chat";
+import "stream-chat-react/dist/css/v2/index.css";
 
-const apiKey = '6ujdvzws3yau'; // Your Stream API key
+const apiKey = "6ujdvzws3yau";
 
-interface ChattingWithCreatorProps {
+interface ChattingWithCampaignProps {
   creatorEmail: string;
+  campaignId: string;
 }
 
-// Sanitize for StreamChat IDs
 const safeId = (email: string) =>
-  email.toLowerCase().replace(/[^a-z0-9_\-!]/gi, '_');
+  email.toLowerCase().replace(/[^a-z0-9_\-!]/gi, "_");
 
-export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) {
+function ChattingWithCampaign({ creatorEmail, campaignId }: ChattingWithCampaignProps) {
   const { data: session, status } = useSession();
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
   const [channel, setChannel] = useState<StreamChannel | null>(null);
 
   useEffect(() => {
-    if (!session?.user?.email || status !== 'authenticated' || !creatorEmail) return;
+    if (!session?.user?.email || status !== "authenticated" || !creatorEmail || !campaignId) return;
 
     let client: StreamChat;
     let isMounted = true;
@@ -43,18 +43,23 @@ export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) 
     const setupChat = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/chat/direct/${creatorEmail}?currentEmail=${currentEmail}`
+          `http://localhost:5000/api/chat/campaign/${campaignId}/chat?currentEmail=${encodeURIComponent(
+            currentEmail
+          )}&otherEmail=${encodeURIComponent(creatorEmail)}`
         );
-        const data = await res.json();
 
-        if (!data.success) return;
+        const data = await res.json();
+        if (!data.success) {
+          console.error("Failed to fetch chat setup:", data.message);
+          return;
+        }
 
         client = StreamChat.getInstance(apiKey);
 
         await client.connectUser(
           {
             id: userId,
-            name: data.currentUser.name || 'User',
+            name: data.currentUser.name || "User",
             image: data.currentUser.image,
           },
           data.token
@@ -62,7 +67,7 @@ export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) 
 
         if (!isMounted) return;
 
-        const userChannel = client.channel('messaging', data.channelId, {
+        const userChannel = client.channel("messaging", data.channelId, {
           members: [userId, targetId],
         });
 
@@ -73,7 +78,7 @@ export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) 
           setChannel(userChannel);
         }
       } catch (error) {
-        console.error('Error setting up direct chat:', error);
+        console.error("Error setting up campaign chat:", error);
       }
     };
 
@@ -83,7 +88,7 @@ export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) 
       isMounted = false;
       if (client) client.disconnectUser();
     };
-  }, [session?.user?.email, status, creatorEmail]);
+  }, [session?.user?.email, status, creatorEmail, campaignId]);
 
   if (!chatClient || !channel) return <LoadingIndicator />;
 
@@ -100,3 +105,5 @@ export function ChattingWithCreator({ creatorEmail }: ChattingWithCreatorProps) 
     </Chat>
   );
 }
+
+export default ChattingWithCampaign;

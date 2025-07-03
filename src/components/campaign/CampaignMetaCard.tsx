@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react"; // import useSession
+import { useSession } from "next-auth/react";
 import Button from "../ui/button/Button";
 import Link from "next/link";
 import ApplyToCampaign from "@/components/campaign/Apply";
+import {Modal}  from "@/components/ui/modal"; // Make sure you have this component
+import ChattingWithCampaign from "@/components/Message/Chat";
 
 type CampaignDetails = {
   id: string | number;
@@ -27,6 +29,10 @@ type CampaignDetails = {
   email: string;
 };
 
+type CreatorInfo = {
+  email: string;
+};
+
 export default function CampaignMetaCard({
   campaignName,
 }: {
@@ -34,41 +40,60 @@ export default function CampaignMetaCard({
 }) {
   const { data: session, status } = useSession();
   const [campaign, setCampaign] = useState<CampaignDetails | null>(null);
+  const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
+  const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null); // State to control modal
 
+  // Fetch campaign details
   useEffect(() => {
-    const fetchCampaign = async () => {
-      const res = await fetch(
-        `http://localhost:5000/campaign/getcampaigns?campaignName=${encodeURIComponent(
-          campaignName
-        )}`
-      );
-      if (!res.ok) {
-        console.error("Failed to fetch campaign");
-        return;
+    async function fetchCampaign() {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/campaign/getcampaigns?campaignName=${encodeURIComponent(
+            campaignName
+          )}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch campaign");
+        const data = await res.json();
+        if (data?.length > 0) setCampaign(data[0]);
+      } catch (error) {
+        console.error(error);
       }
-      const data = await res.json();
-      if (data?.length > 0) setCampaign(data[0]);
-    };
-
+    }
     fetchCampaign();
   }, [campaignName]);
 
+  // Fetch creator status
+  useEffect(() => {
+    if (!campaignName || !session?.user?.email) return;
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/campaigns/${encodeURIComponent(
+            campaignName
+          )}/creators/status`
+        );
+        if (!res.ok) throw new Error("Failed to fetch status");
+        const data = await res.json();
+        const statusForUser = data[session.user.email] || "not applied";
+        setCreatorStatus(statusForUser);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchStatus();
+  }, [campaignName, session?.user?.email]);
+
   if (!campaign)
     return <div className="p-4 text-gray-500">Loading campaign...</div>;
-
-  // While session is loading, you might want to render a loader or nothing
-  if (status === "loading") {
+  if (status === "loading")
     return <div className="p-4 text-gray-500">Checking authentication...</div>;
-  }
-
-  // If not logged in, you could display a message or hide the apply section
-  if (!session?.user?.email) {
+  if (!session?.user?.email)
     return (
       <div className="p-4 text-red-500">
         You must be logged in to apply to this campaign.
       </div>
     );
-  }
 
   return (
     <div className="p-8 border border-gray-300 rounded-xl dark:border-gray-700 bg-white dark:bg-gray-900 max-w-4xl mx-auto shadow-lg">
@@ -143,6 +168,12 @@ export default function CampaignMetaCard({
         </p>
       </div>
 
+      {creatorStatus && (
+        <p className="mt-4 text-center font-semibold text-blue-600">
+          Your status: {creatorStatus}
+        </p>
+      )}
+
       <div className="mt-8 flex flex-col items-center gap-6">
         <Link
           href={`/camp/${encodeURIComponent(campaign.campaignName)}`}
@@ -158,6 +189,27 @@ export default function CampaignMetaCard({
           campaignId={campaign.id.toString()}
           creatorEmail={session.user.email}
         />
+
+        {creatorStatus === "approved" && (
+          <>
+            <Button onClick={() => setChatCreator({ email: campaign.email })}>
+              Chat with Brand
+            </Button>
+
+            <Modal
+              isOpen={!!chatCreator}
+              onClose={() => setChatCreator(null)}
+              className="max-w-2xl"
+            >
+              {chatCreator && campaign.id && (
+                <ChattingWithCampaign
+                  creatorEmail={chatCreator.email}
+                  campaignId={campaign.id.toString()}
+                />
+              )}
+            </Modal>
+          </>
+        )}
       </div>
     </div>
   );
