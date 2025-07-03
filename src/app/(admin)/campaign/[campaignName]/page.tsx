@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 
 import CampaignMetaCard from "@/components/campaign/CampaignMetaCard";
-import CampaignMetaCard from "@/components/campaign/Status";
 
 
 export default function CampaignPage() {
