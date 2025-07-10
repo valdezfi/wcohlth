@@ -208,7 +208,7 @@ export default function UserDropdown() {
   const [fullName, setFullName] = useState("User");
   const [profileImage, setProfileImage] = useState(DEFAULT_IMAGE);
   const [error, setError] = useState<string | null>(null);
-
+const senderEmail = session?.user?.email
   const toggleDropdown = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
@@ -229,8 +229,8 @@ export default function UserDropdown() {
         setError(null);
 
         const [infoRes, imageRes] = await Promise.all([
-        fetch(`${API_BASE}/creator/getgeneralinfoemail/${session.user.email}`),
-         fetch(`${API_BASE}/creator/getprofileimage/${session.user.email}`),
+        fetch(`${API_BASE}/creator/getgeneralinfoemail/${senderEmail}`),
+         fetch(`${API_BASE}/creator/getprofileimage/${senderEmail}`),
         ]);
 
         if (!infoRes.ok) throw new Error("Failed to fetch user info");
@@ -310,7 +310,6 @@ export default function UserDropdown() {
       </button>
 
       <Dropdown
-        id="user-dropdown"
         isOpen={isOpen}
         onClose={closeDropdown}
         className="absolute right-0 mt-[17px] w-[260px] rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
