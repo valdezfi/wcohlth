@@ -14,7 +14,6 @@ import {
   // PageIcon,
   // PieChartIcon,
   // PlugInIcon,
-  TableIcon,
   UserCircleIcon,
 } from "../icons/index";
 // import SidebarWidget from "./SidebarWidget";
@@ -277,8 +276,7 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  // const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-      const handleSubmenuToggle = (index: number, menuType: "main" ) => {
+  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
 
     setOpenSubmenu((prevOpenSubmenu) => {
       if (
