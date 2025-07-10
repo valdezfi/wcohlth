@@ -54,10 +54,12 @@ export default function CampaignAIChat({ email }: { email: string }) {
 
       // FIX HERE: Use 'reply' because backend sends 'reply' now
       return data.reply as string;
-    } catch (e: any) {
-      console.error("AI fetch error:", e);
-      return `Error: ${e.message}`;
-    } finally {
+   } catch (e: unknown) {
+  const err = e as Error;
+  console.error("AI fetch error:", err);
+  return `Error: ${err.message}`;
+}
+finally {
       setLoading(false);
     }
   };
@@ -108,7 +110,7 @@ export default function CampaignAIChat({ email }: { email: string }) {
             <ReactMarkdown
               skipHtml={true}
               components={{
-                a: ({ node, ...props }) => (
+                a: ({  ...props }) => (
                   <a
                     {...props}
                     target="_blank"
