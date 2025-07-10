@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import Button from "../ui/button/Button";
 import Link from "next/link";
 import ApplyToCampaign from "@/components/campaign/Apply";
-import {Modal}  from "@/components/ui/modal"; // Make sure you have this component
+import { Modal } from "@/components/ui/modal";
 import ChattingWithCampaign from "@/components/Message/Chat";
 
 type CampaignDetails = {
@@ -41,7 +41,9 @@ export default function CampaignMetaCard({
   const { data: session, status } = useSession();
   const [campaign, setCampaign] = useState<CampaignDetails | null>(null);
   const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
-  const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null); // State to control modal
+  const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null);
+
+  const emailuser = session?.user?.email;
 
   // Fetch campaign details
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function CampaignMetaCard({
 
   // Fetch creator status
   useEffect(() => {
-    if (!campaignName || !session?.user?.email) return;
+    if (!campaignName || !emailuser) return;
 
     async function fetchStatus() {
       try {
@@ -75,14 +77,19 @@ export default function CampaignMetaCard({
         );
         if (!res.ok) throw new Error("Failed to fetch status");
         const data = await res.json();
-        const statusForUser = data[session.user.email] || "not applied";
-        setCreatorStatus(statusForUser);
+
+        if (typeof emailuser === "string" && emailuser in data) {
+          setCreatorStatus(data[emailuser]);
+        } else {
+          setCreatorStatus("not applied");
+        }
       } catch (error) {
         console.error(error);
       }
     }
+
     fetchStatus();
-  }, [campaignName, session?.user?.email]);
+  }, [campaignName, emailuser]);
 
   if (!campaign)
     return <div className="p-4 text-gray-500">Loading campaign...</div>;
@@ -112,60 +119,20 @@ export default function CampaignMetaCard({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-gray-800 dark:text-gray-300 text-lg leading-relaxed">
-        <p>
-          <span className="font-semibold">Industry:</span>{" "}
-          {campaign.industry || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Platform:</span>{" "}
-          {campaign.platform || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Start Date:</span>{" "}
-          {campaign.startDate || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">End Date:</span>{" "}
-          {campaign.endDate || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Deliverables:</span>{" "}
-          {campaign.deliverables || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Product Details:</span>{" "}
-          {campaign.productDetails || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Optional Product Details 1:</span>{" "}
-          {campaign.optionalProductDetails1 || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Optional Product Details 2:</span>{" "}
-          {campaign.optionalProductDetails2 || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Compensation:</span>{" "}
-          {campaign.compensation || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Why We Want This Content:</span>{" "}
-          {campaign.whyWeWantThisContent || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Don'ts:</span> {campaign.doNot || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Ready to Post:</span>{" "}
-          {campaign.readyToPost || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Target Country:</span>{" "}
-          {campaign.targetCountry || "N/A"}
-        </p>
+        <p><span className="font-semibold">Industry:</span> {campaign.industry || "N/A"}</p>
+        <p><span className="font-semibold">Platform:</span> {campaign.platform || "N/A"}</p>
+        <p><span className="font-semibold">Start Date:</span> {campaign.startDate || "N/A"}</p>
+        <p><span className="font-semibold">End Date:</span> {campaign.endDate || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Deliverables:</span> {campaign.deliverables || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Product Details:</span> {campaign.productDetails || "N/A"}</p>
+        <p><span className="font-semibold">Optional Product Details 1:</span> {campaign.optionalProductDetails1 || "N/A"}</p>
+        <p><span className="font-semibold">Optional Product Details 2:</span> {campaign.optionalProductDetails2 || "N/A"}</p>
+        <p><span className="font-semibold">Compensation:</span> {campaign.compensation || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Why We Want This Content:</span> {campaign.whyWeWantThisContent || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Do not:</span> {campaign.doNot || "N/A"}</p>
+        <p><span className="font-semibold">Ready to Post:</span> {campaign.readyToPost || "N/A"}</p>
+        <p><span className="font-semibold">Target Country:</span> {campaign.targetCountry || "N/A"}</p>
       </div>
 
       {creatorStatus && (

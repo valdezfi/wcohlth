@@ -67,13 +67,11 @@ export default function ApplyToCampaign({
 
       if (!res.ok) throw new Error(data.error || "Failed to apply.");
 
-      setSuccess(true);
-      setSubmittedMessage(message.trim());
-      setMessage("");
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
-    } finally {
-      setSending(false);
+       setSuccess(true);
+  setSubmittedMessage(message.trim());
+  setMessage("");
+} finally {
+  setSending(false);
     }
   };
 

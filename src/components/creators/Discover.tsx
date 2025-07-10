@@ -21,22 +21,28 @@ export default function CreatorDiscovery() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCreators = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/creators/all");
-        if (!res.ok) throw new Error("Failed to fetch creators");
-        const data = await res.json();
-        setCreators(data);
-      } catch (err: any) {
+ useEffect(() => {
+  const fetchCreators = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/creators/all");
+      if (!res.ok) throw new Error("Failed to fetch creators");
+      const data = await res.json();
+      setCreators(data);
+    } catch (err) {
+      if (err instanceof Error) {
         console.error(err);
         setError(err.message);
-      } finally {
-        setLoading(false);
+      } else {
+        console.error('Unknown error', err);
+        setError("An unknown error occurred.");
       }
-    };
-    fetchCreators();
-  }, []);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchCreators();
+}, []);
+
 
   const handleShowMore = () => {
     setVisibleCount((prev) => prev + 9);

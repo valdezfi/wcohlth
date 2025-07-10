@@ -46,37 +46,42 @@ export default function CreateCampaignModal({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !imageFile) return alert("Email or image missing");
+  e.preventDefault();
+  if (!email || !imageFile) return alert("Email or image missing");
 
-    try {
-      const formData = new FormData();
-      formData.append("image", imageFile);
+  try {
+    const formData = new FormData();
+    formData.append("image", imageFile);
 
-      for (const key in campaign) {
-        formData.append(key, campaign[key as keyof typeof campaign]);
+    for (const key in campaign) {
+      formData.append(key, campaign[key as keyof typeof campaign]);
+    }
+
+    const res = await fetch(
+      `http://localhost:5000/campaign/postcampaign/${email}`,
+      {
+        method: "POST",
+        body: formData,
       }
+    );
 
-      const res = await fetch(
-        `http://localhost:5000/campaign/postcampaign/${email}`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Unknown error");
+    }
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Unknown error");
-      }
-
-      alert("Campaign posted successfully!");
-      onClose();
-    } catch (err: any) {
+    alert("Campaign posted successfully!");
+    onClose();
+  } catch (err) {
+    if (err instanceof Error) {
       console.error("Failed to post campaign:", err.message);
       alert("Failed to post campaign: " + err.message);
+    } else {
+      console.error("Failed to post campaign:", err);
+      alert("Failed to post campaign: Unknown error");
     }
-  };
+  }
+};
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[700px] m-4">
@@ -198,7 +203,7 @@ export default function CreateCampaignModal({
           </div>
 
           <div>
-            <Label>Do's</Label>
+            <Label>Do</Label>
             <TextArea
               name="dos"
               value={campaign.dos}
@@ -208,7 +213,7 @@ export default function CreateCampaignModal({
           </div>
 
           <div>
-            <Label>Don'ts</Label>
+            <Label>Do not</Label>
             <TextArea
               name="doNot"
               value={campaign.doNot}

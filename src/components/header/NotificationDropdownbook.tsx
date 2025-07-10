@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 
 interface CampaignNotification {

@@ -73,8 +73,8 @@ export default function PublicCampaignView({ campaignName }: { campaignName: str
         <div><p><span className="font-semibold">Optional Product Details 2:</span> {campaign.optionalProductDetails2 || "N/A"}</p></div>
         <div><p><span className="font-semibold">Compensation:</span> {campaign.compensation || "N/A"}</p></div>
         <div className="sm:col-span-2"><p><span className="font-semibold">Why We Want This Content:</span> {campaign.whyWeWantThisContent || "N/A"}</p></div>
-        <div className="sm:col-span-2"><p><span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}</p></div>
-        <div className="sm:col-span-2"><p><span className="font-semibold">Don'ts:</span> {campaign.doNot || "N/A"}</p></div>
+        <div className="sm:col-span-2"><p><span className="font-semibold">Do:</span> {campaign.dos || "N/A"}</p></div>
+        <div className="sm:col-span-2"><p><span className="font-semibold">Do Not:</span> {campaign.doNot || "N/A"}</p></div>
         <div><p><span className="font-semibold">Ready to Post:</span> {campaign.readyToPost || "N/A"}</p></div>
         <div><p><span className="font-semibold">Target Country:</span> {campaign.targetCountry || "N/A"}</p></div>
       </div>
