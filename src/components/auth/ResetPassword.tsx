@@ -15,7 +15,6 @@ export default function StartResetPassword() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +36,14 @@ export default function StartResetPassword() {
 
       setSuccessMsg("Reset link sent to your email.");
       setEmail("");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to send reset link.");
-    } finally {
-      setLoading(false);
-    }
+ } catch (err: unknown) {
+  if (err instanceof Error) {
+    setErrorMsg(err.message);
+  } else {
+    setErrorMsg("An unknown error occurred.");
+  }
+}
+
   };
 
   return (

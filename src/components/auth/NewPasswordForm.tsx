@@ -58,12 +58,13 @@ export default function NewPasswordForm() {
       setTimeout(() => {
         router.push("/signin");
       }, 2000);
-    } catch (err: any) {
-      setErrorMsg(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setErrorMsg(err.message);
+  } else {
+    setErrorMsg("An unknown error occurred.");
+  }
+};
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">

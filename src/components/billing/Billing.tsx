@@ -21,10 +21,7 @@ type SubscriptionData = {
 const FREE_PLAN = {
   name: "Free Plan",
   price: 0,
-  benefits: [
-    "Create unlimited campaigns",
-  
-  ],
+  benefits: ["Create unlimited campaigns"],
 };
 
 const PLANS = {
@@ -33,31 +30,19 @@ const PLANS = {
     name: "Pro Monthly",
     price: 59.99,
     interval: "month" as const,
- benefits: [
-  "All Free Plan features included",
-
-  // 🧠 AI & Automation
-  "Your 24/7 AI campaign strategist & talent manager",
-  "Auto-generated influencer briefs, media plans & pitch decks",
-  "AI-written content hooks to increase views, clicks & conversions",
-  "Smart Contract Builder: Generate creator agreements (UGC, affiliate, sponsorship) instantly",
-
-  // 📢 Ads Strategy & Influencer Scaling
-  "AI-Powered Ads Planner: Get ad copy, audience targeting, and campaign structure by objective",
-
-  // 🎙️ Podcast & Content Tools
-  "Podcast AI Assistant: Weekly topic ideas, full outlines, and call-to-actions",
-  "Generate compelling show notes, CTAs, and email summaries",
-
-  // 📈 Growth & Monetization
-  "AI-Powered Income Strategy Generator: Brand deals, affiliate offers, merch, paid communities",
-  "Launch & monetization playbooks tailored to your agency or creator tier",
-  "AI Idea Engine: Generate viral content angles, campaign themes, and monetizable hooks",
-
-  "Done-for-you pitch decks, contract templates, & SOPs",
-  "Priority support and early access to new tools",
-]
-
+    benefits: [
+      "All Free Plan features included",
+      "AI campaign strategist",
+      "Influencer briefs",
+      "Smart Contract Builder",
+      "AI Ads Planner",
+      "Podcast AI Assistant",
+      "Income Strategy Generator",
+      "Monetization playbooks",
+      "AI Idea Engine",
+      "Pitch decks & SOPs",
+      "Priority support",
+    ],
   },
   yearly: {
     id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_399!,
@@ -105,8 +90,9 @@ export default function Billing({ email }: { email: string }) {
           productName: data.subscription.items.data[0].price.nickname,
         });
         setError("");
-      } catch (err: any) {
-        setSubscription(null);
+      } catch (e: unknown) {
+        const err = e as Error;
+        console.error("Fetch subscription error:", err);
         setError(err.message);
       }
     };
@@ -114,41 +100,8 @@ export default function Billing({ email }: { email: string }) {
     fetchSubscription();
   }, [email]);
 
-  const startCheckout = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:5000/api/c/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          priceId: selectedPlan.id,
-          billingDetails: {
-            name: "TBD",
-            address: {
-              line1: "TBD",
-              city: "TBD",
-              postal_code: "00000",
-              country: "US",
-            },
-          },
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create subscription");
-      setClientSecret(data.clientSecret);
-      setCheckoutStarted(true);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const cancelSubscription = async () => {
     if (!confirm("Are you sure you want to cancel your subscription?")) return;
-
     setLoading(true);
     try {
       const res = await fetch("http://localhost:5000/api/c/cancel", {
@@ -159,7 +112,9 @@ export default function Billing({ email }: { email: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to cancel subscription");
       window.location.reload();
-    } catch (err: any) {
+    } catch (e: unknown) {
+      const err = e as Error;
+      console.error("Cancel subscription error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -181,13 +136,33 @@ export default function Billing({ email }: { email: string }) {
         </button>
         <Elements stripe={stripePromise} options={{ clientSecret }}>
           <CheckoutForm
-            email={email}
-            onSuccess={() => {
-              setCheckoutStarted(false);
-              setClientSecret("");
-              window.location.reload();
+            onCompleteBilling={async (billingDetails) => {
+              try {
+                setLoading(true);
+                const res = await fetch("http://localhost:5000/api/c/subscribe", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    email,
+                    priceId: selectedPlan.id,
+                    billingDetails,
+                  }),
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to create subscription");
+
+                setCheckoutStarted(false);
+                setClientSecret("");
+                window.location.reload();
+              } catch (e: unknown) {
+                const err = e as Error;
+                console.error("Subscription error:", err);
+                alert(err.message);
+              } finally {
+                setLoading(false);
+              }
             }}
-            onError={(msg: string) => alert(msg)}
           />
         </Elements>
       </div>
@@ -203,22 +178,28 @@ export default function Billing({ email }: { email: string }) {
       {error && <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>}
 
       {!subscription && (
-        <div className="mb-6 text-center">
-          <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300">
-            {FREE_PLAN.benefits.map((b) => (
-              <li key={b}>{b}</li>
-            ))}
-          </ul>
-          <hr className="my-6 border-gray-300 dark:border-gray-700" />
-        </div>
+        <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300 mb-6">
+          {FREE_PLAN.benefits.map((b) => (
+            <li key={b}>{b}</li>
+          ))}
+        </ul>
       )}
 
       {subscription && (
         <>
-          <p><strong>Plan:</strong> {subscription.productName}</p>
-          <p><strong>Status:</strong> {subscription.status}</p>
-          <p><strong>Price:</strong> {formatPrice(subscription.priceAmount)} / {subscription.interval}</p>
-          <p><strong>Renews On:</strong> {new Date(subscription.current_period_end * 1000).toLocaleDateString()}</p>
+          <p>
+            <strong>Plan:</strong> {subscription.productName}
+          </p>
+          <p>
+            <strong>Status:</strong> {subscription.status}
+          </p>
+          <p>
+            <strong>Price:</strong> {formatPrice(subscription.priceAmount)} / {subscription.interval}
+          </p>
+          <p>
+            <strong>Renews On:</strong>{" "}
+            {new Date(subscription.current_period_end * 1000).toLocaleDateString()}
+          </p>
           {subscription.cancel_at_period_end && (
             <p className="text-yellow-600 mt-2">Cancels at end of billing period</p>
           )}
@@ -236,13 +217,17 @@ export default function Billing({ email }: { email: string }) {
       <div className="flex justify-center space-x-4 mb-4">
         <button
           onClick={() => setBillingPeriod("monthly")}
-          className={`px-4 py-2 rounded ${billingPeriod === "monthly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"}`}
+          className={`px-4 py-2 rounded ${
+            billingPeriod === "monthly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"
+          }`}
         >
           Monthly
         </button>
         <button
           onClick={() => setBillingPeriod("yearly")}
-          className={`px-4 py-2 rounded ${billingPeriod === "yearly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"}`}
+          className={`px-4 py-2 rounded ${
+            billingPeriod === "yearly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"
+          }`}
         >
           Yearly (Save {formatPrice(savings * 100)})
         </button>
@@ -250,7 +235,9 @@ export default function Billing({ email }: { email: string }) {
 
       <div className="text-center mb-6">
         <h3 className="text-lg font-semibold">{selectedPlan.name}</h3>
-        <p className="text-3xl font-bold">{formatPrice(selectedPlan.price * 100)} / {selectedPlan.interval === "month" ? "mo" : "yr"}</p>
+        <p className="text-3xl font-bold">
+          {formatPrice(selectedPlan.price * 100)} / {selectedPlan.interval === "month" ? "mo" : "yr"}
+        </p>
         <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300">
           {selectedPlan.benefits.map((b) => (
             <li key={b}>{b}</li>
@@ -259,9 +246,11 @@ export default function Billing({ email }: { email: string }) {
       </div>
 
       <button
-        onClick={startCheckout}
+        onClick={() => setCheckoutStarted(true)}
         disabled={loading || subscription?.priceId === selectedPlan.id}
-        className={`w-full py-3 rounded text-white ${billingPeriod === "yearly" ? "bg-green-600 hover:bg-green-500" : "bg-blue-600 hover:bg-blue-500"} disabled:opacity-50`}
+        className={`w-full py-3 rounded text-white ${
+          billingPeriod === "yearly" ? "bg-green-600 hover:bg-green-500" : "bg-blue-600 hover:bg-blue-500"
+        } disabled:opacity-50`}
       >
         {loading
           ? "Processing..."
