@@ -9,7 +9,6 @@ import {
   FaGlobe,
   FaComments,
 } from "react-icons/fa";
-import { ChattingWithCreator } from "@/components/Message/Chating";
 
 type Creator = {
   creatorName: string;
@@ -273,7 +272,6 @@ export default function CreatorGeneralPublicProfileCard({
               ×
             </button>
             <div className="p-4">
-              <ChattingWithCreator creatorEmail={creator.email} />
             </div>
           </div>
         </div>
