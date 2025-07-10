@@ -56,15 +56,16 @@ export default function CheckoutForm({
       return;
     }
 
-    setLoading(true);
-    try {
-      await onCompleteBilling({ name, address });
-    } catch (err: any) {
-      setErrorMessage(err.message || "Failed to process billing details.");
-    } finally {
-      setLoading(false);
-    }
-  };
+   setLoading(true);
+try {
+  await onCompleteBilling({ name, address });
+} catch (err) {
+  const error = err instanceof Error ? err.message : "Failed to process billing details.";
+  setErrorMessage(error);
+} finally {
+  setLoading(false);
+}
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

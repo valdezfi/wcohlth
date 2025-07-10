@@ -59,12 +59,15 @@ export default function NewPasswordForm() {
         router.push("/signin");
       }, 2000);
     } catch (err: unknown) {
-  if (err instanceof Error) {
-    setErrorMsg(err.message);
-  } else {
-    setErrorMsg("An unknown error occurred.");
-  }
-};
+      if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg("An unknown error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
