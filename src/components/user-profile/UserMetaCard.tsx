@@ -12,16 +12,15 @@ import {
   FaInstagram,
   FaYoutube,
   FaTiktok,
-  FaTwitch,
   FaGlobe,
   FaEnvelope,
-  FaComments,
 } from "react-icons/fa";
 
 export default function UserMetaCard() {
   const { data: session } = useSession();
   const user = session?.user;
   const { isOpen, openModal, closeModal } = useModal();
+  const email = session?.user?.email;
 
   const [creatorName, setCreatorName] = useState("");
   const [about, setAbout] = useState("");
@@ -35,14 +34,14 @@ export default function UserMetaCard() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (!user?.email) return;
+    if (!email) return;
 
     const fetchUserInfo = async () => {
       try {
         // Fetch main creator info (excluding imageUrl)
         const res = await fetch(
           `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(
-            user.email
+          email
           )}`
         );
         if (!res.ok) throw new Error("Failed to fetch user info");
@@ -66,7 +65,7 @@ export default function UserMetaCard() {
         // Separate fetch for profile image URL
         const imgRes = await fetch(
           `http://localhost:5000/creator/getprofileimage/${encodeURIComponent(
-            user.email
+            email
           )}`
         );
         if (!imgRes.ok) {
