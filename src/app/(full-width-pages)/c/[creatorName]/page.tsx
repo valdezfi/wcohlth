@@ -1,5 +1,4 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import CreatorGeneralPublicProfileCard from "@/components/creators/CreatorProfile";
@@ -41,7 +40,7 @@ export default async function CreatorProfilePage({
 }) {
   const resolvedParams = await params;
 
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
   if (!session) redirect("/signin");
 
   return (

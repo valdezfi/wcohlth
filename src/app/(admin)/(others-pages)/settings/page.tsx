@@ -3,7 +3,6 @@ import SettingsCard from "@/components/Settings/SettingsCard";
 import { Metadata } from "next";
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -127,7 +126,7 @@ export const metadata: Metadata = {
 
 export default async function Settings () {
 
- const session = await getServerSession(authOptions);
+ const session = await getServerSession();
 
   if (!session) {
     redirect("/signin");

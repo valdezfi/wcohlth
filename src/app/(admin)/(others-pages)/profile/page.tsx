@@ -4,7 +4,6 @@ import UserMetaCard from "@/components/user-profile/UserMetaCard";
 import { Metadata } from "next";
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
 
@@ -138,7 +137,7 @@ export const metadata: Metadata = {
 
 export default async function Profile() {
 
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
   
     if (!session) {
       redirect("/signin");

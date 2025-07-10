@@ -1,7 +1,9 @@
+// src/app/api/auth/[...nextauth]/route.js
+
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import mysql from "mysql2/promise";
-import NextAuth from "next-auth";
 
 const db = mysql.createPool({
   host: process.env.NEXT_PUBLIC_DB_HOST,
@@ -10,8 +12,7 @@ const db = mysql.createPool({
   database: process.env.NEXT_PUBLIC_DB_NAME,
 });
 
-// Extract auth options to reuse in session checks
-export const authOptions = {
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -22,22 +23,20 @@ export const authOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const [rows] = await db.query(
-          "SELECT * FROM Creators WHERE email = ?",
-          [credentials.email]
-        );
-
-        if (!rows || rows.length === 0) return null;
-
+        const [rows] = await db.query("SELECT * FROM Creators WHERE email = ?", [
+          credentials.email,
+        ]);
         const user = rows[0];
+        if (!user) return null;
+
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
         return {
           id: user.id.toString(),
           email: user.email,
-          username: user.username ?? undefined,
-          status: user.status ?? undefined,
+          username: user.username || undefined,
+          status: user.status || undefined,
         };
       },
     }),
@@ -45,7 +44,9 @@ export const authOptions = {
   pages: {
     signIn: "/signin",
   },
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -69,6 +70,6 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
+// ✅ Required default export for App Router
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };
