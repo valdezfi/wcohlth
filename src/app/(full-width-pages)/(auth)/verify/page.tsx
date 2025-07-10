@@ -1,11 +1,16 @@
+import React, { Suspense } from "react";
 import VerifyEmailPage from "@/components/auth/Verify";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Next.js SignIn Page | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js Signin Page TailAdmin Dashboard Template",
+  title: "Grande",
+  description: "Boost Your ADs With Influencers, UGC Creators, & Podcast Creators",
 };
 
 export default function SignIn() {
-  return <VerifyEmailPage />;
+  return (
+    <Suspense fallback={<div>Verifying email...</div>}>
+      <VerifyEmailPage />
+    </Suspense>
+  );
 }
