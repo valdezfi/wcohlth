@@ -1,12 +1,10 @@
-// import UserAddressCard from "@/components/user-profile/UserAddressCard";
+import React, { Suspense } from "react";
 import ResetPasswordPage from "@/components/Settings/ResetForm";
 import { Metadata } from "next";
-import React from "react";
 
 export const metadata: Metadata = {
-  title: "Next.js Profile | TailAdmin - Next.js Dashboard Template",
-  description:
-    "This is Next.js Profile page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
+  title: "Grande",
+  description: "Boost Your ADs With Influencers, UGC Creators, & Podcast Creators",
 };
 
 export default function Profile() {
@@ -17,10 +15,13 @@ export default function Profile() {
           Profile
         </h3>
         <div className="space-y-6">
-          <ResetPasswordPage />
+          <Suspense fallback={<div>Loading reset form...</div>}>
+            <ResetPasswordPage />
+          </Suspense>
           {/* <UserAddressCard /> */}
         </div>
       </div>
     </div>
   );
 }
+
