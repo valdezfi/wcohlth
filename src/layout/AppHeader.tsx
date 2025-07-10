@@ -12,12 +12,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { useModal } from "@/hooks/useModal";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
-  const { isOpen, openModal, closeModal } = useModal();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const { data: session } = useSession();
