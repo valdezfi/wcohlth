@@ -35,36 +35,43 @@ export default function CheckoutForm({
 
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setErrorMessage("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage("");
+  if (!stripe || !elements) {
+    setErrorMessage("Stripe is not loaded yet.");
+    return;
+  }
 
-    if (!stripe || !elements) {
-      setErrorMessage("Stripe is not loaded yet.");
-      return;
-    }
+  if (
+    !name.trim() ||
+    !address.line1 ||
+    !address.city ||
+    !address.postal_code ||
+    !address.country
+  ) {
+    setErrorMessage("Please complete all required billing fields.");
+    return;
+  }
 
-    if (
-      !name.trim() ||
-      !address.line1 ||
-      !address.city ||
-      !address.postal_code ||
-      !address.country
-    ) {
-      setErrorMessage("Please complete all required billing fields.");
-      return;
-    }
+  setLoading(true);
+  try {
+    await onCompleteBilling({ name, address });
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "Failed to process billing details.";
+    setErrorMessage(error);
+  } finally {
+    setLoading(false);
+  }  // <-- THIS CLOSES try/catch/finally block
 
-   setLoading(true);
-try {
-  await onCompleteBilling({ name, address });
-} catch (err) {
-  const error = err instanceof Error ? err.message : "Failed to process billing details.";
-  setErrorMessage(error);
-} finally {
-  setLoading(false);
-}
+};  // <-- THIS CLOSES handleSubmit function
+
+return (
+  <form onSubmit={handleSubmit} className="space-y-6">
+    {/* ...rest of your JSX... */}
+  </form>
+);
 
 
   return (
