@@ -22,10 +22,10 @@ export default function CancelConfirmationModal({
           Are you sure you want to cancel this approved transaction? This action cannot be undone.
         </p>
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="primary" onClick={onClose}>
             No, Keep It
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
+          <Button variant="primary" onClick={onConfirm}>
             Yes, Cancel It
           </Button>
         </div>
