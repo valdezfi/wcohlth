@@ -38,7 +38,7 @@ const industryOptions = [
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
   const { data: session } = useSession();
-  const user = session?.user;
+  const userEmail = session?.user?.email;
 
   const [info, setInfo] = useState({
     email: "",
@@ -48,12 +48,12 @@ export default function UserInfoCard() {
   });
 
   useEffect(() => {
-    if (!user?.email) return;
+    if (!userEmail) return;
 
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(user.email)}`
+          `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
         );
         if (!res.ok) throw new Error("Failed to fetch brand info");
 
@@ -61,7 +61,7 @@ export default function UserInfoCard() {
         const brand = data.user || data;
 
         setInfo({
-          email: brand.email || user.email,
+          email: brand.email || userEmail,
           niche: brand.niche || "",
           country: brand.country || "",
           creatorName: brand.creatorName || "",
@@ -72,18 +72,18 @@ export default function UserInfoCard() {
     };
 
     fetchData();
-  }, [user?.email]);
+  }, [userEmail]);
 
   const handleChange = (field: keyof typeof info, value: string) => {
     setInfo((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
-    if (!user?.email) return;
+    if (!userEmail) return;
 
     try {
       const res = await fetch(
-        `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(user.email)}`,
+        `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
