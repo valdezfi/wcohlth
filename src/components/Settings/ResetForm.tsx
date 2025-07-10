@@ -29,7 +29,9 @@ export default function ResetPasswordPage() {
 
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/creator/api/auth/reset-password', {
+      // const res = await fetch('http://localhost:5000/api/auth/reset-password', {
+            const res = await fetch('/g/api/auth/reset-password', {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -69,21 +71,27 @@ export default function ResetPasswordPage() {
           {message && <p className="mb-4 text-green-500">{message}</p>}
 
           <div className="flex flex-col gap-4 text-left">
-            <Input
-              type="password"
-              label="New Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter new password"
-            />
+         <label className="text-sm text-gray-700 dark:text-white mb-1">
+  New Password
+</label>
+<Input
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="Enter new password"
+/>
 
-            <Input
-              type="password"
-              label="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-            />
+
+        <label className="text-sm text-gray-700 dark:text-white mb-1">
+  Confirm Password
+</label>
+<Input
+  type="password"
+  value={confirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}
+  placeholder="Confirm new password"
+/>
+
 
             <Button onClick={handleReset} disabled={loading}>
               {loading ? 'Resetting...' : 'Reset Password'}
