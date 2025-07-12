@@ -21,7 +21,10 @@ type SubscriptionData = {
 const FREE_PLAN = {
   name: "Free Plan",
   price: 0,
-  benefits: ["Apply unlimited campaigns, Try ai manager"],
+  benefits: [  "Apply to unlimited campaigns",
+      "Basic creator insights",
+      "Community access",
+      "Light AI career advice",],
 };
 
 const PLANS = {
@@ -34,7 +37,6 @@ const PLANS = {
       "All Free plan benefits",
       "Priority support",
       "Exclusive early feature access",
-      "Save over $300/year",
        "Influencer briefs",
       "Smart Contract Builder",
       "AI Ads Planner",
@@ -43,6 +45,11 @@ const PLANS = {
       "Monetization playbooks",
       "AI Idea Engine",
       "Pitch decks & SOPs",
+      "Personalized AI career roadmap",
+      "AI-backed brand partnership advice",
+      "Help building digital products",
+      "Advanced creator analytics",
+      "Priority campaign access",
       "Priority Support"  ],
   },
   yearly: {
