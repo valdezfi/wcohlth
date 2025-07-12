@@ -21,7 +21,7 @@ type SubscriptionData = {
 const FREE_PLAN = {
   name: "Free Plan",
   price: 0,
-  benefits: [  "Apply to unlimited campaigns",
+  benefits: [   "Apply to unlimited campaigns",
       "Basic creator insights",
       "Community access",
       "Light AI career advice",],
@@ -69,7 +69,6 @@ const PLANS = {
       "Income Strategy Generator",
       "Monetization playbooks",
       "AI Idea Engine",
-      "Pitch decks & SOPs",
       "Priority support",
     ],
   },
