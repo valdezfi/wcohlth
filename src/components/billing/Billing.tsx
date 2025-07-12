@@ -21,7 +21,7 @@ type SubscriptionData = {
 const FREE_PLAN = {
   name: "Free Plan",
   price: 0,
-  benefits: ["Create unlimited campaigns"],
+  benefits: ["Apply unlimited campaigns, Try ai manager"],
 };
 
 const PLANS = {
@@ -31,9 +31,31 @@ const PLANS = {
     price: 59.99,
     interval: "month" as const,
     benefits: [
-      "All Free Plan features included",
-      "AI campaign strategist",
-      "Influencer briefs",
+      "All Free plan benefits",
+      "Priority support",
+      "Exclusive early feature access",
+      "Save over $300/year",
+       "Influencer briefs",
+      "Smart Contract Builder",
+      "AI Ads Planner",
+      "Podcast AI Assistant",
+      "Income Strategy Generator",
+      "Monetization playbooks",
+      "AI Idea Engine",
+      "Pitch decks & SOPs",
+      "Priority Support"  ],
+  },
+  yearly: {
+    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_399!,
+    name: "Pro Yearly",
+    price: 399,
+    interval: "year" as const,
+    benefits: [
+      "All Free plan benefits",
+      "Priority support",
+      "Exclusive early feature access",
+      "Save over $300/year",
+       "Influencer briefs",
       "Smart Contract Builder",
       "AI Ads Planner",
       "Podcast AI Assistant",
@@ -42,18 +64,6 @@ const PLANS = {
       "AI Idea Engine",
       "Pitch decks & SOPs",
       "Priority support",
-    ],
-  },
-  yearly: {
-    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_399!,
-    name: "Pro Yearly",
-    price: 399,
-    interval: "year" as const,
-    benefits: [
-      "All Monthly plan benefits",
-      "Priority support",
-      "Exclusive early feature access",
-      "Save over $300/year",
     ],
   },
 };
