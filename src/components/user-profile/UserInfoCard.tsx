@@ -53,7 +53,10 @@ export default function UserInfoCard() {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
+          // `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
+
+                    `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
+
         );
         if (!res.ok) throw new Error("Failed to fetch brand info");
 
@@ -83,7 +86,10 @@ export default function UserInfoCard() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
+        // `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
+
+                `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -128,12 +134,15 @@ export default function UserInfoCard() {
                   Public Profile
                 </p>
                 <a
-                  href={`http://localhost:3000/c/${encodeURIComponent(info.creatorName)}`}
+                  // href={`http://localhost:3000/c/${encodeURIComponent(info.creatorName)}`}
+
+                                    href={`/c/${encodeURIComponent(info.creatorName)}`}
+
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-blue-600 dark:text-blue-400 underline break-all"
                 >
-                  📣 http://localhost:3000/c/{info.creatorName}
+                  📣 Public Link
                 </a>
               </div>
             )}

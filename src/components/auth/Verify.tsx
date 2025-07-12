@@ -15,7 +15,10 @@ const VerifyEmailPage = () => {
 
     const verifyEmail = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/c/api/auth/verify?token=${token}`);
+        // const res = await fetch(`http://localhost:5000/c/api/auth/verify?token=${token}`);
+
+      const res = await fetch(`https://app.grandeapp.com/g/c/api/auth/verify?token=${token}`);
+
         const data = await res.json();
 
         if (res.ok) {

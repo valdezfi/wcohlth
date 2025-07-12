@@ -16,23 +16,29 @@ interface CampaignNotification {
 }
 
 export default function CampaignNotificationDropdown() {
-  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<CampaignNotification[]>([]);
   const [newNotification, setNewNotification] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const { data: session, status } = useSession();
+  const email = session?.user?.email;
+
   const fetchCampaigns = useCallback(async () => {
-    if (status !== "authenticated" || !session?.user?.email) return;
+    if (status !== "authenticated" || !email) return;
 
     try {
       const res = await fetch(
-        `http://localhost:5000/campaign/getcampaigns?email=${encodeURIComponent(session.user.email)}`
+
+                // `http://localhost:5000/campaign/getcampaigns?email=${encodeURIComponent(email)}`
+
+        `https://app.grandeapp.com/g/campaign/getcampaigns?email=${encodeURIComponent(email)}`
       );
       if (!res.ok) {
         setNotifications([]);
         return;
       }
+
       const data: CampaignNotification[] = await res.json();
       setNotifications(data);
       if (data.length > 0) setNewNotification(true);
@@ -40,21 +46,19 @@ export default function CampaignNotificationDropdown() {
       console.error("Failed to fetch campaigns:", err);
       setNotifications([]);
     }
-  }, [session?.user?.email, status]);
+  }, [email, status]);
 
   const toggleDropdown = useCallback(() => {
     setIsOpen((prev) => !prev);
     if (!isOpen) {
-      setNewNotification(false); // Clear notification indicator on open
+      setNewNotification(false); // Clear indicator on open
     }
   }, [isOpen]);
 
-  // Fetch campaigns on mount and when session changes
   useEffect(() => {
     fetchCampaigns();
   }, [fetchCampaigns]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!isOpen) return;
 
@@ -63,6 +67,7 @@ export default function CampaignNotificationDropdown() {
         setIsOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
@@ -124,7 +129,8 @@ export default function CampaignNotificationDropdown() {
                       {campaign.compensation} • {campaign.targetCountry}
                     </span>
                     <span className="text-xs mt-1 text-gray-400 dark:text-gray-500">
-                      {new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}
+                      {new Date(campaign.startDate).toLocaleDateString()} -{" "}
+                      {new Date(campaign.endDate).toLocaleDateString()}
                     </span>
                   </div>
                 </li>
@@ -138,3 +144,5 @@ export default function CampaignNotificationDropdown() {
     </div>
   );
 }
+
+

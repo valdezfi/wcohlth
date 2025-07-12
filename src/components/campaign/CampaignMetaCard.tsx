@@ -50,7 +50,11 @@ export default function CampaignMetaCard({
     async function fetchCampaign() {
       try {
         const res = await fetch(
-          `http://localhost:5000/campaign/getcampaigns?campaignName=${encodeURIComponent(
+          // `http://localhost:5000/campaign/getcampaigns?campaignName=${encodeURIComponent(
+
+
+                    `https://app.grandeapp.com/g/campaign/getcampaigns?campaignName=${encodeURIComponent(
+
             campaignName
           )}`
         );
@@ -71,7 +75,11 @@ export default function CampaignMetaCard({
     async function fetchStatus() {
       try {
         const res = await fetch(
-          `http://localhost:5000/campaigns/${encodeURIComponent(
+          // `http://localhost:5000/campaigns/${encodeURIComponent(
+
+
+                      `https://app.grandeapp.com/g/campaigns/${encodeURIComponent(
+
             campaignName
           )}/creators/status`
         );

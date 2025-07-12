@@ -18,7 +18,14 @@ export default function SignUpForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/creator/signup", {
+      // const res = await fetch("http://localhost:5000/creator/signup", {
+
+      const res = await fetch("https://app.grandeapp.com/g/creator/signup", {
+
+
+
+
+         
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

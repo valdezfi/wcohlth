@@ -200,7 +200,9 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 
 const DEFAULT_IMAGE = "/images/user/placeholder.svg";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
+// const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://app.grandeapp.com/g";
+
 
 export default function UserDropdown() {
   const { data: session, status } = useSession();

@@ -43,7 +43,12 @@ export default function CampaignAIChat({ email }: { email: string }) {
   const fetchAIResponse = async (text: string) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/ai/creatormanager", {
+      // const res = await fetch("http://localhost:5000/api/ai/creatormanager", {
+      const res = await fetch("https://app.grandeapp.com/g/api/ai/creatormanager", {
+
+
+
+        
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, message: text }),

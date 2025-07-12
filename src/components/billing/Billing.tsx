@@ -92,7 +92,10 @@ export default function Billing({ email }: { email: string }) {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/c/subscription?email=${email}`);
+        // const res = await fetch(`http://localhost:5000/api/c/subscription?email=${email}`);
+
+      const res = await fetch(`https://app.grandeapp.com/g/api/c/subscription?email=${email}`);
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Subscription not found.");
         setSubscription({
@@ -120,7 +123,12 @@ export default function Billing({ email }: { email: string }) {
     if (!confirm("Are you sure you want to cancel your subscription?")) return;
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/c/cancel", {
+      // const res = await fetch("http://localhost:5000/api/c/cancel", {
+
+      const res = await fetch("https://app.grandeapp.com/g/api/c/cancel", {
+
+
+        
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -155,7 +163,13 @@ export default function Billing({ email }: { email: string }) {
             onCompleteBilling={async (billingDetails) => {
               try {
                 setLoading(true);
-                const res = await fetch("http://localhost:5000/api/c/subscribe", {
+                // const res = await fetch("http://localhost:5000/api/c/subscribe", {
+
+                const res = await fetch("https://app.grandeapp.com/g/api/c/subscribe", {
+
+
+
+                  
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({

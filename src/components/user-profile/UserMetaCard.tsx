@@ -32,7 +32,6 @@ export default function UserMetaCard() {
   const [country, setCountry] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-
   useEffect(() => {
     if (!email) return;
 
@@ -40,7 +39,12 @@ export default function UserMetaCard() {
       try {
         // Fetch main creator info (excluding imageUrl)
         const res = await fetch(
-          `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(
+          // `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(
+          // email
+          // )}`
+
+
+              `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(
           email
           )}`
         );
@@ -64,7 +68,12 @@ export default function UserMetaCard() {
       try {
         // Separate fetch for profile image URL
         const imgRes = await fetch(
-          `http://localhost:5000/creator/getprofileimage/${encodeURIComponent(
+          // `http://localhost:5000/creator/getprofileimage/${encodeURIComponent(
+          //   email
+          // )}`
+
+
+            `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(
             email
           )}`
         );
@@ -83,10 +92,10 @@ export default function UserMetaCard() {
 
     fetchUserInfo();
     fetchProfileImage();
-  }, [user?.email]);
+  }, [email]);
 
   const handleSave = async () => {
-    if (!user?.email) return;
+    if (!email) return;
 
     try {
       // 1. Upload profile image if selected
@@ -95,9 +104,15 @@ export default function UserMetaCard() {
         formData.append("image", profileImageFile);
 
         const imageRes = await fetch(
-          `http://localhost:5000/creator/postprofileimage/${encodeURIComponent(
-            user.email
+          // `http://localhost:5000/creator/postprofileimage/${encodeURIComponent(
+          //   user.email
+          // )}`,
+
+
+  ` https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(
+            email
           )}`,
+         
           {
             method: "POST",
             body: formData,
@@ -124,9 +139,16 @@ export default function UserMetaCard() {
       };
 
       const infoRes = await fetch(
-        `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(
-          user.email
+        // `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(
+        //   user.email
+        // )}`,
+
+
+
+  `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(
+          email
         )}`,
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

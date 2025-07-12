@@ -33,7 +33,16 @@ export default function CreatorGeneralPublicProfileCard() {
 
     const fetchCreator = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/creator/getgeneralinfo/${email}`);
+        // const res = await fetch(`http://localhost:5000/creator/getgeneralinfo/${email}`);
+
+        const res = await fetch(`https://app.grandeapp.com/g/creator/getgeneralinfo/${email}`);
+
+
+
+
+
+
+
         if (!res.ok) throw new Error("Failed to fetch creator info");
 
         const data = await res.json();

@@ -30,7 +30,7 @@ export default function ResetPasswordPage() {
     try {
       setLoading(true);
       // const res = await fetch('http://localhost:5000/api/auth/reset-password', {
-            const res = await fetch('/g/api/auth/reset-password', {
+            const res = await fetch('https://app.grandeapp.com/g/api/auth/reset-password', {
 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

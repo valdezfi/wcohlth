@@ -43,7 +43,12 @@ function ChattingWithCampaign({ creatorEmail, campaignId }: ChattingWithCampaign
     const setupChat = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/chat/campaign/${campaignId}/chat?currentEmail=${encodeURIComponent(
+          // `http://localhost:5000/api/chat/campaign/${campaignId}/chat?currentEmail=${encodeURIComponent(
+
+          `https://app.grandeapp.com/g/api/chat/campaign/${campaignId}/chat?currentEmail=${encodeURIComponent(
+
+
+
             currentEmail
           )}&otherEmail=${encodeURIComponent(creatorEmail)}`
         );

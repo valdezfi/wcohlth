@@ -24,7 +24,11 @@ export default function CreatorDiscovery() {
  useEffect(() => {
   const fetchCreators = async () => {
     try {
-      const res = await fetch("http://localhost:5000/creators/all");
+      // const res = await fetch("http://localhost:5000/creators/all");
+      const res = await fetch("https://app.grandeapp.com/g/creators/all");
+
+
+      
       if (!res.ok) throw new Error("Failed to fetch creators");
       const data = await res.json();
       setCreators(data);

@@ -30,7 +30,11 @@ export default function UserAddressCard() {
     const fetchGeneralInfo = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/brand/getgeneralinfo/${user.email}`
+          // `http://localhost:5000/brand/getgeneralinfo/${user.email}`
+
+
+                    `https://app.grandeapp.com/g/brand/getgeneralinfo/${user.email}`
+
         );
         const data = await res.json();
         setGeneralInfo(data);

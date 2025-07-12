@@ -19,7 +19,13 @@ export default function ApplyToCampaign({
   useEffect(() => {
     const fetchApplicationStatus = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/campaigncreator/${campaignId}`);
+        // const res = await fetch(`http://localhost:5000/campaigncreator/${campaignId}`);
+
+        const res = await fetch(`https://app.grandeapp.com/g/campaigncreator/${campaignId}`);
+
+
+
+        
         const data = await res.json();
 
         if (res.ok && Array.isArray(data.appliedByCreators)) {
@@ -52,7 +58,11 @@ export default function ApplyToCampaign({
 
     try {
       const res = await fetch(
-        `http://localhost:5000/campaigncreator/${campaignId}/apply`,
+        // `http://localhost:5000/campaigncreator/${campaignId}/apply`,
+
+
+                `https://app.grandeapp.com/g/campaigncreator/${campaignId}/apply`,
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

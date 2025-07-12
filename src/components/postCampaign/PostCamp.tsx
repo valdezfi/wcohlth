@@ -58,7 +58,12 @@ export default function CreateCampaignModal({
     }
 
     const res = await fetch(
-      `http://localhost:5000/campaign/postcampaign/${email}`,
+      // `http://localhost:5000/campaign/postcampaign/${email}`,
+
+
+      `https://app.grandeapp.com/g/campaign/postcampaign/${email}`,
+
+
       {
         method: "POST",
         body: formData,

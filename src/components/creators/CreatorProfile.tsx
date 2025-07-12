@@ -93,7 +93,11 @@ export default function CreatorGeneralPublicProfileCard({
     const fetchCreator = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/creator/getgeneralinfo/${encodeURIComponent(
+          // `http://localhost:5000/creator/getgeneralinfo/${encodeURIComponent(
+
+
+                      `https://app.grandeapp.com/g/creator/getgeneralinfo/${encodeURIComponent(
+
             email
           )}`
         );
@@ -130,7 +134,11 @@ export default function CreatorGeneralPublicProfileCard({
     setSending(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/paycemail", {
+      // const res = await fetch("http://localhost:5000/api/paycemail", {
+
+
+            const res = await fetch("https://app.grandeapp.com/g/api/paycemail", {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
