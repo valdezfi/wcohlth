@@ -18,7 +18,7 @@ export default function VerifyBanner() {
       if (status === 'loading' || !email) return;
 
       try {
-        const res = await fetch('grandeapp.com/g/api/auth/me', {
+        const res = await fetch('https://app.grandeapp.com/g/c/api/auth/me', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export default function VerifyBanner() {
     setError('');
 
     try {
-      const res = await fetch('grandeapp.com/g/c/api/auth/resendVerificationEmail', {
+      const res = await fetch('https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
