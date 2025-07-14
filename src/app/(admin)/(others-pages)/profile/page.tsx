@@ -1,9 +1,13 @@
 // import UserAddressCard from "@/components/user-profile/UserAddressCard";
+
+"use client"
+
 import UserInfoCard from "@/components/user-profile/UserInfoCard";
 import UserMetaCard from "@/components/user-profile/UserMetaCard";
 import React from "react";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
+
 
 
 
