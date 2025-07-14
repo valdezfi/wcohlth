@@ -1,5 +1,3 @@
-// src/app/api/auth/[...nextauth]/route.js
-
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -12,7 +10,7 @@ const db = mysql.createPool({
   database: process.env.NEXT_PUBLIC_DB_NAME,
 });
 
-const authOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -21,23 +19,35 @@ const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
 
-        const [rows] = await db.query("SELECT * FROM Creators WHERE email = ?", [
-          credentials.email,
-        ]);
-        const user = rows[0];
-        if (!user) return null;
+        try {
+          const [rows] = await db.query(
+            "SELECT * FROM Creators WHERE email = ?",
+            [credentials.email]
+          );
+          const user = rows[0];
+          if (!user) {
+            throw new Error("No user found with that email");
+          }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+          if (!isValid) {
+            throw new Error("Incorrect password");
+          }
 
-        return {
-          id: user.id.toString(),
-          email: user.email,
-          username: user.username || undefined,
-          status: user.status || undefined,
-        };
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            username: user.username || undefined,
+            status: user.status || undefined,
+          };
+        } catch (error) {
+          console.error("Authorize error:", error);
+          throw new Error(error.message || "Login failed");
+        }
       },
     }),
   ],
@@ -70,6 +80,5 @@ const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// ✅ Required default export for App Router
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

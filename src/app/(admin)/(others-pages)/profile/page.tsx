@@ -1,17 +1,16 @@
-
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // make sure this path is correct
 import { redirect } from "next/navigation";
 
 import UserMetaCard from "@/components/user-profile/UserMetaCard";
 import UserInfoCard from "@/components/user-profile/UserInfoCard";
 
 export default async function Profile() {
-  
-  const session = await getServerSession();
- 
-   if (!session) {
-     redirect("/signin");
-   }
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/signin");
+  }
 
   return (
     <div>
@@ -20,7 +19,7 @@ export default async function Profile() {
           Profile
         </h3>
         <div className="space-y-6">
-          <UserMetaCard  />
+          <UserMetaCard />
           <UserInfoCard />
         </div>
       </div>

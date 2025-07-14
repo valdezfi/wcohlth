@@ -3,6 +3,7 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import CampaignListTable from "@/components/tables/CampaignListTable";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // adjust path if needed
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -11,9 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default async function BasicTables() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.email) {
     redirect("/signin");
   }
 
