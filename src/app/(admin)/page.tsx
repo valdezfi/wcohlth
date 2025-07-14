@@ -1,10 +1,10 @@
+// ✅ Server Component (default in app directory)
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import CampaignListTable from "@/components/tables/CampaignListTable";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import React from "react";
 
 export const metadata: Metadata = {
   title: "Grande",
