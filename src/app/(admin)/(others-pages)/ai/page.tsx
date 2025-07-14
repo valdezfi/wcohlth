@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import CampaignAIChat from "@/components/ai/creatorManager";
 
@@ -17,12 +17,8 @@ export default function AiPage() {
       if (!email) return;
 
       try {
-        // 1. Check subscription status
-        // const subRes = await fetch(`http://localhost:5000/api/c/subscription?email=${email}`);
-                const subRes = await fetch(`https://app.grandeapp.com/g/api/c/subscription?email=${email}`);
-
+        const subRes = await fetch(`https://app.grandeapp.com/g/api/c/subscription?email=${email}`);
         const subData = await subRes.json();
-
         const isSubscribed = subData.subscription?.status === "active";
 
         if (isSubscribed) {
@@ -30,33 +26,21 @@ export default function AiPage() {
           return;
         }
 
-        // 2. Not subscribed? Check if trial is valid
-        // const trialRes = await fetch(`http://localhost:5000/api/c/ai/trial-status?email=${email}`);
         const trialRes = await fetch(`https://app.grandeapp.com/g/api/c/ai/trial-status?email=${email}`);
-
-        
         const trialData = await trialRes.json();
 
         if (!trialData.used) {
-          // Trial unused → mark it as used
-          // await fetch("http://localhost:5000/api/c/ai/trial-used", {
           await fetch("https://app.grandeapp.com/g/api/c/ai/trial-used", {
-
-            
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
           });
           setHasAccess(true);
-          setTrialUsed(true);  // they just started free trial
+          setTrialUsed(true);
         } else if (trialData.used && trialData.valid) {
-          // Trial in progress (within 1 hour)
           setHasAccess(true);
           setTrialUsed(true);
         } else {
-          // Trial expired
           setHasAccess(false);
           setTrialUsed(true);
         }
@@ -78,6 +62,11 @@ export default function AiPage() {
         <p className="text-gray-700 dark:text-white text-lg">Checking access...</p>
       </div>
     );
+  }
+
+  if (status === "unauthenticated") {
+    signIn();
+    return null;
   }
 
   if (!email) {
@@ -117,7 +106,6 @@ export default function AiPage() {
         AI Marketing Manager
       </h1>
 
-      {/* Show banner if user is on free trial */}
       {trialUsed && (
         <div className="mb-6 max-w-xl mx-auto rounded-md bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 text-center font-semibold">
           You are currently on your free 1-hour trial.
