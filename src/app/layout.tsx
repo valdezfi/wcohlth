@@ -3,7 +3,7 @@ import './globals.css';
 
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import VerifyBanner from '@/components/VerifyBanner'; // 👈 you'll create this component
+import VerifyBanner from '@/components/VerifyBanner/VerifyBanner'; // 👈 you'll create this component
 
 const outfit = Outfit({
   subsets: ["latin"],
