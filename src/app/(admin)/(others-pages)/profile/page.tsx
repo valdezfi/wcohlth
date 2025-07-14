@@ -1,30 +1,15 @@
-// import UserAddressCard from "@/components/user-profile/UserAddressCard";
-
-"use client"
-
-import UserInfoCard from "@/components/user-profile/UserInfoCard";
-import UserMetaCard from "@/components/user-profile/UserMetaCard";
-import React from "react";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-
-
-
-
-
-
-
-
-
-
+import UserMetaCard from "@/components/user-profile/UserMetaCard";
+import UserInfoCard from "@/components/user-profile/UserInfoCard";
 
 export default async function Profile() {
+  const session = await getServerSession();
 
-    const session = await getServerSession();
-  
-    if (!session) {
-      redirect("/signin");
-    }
+  if (!session) {
+    redirect("/signin");
+  }
+
   return (
     <div>
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
@@ -32,9 +17,8 @@ export default async function Profile() {
           Profile
         </h3>
         <div className="space-y-6">
-          <UserMetaCard />
+          <UserMetaCard  />
           <UserInfoCard />
-          {/* <UserAddressCard /> */}
         </div>
       </div>
     </div>
