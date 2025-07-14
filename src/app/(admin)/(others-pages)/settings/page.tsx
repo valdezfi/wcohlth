@@ -1,7 +1,6 @@
 // import UserAddressCard from "@/components/user-profile/UserAddressCard";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import { Metadata } from "next";
-import React from "react";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 

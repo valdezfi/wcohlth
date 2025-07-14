@@ -1,13 +1,15 @@
+'use client';
+
 import { Outfit } from 'next/font/google';
 import './globals.css';
 
+import { SessionProvider } from 'next-auth/react';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import VerifyBanner from '@/components/VerifyBanner/VerifyBanner';
-import { SessionProvider } from "next-auth/react"; // ✅ import this
 
 const outfit = Outfit({
-  subsets: ["latin"],
+  subsets: ['latin'],
 });
 
 export default function RootLayout({
@@ -18,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        <SessionProvider> {/* ✅ wrap everything */}
+        <SessionProvider>
           <ThemeProvider>
             <SidebarProvider>
               <VerifyBanner />
@@ -30,3 +32,4 @@ export default function RootLayout({
     </html>
   );
 }
+
