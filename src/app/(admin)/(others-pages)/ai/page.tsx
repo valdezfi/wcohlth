@@ -3,6 +3,7 @@
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import CampaignAIChat from "@/components/ai/creatorManager";
+import React from "react";
 
 export default function AiPage() {
   const { data: session, status } = useSession();

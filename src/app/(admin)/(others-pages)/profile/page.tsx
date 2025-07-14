@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // make sure this path is correct
 import { redirect } from "next/navigation";
+import React from "react";
 
 import UserMetaCard from "@/components/user-profile/UserMetaCard";
 import UserInfoCard from "@/components/user-profile/UserInfoCard";
 
 export default async function Profile() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   if (!session) {
     redirect("/signin");

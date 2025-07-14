@@ -10,7 +10,7 @@ const db = mysql.createPool({
   database: process.env.NEXT_PUBLIC_DB_NAME,
 });
 
-export const authOptions = {
+ const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",

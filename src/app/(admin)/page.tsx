@@ -3,8 +3,8 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import CampaignListTable from "@/components/tables/CampaignListTable";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // adjust path if needed
 import { redirect } from "next/navigation";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "Grande",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BasicTables() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   if (!session?.user?.email) {
     redirect("/signin");

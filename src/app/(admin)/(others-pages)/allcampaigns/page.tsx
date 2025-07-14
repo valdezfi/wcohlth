@@ -4,6 +4,7 @@ import CampaignListTable from "@/components/tables/CampaignListTable";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "Numerobook | Instantly Buy & Sell Crypto",
