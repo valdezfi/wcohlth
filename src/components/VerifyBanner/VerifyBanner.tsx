@@ -44,7 +44,7 @@ export default function VerifyBanner() {
 
     try {
       const res = await fetch(
-        'https://app.grandeapp.com/c/api/auth/resendVerificationEmail',
+        'https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
