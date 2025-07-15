@@ -11,21 +11,14 @@ export default function VerifyBanner() {
   const [error, setError] = useState('');
   const email = session?.user?.email;
 
-
-
   useEffect(() => {
     const checkUser = async () => {
       if (status === 'loading' || !email) return;
 
       try {
-        const res = await fetch('https://app.grandeapp.com/g/c/api/auth/me', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: email }),
-        });
-
+        const res = await fetch(
+          `https://app.grandeapp.com/g/c/api/checkverified?email=${encodeURIComponent(email)}`
+        );
         const data = await res.json();
 
         if (res.ok && data.isVerified === 1) {
@@ -40,7 +33,7 @@ export default function VerifyBanner() {
     };
 
     checkUser();
-  }, [session, status]);
+  }, [email, status]);
 
   const handleResend = async () => {
     if (!email) return;
@@ -50,13 +43,14 @@ export default function VerifyBanner() {
     setError('');
 
     try {
-      const res = await fetch('https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: email }),
-      });
+      const res = await fetch(
+        'https://app.grandeapp.com/c/api/auth/resendVerificationEmail',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await res.json();
 
@@ -76,8 +70,8 @@ export default function VerifyBanner() {
   if (status === 'loading' || isVerified) return null;
 
   return (
-    <div className="bg-yellow-100 text-yellow-800 px-4 py-3 text-center text-sm flex flex-col items-center gap-2">
-      <span>Please verify your email to unlock all features.</span>
+    <div className="bg-yellow-100 text-yellow-800 px-4 py-3 text-center text-sm flex flex-col items-center gap-2 dark:bg-yellow-900 dark:text-yellow-100">
+      <span>⚠️ Please verify your email to unlock all features.</span>
       <button
         onClick={handleResend}
         disabled={sending || sent}
