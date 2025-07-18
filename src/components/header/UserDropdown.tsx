@@ -340,8 +340,8 @@ const senderEmail = session?.user?.email
             </DropdownItem>
           </li>
           <li>
-            <DropdownItem tag="a" href="mailto:support@numerobook.com" onItemClick={closeDropdown}>
-              support@numerobook.com
+            <DropdownItem tag="a" href="mailto:support@grandeapp.com" onItemClick={closeDropdown}>
+              support@grandeapp.com
             </DropdownItem>
           </li>
         </ul>
