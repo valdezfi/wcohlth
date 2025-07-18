@@ -64,30 +64,32 @@ export default function UserMetaCard() {
       }
     };
 
-    const fetchProfileImage = async () => {
-    try {
-      const imgRes = await fetch(
-        `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
-      );
+ const fetchProfileImage = async () => {
+  try {
+    const imgRes = await fetch(
+      `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
+    );
 
-      if (!imgRes.ok) {
-        setProfileImage(null); // fallback to default
-        return;
-      }
-
-      const imgData = await imgRes.json();
-      setProfileImage(imgData.imageUrl || null);
-    } catch (err) {
-      console.error("Error fetching profile image:", err);
-      setProfileImage(null);
+    if (!imgRes.ok) {
+      setProfileImage(null); // fallback to default
+      return;
     }
-  };
 
-  if (email) {
-    fetchUserInfo();
-    fetchProfileImage();
+    const imgData = await imgRes.json(); // ✅ Only call this once
+    console.log("Fetched profile image:", imgData);
+
+    setProfileImage(imgData.imageUrl || null);
+  } catch (err) {
+    console.error("Error fetching profile image:", err);
+    setProfileImage(null);
   }
-}, [email]);
+};
+
+if (email) {
+  fetchUserInfo();
+  fetchProfileImage();
+}
+
 
   const handleSave = async () => {
     if (!email) return;
