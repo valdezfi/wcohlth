@@ -101,7 +101,7 @@ export default function CampaignMetaCard({
           setCreatorStatus(data[emailuser]);
         } else {
 setCreatorStatus(
-  "Please be patient. Brand or agency is in review process and will get back shortly."
+  "Please be patient. Brand or Agency is in review process and will get back shortly."
 );        }
      } catch {
   setError("Unknown error fetching campaign");
