@@ -7,7 +7,6 @@ import {
   FaTiktok,
   FaTwitch,
   FaGlobe,
-  // FaComments,
 } from "react-icons/fa";
 
 type Creator = {
@@ -31,25 +30,24 @@ type Creator = {
 };
 
 function isValidUrl(url: string) {
-  if (!url) return false;
+  if (!url || typeof url !== "string") return false;
+
+  const cleaned = url.trim();
+  if (
+    cleaned === "" ||
+    cleaned === "Not Provided" ||
+    cleaned === "{}" ||
+    cleaned.toLowerCase() === "null"
+  )
+    return false;
+
   try {
-    new URL(url);
-    return true;
+    // If url doesn't start with http, add https:// for URL parsing
+    const parsed = new URL(cleaned.startsWith("http") ? cleaned : `https://${cleaned}`);
+    return !!parsed.hostname;
   } catch {
     return false;
   }
-}
-
-function clean(val: string | undefined | null) {
-  if (!val) return null;
-  if (
-    val.trim() === "" ||
-    val === "Not Provided" ||
-    val === "{}" ||
-    val.toLowerCase() === "null"
-  )
-    return null;
-  return val;
 }
 
 export default function CreatorGeneralPublicProfileCard({
@@ -93,21 +91,17 @@ export default function CreatorGeneralPublicProfileCard({
     const fetchCreator = async () => {
       try {
         const res = await fetch(
-          // `http://localhost:5000/creator/getgeneralinfo/${encodeURIComponent(
-
-
-                      `https://app.grandeapp.com/g/creator/getgeneralinfo/${encodeURIComponent(
-
-            email
-          )}`
+          `https://app.grandeapp.com/g/creator/getgeneralinfo/${encodeURIComponent(email)}`
         );
         if (!res.ok) throw new Error("Failed to fetch creator info");
 
         const data = await res.json();
+
+        // Clean and normalize URLs for social links
         const fixUrl = (url: string) => {
-          if (!url) return "";
-          if (url.startsWith("http")) return url;
-          return "https://" + url;
+          if (!url || url === "Not Provided" || url === "{}" || url.toLowerCase() === "null")
+            return "";
+          return url.startsWith("http") ? url : `https://${url}`;
         };
 
         setCreator({
@@ -128,17 +122,15 @@ export default function CreatorGeneralPublicProfileCard({
     fetchCreator();
   }, [email]);
 
-  const imageUrl = clean(creator.imageUrl) || "/images/user/placeholder.svg";
+  const imageUrl = creator.imageUrl?.trim()
+    ? creator.imageUrl
+    : "/images/user/placeholder.svg";
 
   async function sendEmailRequest() {
     setSending(true);
 
     try {
-      // const res = await fetch("http://localhost:5000/api/paycemail", {
-
-
-            const res = await fetch("https://app.grandeapp.com/g/api/paycemail", {
-
+      const res = await fetch("https://app.grandeapp.com/g/api/paycemail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,7 +171,7 @@ export default function CreatorGeneralPublicProfileCard({
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl max-w-md w-full p-8 flex flex-col items-center border border-blue-500">
         <img
           src={imageUrl}
-          alt={clean(creator.creatorName) || "Creator"}
+          alt={creator.creatorName || "Creator"}
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = "/images/user/placeholder.svg";
@@ -188,36 +180,26 @@ export default function CreatorGeneralPublicProfileCard({
         />
 
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-1 text-center">
-          {clean(creator.creatorName) || "Unknown Creator"}
+          {creator.creatorName || "Unknown Creator"}
         </h1>
 
-        {clean(creator.agency) && (
+        {creator.agency && (
           <p className="text-indigo-500 text-sm mb-4">{creator.agency}</p>
         )}
 
-        {clean(creator.about) && (
+        {creator.about && (
           <p className="text-gray-700 dark:text-gray-300 mb-8 text-center px-6">
             {creator.about}
           </p>
         )}
 
         <div className="flex gap-4 flex-wrap justify-center mb-8">
-       {/* <button
-  onClick={() => (window.location.href = "https://grandeapp.com")}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
->
-  <FaComments />
-  Chat
-</button> */}
-
-
           <button
-  onClick={() => (window.location.href = "https://grandeapp.com")}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition"
->
-  Join My Campaign
-</button>
-
+            onClick={() => (window.location.href = "https://grandeapp.com")}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition"
+          >
+            Join My Campaign
+          </button>
         </div>
 
         <div className="flex flex-col gap-4 w-full">
@@ -264,7 +246,7 @@ export default function CreatorGeneralPublicProfileCard({
         </div>
       </div>
 
-      {showChat && clean(creator.email) && (
+      {showChat && creator.email && (
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
           onClick={() => setShowChat(false)}
@@ -279,8 +261,7 @@ export default function CreatorGeneralPublicProfileCard({
             >
               ×
             </button>
-            <div className="p-4">
-            </div>
+            <div className="p-4">{/* Chat content goes here */}</div>
           </div>
         </div>
       )}
