@@ -42,27 +42,38 @@ export default function CampaignMetaCard({
   const [campaign, setCampaign] = useState<CampaignDetails | null>(null);
   const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
   const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const emailuser = session?.user?.email;
 
   // Fetch campaign details
   useEffect(() => {
     async function fetchCampaign() {
+      if (!campaignName) return;
+
       try {
+        console.log("Fetching campaign for:", campaignName);
         const res = await fetch(
-          // `http://localhost:5000/campaign/getcampaigns?campaignName=${encodeURIComponent(
-
-
-                    `https://app.grandeapp.com/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(
-
-            campaignName
-          )}`
+          `/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(campaignName)}`
         );
-        if (!res.ok) throw new Error("Failed to fetch campaign");
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch campaign: ${res.status} ${res.statusText}`);
+        }
         const data = await res.json();
-        if (data?.length > 0) setCampaign(data[0]);
-      } catch (error) {
-        console.error(error);
+        console.log("Campaign data:", data);
+
+        if (data?.length > 0) {
+          setCampaign(data[0]);
+          setError(null);
+        } else {
+          setError("No campaign found.");
+          setCampaign(null);
+        }
+      } catch (err: any) {
+        console.error("Error fetching campaign:", err);
+        setError(err.message || "Error fetching campaign");
+        setCampaign(null);
       }
     }
     fetchCampaign();
@@ -70,42 +81,50 @@ export default function CampaignMetaCard({
 
   // Fetch creator status
   useEffect(() => {
-    if (!campaignName || !emailuser) return;
-
     async function fetchStatus() {
+      if (!campaignName || !emailuser) return;
+
       try {
+        console.log("Fetching creator status for:", campaignName, emailuser);
         const res = await fetch(
-          // `http://localhost:5000/campaigns/${encodeURIComponent(
-
-
-                      `https://app.grandeapp.com/g/campaigns/${encodeURIComponent(
-
-            campaignName
-          )}/creators/status`
+          `/g/campaigns/${encodeURIComponent(campaignName)}/creators/status`
         );
-        if (!res.ok) throw new Error("Failed to fetch status");
+        if (!res.ok) {
+          throw new Error(`Failed to fetch creator status: ${res.status} ${res.statusText}`);
+        }
         const data = await res.json();
+        console.log("Creator status data:", data);
 
-        if (typeof emailuser === "string" && emailuser in data) {
+        if (emailuser in data) {
           setCreatorStatus(data[emailuser]);
         } else {
           setCreatorStatus("not applied");
         }
-      } catch (error) {
-        console.error(error);
+      } catch (err: any) {
+        console.error("Error fetching creator status:", err);
+        setCreatorStatus(null);
       }
     }
 
     fetchStatus();
   }, [campaignName, emailuser]);
 
+  if (error)
+    return (
+      <div className="p-4 text-red-500 text-center font-semibold">{error}</div>
+    );
+
   if (!campaign)
-    return <div className="p-4 text-gray-500">Loading campaign...</div>;
+    return <div className="p-4 text-gray-500 text-center">Loading campaign...</div>;
+
   if (status === "loading")
-    return <div className="p-4 text-gray-500">Checking authentication...</div>;
+    return (
+      <div className="p-4 text-gray-500 text-center">Checking authentication...</div>
+    );
+
   if (!session?.user?.email)
     return (
-      <div className="p-4 text-red-500">
+      <div className="p-4 text-red-500 text-center">
         You must be logged in to apply to this campaign.
       </div>
     );
@@ -127,20 +146,60 @@ export default function CampaignMetaCard({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-gray-800 dark:text-gray-300 text-lg leading-relaxed">
-        <p><span className="font-semibold">Industry:</span> {campaign.industry || "N/A"}</p>
-        <p><span className="font-semibold">Platform:</span> {campaign.platform || "N/A"}</p>
-        <p><span className="font-semibold">Start Date:</span> {campaign.startDate || "N/A"}</p>
-        <p><span className="font-semibold">End Date:</span> {campaign.endDate || "N/A"}</p>
-        <p className="sm:col-span-2"><span className="font-semibold">Deliverables:</span> {campaign.deliverables || "N/A"}</p>
-        <p className="sm:col-span-2"><span className="font-semibold">Product Details:</span> {campaign.productDetails || "N/A"}</p>
-        <p><span className="font-semibold">Optional Product Details 1:</span> {campaign.optionalProductDetails1 || "N/A"}</p>
-        <p><span className="font-semibold">Optional Product Details 2:</span> {campaign.optionalProductDetails2 || "N/A"}</p>
-        <p><span className="font-semibold">Compensation:</span> {campaign.compensation || "N/A"}</p>
-        <p className="sm:col-span-2"><span className="font-semibold">Why We Want This Content:</span> {campaign.whyWeWantThisContent || "N/A"}</p>
-        <p className="sm:col-span-2"><span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}</p>
-        <p className="sm:col-span-2"><span className="font-semibold">Do not:</span> {campaign.doNot || "N/A"}</p>
-        <p><span className="font-semibold">Ready to Post:</span> {campaign.readyToPost || "N/A"}</p>
-        <p><span className="font-semibold">Target Country:</span> {campaign.targetCountry || "N/A"}</p>
+        <p>
+          <span className="font-semibold">Industry:</span>{" "}
+          {campaign.industry || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Platform:</span>{" "}
+          {campaign.platform || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Start Date:</span>{" "}
+          {campaign.startDate || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">End Date:</span>{" "}
+          {campaign.endDate || "N/A"}
+        </p>
+        <p className="sm:col-span-2">
+          <span className="font-semibold">Deliverables:</span>{" "}
+          {campaign.deliverables || "N/A"}
+        </p>
+        <p className="sm:col-span-2">
+          <span className="font-semibold">Product Details:</span>{" "}
+          {campaign.productDetails || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Optional Product Details 1:</span>{" "}
+          {campaign.optionalProductDetails1 || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Optional Product Details 2:</span>{" "}
+          {campaign.optionalProductDetails2 || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Compensation:</span>{" "}
+          {campaign.compensation || "N/A"}
+        </p>
+        <p className="sm:col-span-2">
+          <span className="font-semibold">Why We Want This Content:</span>{" "}
+          {campaign.whyWeWantThisContent || "N/A"}
+        </p>
+        <p className="sm:col-span-2">
+          <span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}
+        </p>
+        <p className="sm:col-span-2">
+          <span className="font-semibold">Do not:</span> {campaign.doNot || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Ready to Post:</span>{" "}
+          {campaign.readyToPost || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Target Country:</span>{" "}
+          {campaign.targetCountry || "N/A"}
+        </p>
       </div>
 
       {creatorStatus && (
