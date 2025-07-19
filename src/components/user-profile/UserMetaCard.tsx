@@ -1,3 +1,4 @@
+// TOP of file: no change
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -32,21 +33,14 @@ export default function UserMetaCard() {
   const [country, setCountry] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+
   useEffect(() => {
     if (!email) return;
 
     const fetchUserInfo = async () => {
       try {
-        // Fetch main creator info (excluding imageUrl)
         const res = await fetch(
-          // `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(
-          // email
-          // )}`
-
-
-              `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(
-          email
-          )}`
+          `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(email)}`
         );
         if (!res.ok) throw new Error("Failed to fetch user info");
         const data = await res.json();
@@ -66,24 +60,15 @@ export default function UserMetaCard() {
 
     const fetchProfileImage = async () => {
       try {
-        // Separate fetch for profile image URL
         const imgRes = await fetch(
-          // `http://localhost:5000/creator/getprofileimage/${encodeURIComponent(
-          //   email
-          // )}`
-
-
-            `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(
-            email
-          )}`
+          `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
         );
         if (!imgRes.ok) {
-          // If no image found, just set to null (fallback image will show)
           setProfileImage(null);
           return;
         }
         const imgData = await imgRes.json();
-        setProfileImage(imgData.imageUrl);
+        setProfileImage(imgData.imageUrl || null);
       } catch (err) {
         console.error("Error fetching profile image:", err);
         setProfileImage(null);
@@ -98,34 +83,24 @@ export default function UserMetaCard() {
     if (!email) return;
 
     try {
-      // 1. Upload profile image if selected
+      // 1. Upload image if selected
       if (profileImageFile) {
+        console.log("Uploading image:", profileImageFile.name);
         const formData = new FormData();
         formData.append("image", profileImageFile);
 
         const imageRes = await fetch(
-          // `http://localhost:5000/creator/postprofileimage/${encodeURIComponent(
-          //   user.email
-          // )}`,
-
-
-  ` https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(
-            email
-          )}`,
-         
-          {
-            method: "POST",
-            body: formData,
-          }
+          `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
+          { method: "POST", body: formData }
         );
 
         if (!imageRes.ok) throw new Error("Image upload failed");
 
         const imageData = await imageRes.json();
-        setProfileImage(imageData.imageUrl);
+        setProfileImage(imageData.imageUrl || null);
       }
 
-      // 2. Save profile data (including latest imageUrl)
+      // 2. Update text info
       const requestBody = {
         creatorName,
         about,
@@ -139,16 +114,7 @@ export default function UserMetaCard() {
       };
 
       const infoRes = await fetch(
-        // `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(
-        //   user.email
-        // )}`,
-
-
-
-  `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(
-          email
-        )}`,
-
+        `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -186,8 +152,6 @@ export default function UserMetaCard() {
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center xl:text-left">
                 {about || "No bio provided."}
               </p>
-
-              {/* Social media icons */}
               <div className="flex justify-center xl:justify-start gap-5 mt-3 text-gray-500 dark:text-gray-400">
                 {instagram && (
                   <a
@@ -204,7 +168,6 @@ export default function UserMetaCard() {
                     <FaInstagram size={22} />
                   </a>
                 )}
-
                 {tiktokLink && (
                   <a
                     href={
@@ -220,7 +183,6 @@ export default function UserMetaCard() {
                     <FaTiktok size={22} />
                   </a>
                 )}
-
                 {youtube && (
                   <a
                     href={
@@ -236,7 +198,6 @@ export default function UserMetaCard() {
                     <FaYoutube size={22} />
                   </a>
                 )}
-
                 {website && (
                   <a
                     href={
@@ -252,7 +213,6 @@ export default function UserMetaCard() {
                     <FaGlobe size={22} />
                   </a>
                 )}
-
                 {user?.email && (
                   <a
                     href={`mailto:${user.email}`}
@@ -295,59 +255,14 @@ export default function UserMetaCard() {
           >
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
-                  <Label>Creator Name</Label>
-                  <Input
-                    value={creatorName}
-                    onChange={(e) => setCreatorName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Agency</Label>
-                  <Input
-                    value={agency}
-                    onChange={(e) => setAgency(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Bio</Label>
-                  <Input value={about} onChange={(e) => setAbout(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Instagram</Label>
-                  <Input
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>TikTok</Label>
-                  <Input
-                    value={tiktokLink}
-                    onChange={(e) => setTiktokLink(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>YouTube</Label>
-                  <Input
-                    value={youtube}
-                    onChange={(e) => setYoutube(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Website</Label>
-                  <Input
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Country</Label>
-                  <Input
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                  />
-                </div>
+                <div><Label>Creator Name</Label><Input value={creatorName} onChange={(e) => setCreatorName(e.target.value)} /></div>
+                <div><Label>Agency</Label><Input value={agency} onChange={(e) => setAgency(e.target.value)} /></div>
+                <div><Label>Bio</Label><Input value={about} onChange={(e) => setAbout(e.target.value)} /></div>
+                <div><Label>Instagram</Label><Input value={instagram} onChange={(e) => setInstagram(e.target.value)} /></div>
+                <div><Label>TikTok</Label><Input value={tiktokLink} onChange={(e) => setTiktokLink(e.target.value)} /></div>
+                <div><Label>YouTube</Label><Input value={youtube} onChange={(e) => setYoutube(e.target.value)} /></div>
+                <div><Label>Website</Label><Input value={website} onChange={(e) => setWebsite(e.target.value)} /></div>
+                <div><Label>Country</Label><Input value={country} onChange={(e) => setCountry(e.target.value)} /></div>
                 <div className="col-span-2">
                   <Label>Upload New Profile Image</Label>
                   <input
@@ -355,10 +270,18 @@ export default function UserMetaCard() {
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) setProfileImageFile(file);
+                      if (file) {
+                        console.log("Selected image file:", file.name);
+                        setProfileImageFile(file);
+                      }
                     }}
                     className="text-sm text-gray-600"
                   />
+                  {profileImageFile && (
+                    <p className="mt-1 text-sm text-gray-500">
+                      Selected file: {profileImageFile.name}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
