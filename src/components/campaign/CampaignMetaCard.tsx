@@ -51,28 +51,24 @@ export default function CampaignMetaCard({
     async function fetchCampaign() {
       if (!campaignName) return;
 
-      try {
-        console.log("Fetching campaign for:", campaignName);
-        const res = await fetch(
-          `/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(campaignName)}`
-        );
+      console.log("Fetching campaign for:", campaignName);
+      const res = await fetch(
+        `/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(campaignName)}`
+      );
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch campaign: ${res.status} ${res.statusText}`);
-        }
-        const data = await res.json();
-        console.log("Campaign data:", data);
+      if (!res.ok) {
+        setError(`Failed to fetch campaign: ${res.status} ${res.statusText}`);
+        setCampaign(null);
+        return;
+      }
+      const data = await res.json();
+      console.log("Campaign data:", data);
 
-        if (data?.length > 0) {
-          setCampaign(data[0]);
-          setError(null);
-        } else {
-          setError("No campaign found.");
-          setCampaign(null);
-        }
-      } catch (err: any) {
-        console.error("Error fetching campaign:", err);
-        setError(err.message || "Error fetching campaign");
+      if (data?.length > 0) {
+        setCampaign(data[0]);
+        setError(null);
+      } else {
+        setError("No campaign found.");
         setCampaign(null);
       }
     }
