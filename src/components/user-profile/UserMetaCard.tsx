@@ -80,58 +80,65 @@ export default function UserMetaCard() {
   }, [email]);
 
   const handleSave = async () => {
-    if (!email) return;
+  if (!email) return;
 
-    try {
-      // 1. Upload image if selected
-      if (profileImageFile) {
-        console.log("Uploading image:", profileImageFile.name);
-        const formData = new FormData();
-        formData.append("image", profileImageFile);
+  try {
+    let updatedImageUrl = profileImage;
 
-        const imageRes = await fetch(
-          `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
-          { method: "POST", body: formData }
-        );
+    // 1. Upload image if selected
+    if (profileImageFile) {
+      console.log("Uploading image:", profileImageFile.name);
+      const formData = new FormData();
+      formData.append("image", profileImageFile);
 
-        if (!imageRes.ok) throw new Error("Image upload failed");
-
-        const imageData = await imageRes.json();
-        setProfileImage(imageData.imageUrl || null);
-      }
-
-      // 2. Update text info
-      const requestBody = {
-        creatorName,
-        about,
-        tiktokLink,
-        instagram,
-        youtube,
-        website,
-        agency,
-        country,
-        imageUrl: profileImage || "",
-      };
-
-      const infoRes = await fetch(
-        `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
+      const imageRes = await fetch(
+        `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
+          body: formData,
         }
       );
 
-      if (!infoRes.ok) {
-        const errText = await infoRes.text();
-        throw new Error(`Update failed: ${errText}`);
-      }
+      if (!imageRes.ok) throw new Error("Image upload failed");
 
-      closeModal();
-    } catch (err) {
-      console.error("Save error:", err);
+      const imageData = await imageRes.json();
+      updatedImageUrl = imageData.imageUrl || null;
+      setProfileImage(updatedImageUrl);
     }
-  };
+
+    // 2. Update text info using latest image URL
+    const requestBody = {
+      creatorName,
+      about,
+      tiktokLink,
+      instagram,
+      youtube,
+      website,
+      agency,
+      country,
+      imageUrl: updatedImageUrl || "",
+    };
+
+    const infoRes = await fetch(
+      `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!infoRes.ok) {
+      const errText = await infoRes.text();
+      throw new Error(`Update failed: ${errText}`);
+    }
+
+    closeModal();
+  } catch (err) {
+    console.error("Save error:", err);
+  }
+};
+
 
   return (
     <>
