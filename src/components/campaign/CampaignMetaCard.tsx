@@ -29,6 +29,8 @@ type CampaignDetails = {
   email: string;
 };
 
+type CreatorStatusResponse = Record<string, string>;
+
 type CreatorInfo = {
   email: string;
 };
@@ -51,24 +53,31 @@ export default function CampaignMetaCard({
     async function fetchCampaign() {
       if (!campaignName) return;
 
-      console.log("Fetching campaign for:", campaignName);
-      const res = await fetch(
-        `/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(campaignName)}`
-      );
-
-      if (!res.ok) {
-        setError(`Failed to fetch campaign: ${res.status} ${res.statusText}`);
-        setCampaign(null);
-        return;
-      }
-      const data = await res.json();
-      console.log("Campaign data:", data);
-
-      if (data?.length > 0) {
-        setCampaign(data[0]);
-        setError(null);
-      } else {
-        setError("No campaign found.");
+      try {
+        const res = await fetch(
+          `/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(
+            campaignName
+          )}`
+        );
+        if (!res.ok) {
+          setError(`Failed to fetch campaign: ${res.status} ${res.statusText}`);
+          setCampaign(null);
+          return;
+        }
+        const data: CampaignDetails[] = await res.json();
+        if (data.length > 0) {
+          setCampaign(data[0]);
+          setError(null);
+        } else {
+          setError("No campaign found.");
+          setCampaign(null);
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(`Error fetching campaign: ${err.message}`);
+        } else {
+          setError("Unknown error fetching campaign");
+        }
         setCampaign(null);
       }
     }
@@ -81,25 +90,24 @@ export default function CampaignMetaCard({
       if (!campaignName || !emailuser) return;
 
       try {
-        console.log("Fetching creator status for:", campaignName, emailuser);
         const res = await fetch(
           `/g/campaigns/${encodeURIComponent(campaignName)}/creators/status`
         );
         if (!res.ok) {
-          throw new Error(`Failed to fetch creator status: ${res.status} ${res.statusText}`);
+          setCreatorStatus(null);
+          return;
         }
-        const data = await res.json();
-        console.log("Creator status data:", data);
+        const data: CreatorStatusResponse = await res.json();
 
         if (emailuser in data) {
           setCreatorStatus(data[emailuser]);
         } else {
           setCreatorStatus("not applied");
         }
-      } catch (err: any) {
-        console.error("Error fetching creator status:", err);
-        setCreatorStatus(null);
-      }
+     } catch {
+  setError("Unknown error fetching campaign");
+  setCampaign(null);
+}
     }
 
     fetchStatus();
