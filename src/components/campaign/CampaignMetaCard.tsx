@@ -43,7 +43,7 @@ export default function CampaignMetaCard({
   const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
   const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null);
   const [loadingCampaign, setLoadingCampaign] = useState(true);
-  const [loadingStatus, setLoadingStatus] = useState(true);
+  // Removed loadingStatus since it's unused
   const [errorCampaign, setErrorCampaign] = useState<string | null>(null);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
 
@@ -57,7 +57,6 @@ export default function CampaignMetaCard({
       setLoadingCampaign(true);
       setErrorCampaign(null);
       try {
-        // Use relative URL (assuming API on same domain)
         const res = await fetch(
           `/g/campaign/getcampaigns?campaignName=${encodeURIComponent(
             campaignName
@@ -67,9 +66,14 @@ export default function CampaignMetaCard({
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) setCampaign(data[0]);
         else setErrorCampaign("No campaign found");
-      } catch (error: any) {
-        setErrorCampaign(error.message || "Unknown error fetching campaign");
-        console.error(error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setErrorCampaign(error.message);
+          console.error(error);
+        } else {
+          setErrorCampaign("Unknown error fetching campaign");
+          console.error(error);
+        }
       } finally {
         setLoadingCampaign(false);
       }
@@ -81,16 +85,13 @@ export default function CampaignMetaCard({
   useEffect(() => {
     if (!campaignName || !emailuser) {
       setCreatorStatus(null);
-      setLoadingStatus(false);
+      // No loadingStatus state anymore
       return;
     }
 
     async function fetchStatus() {
-      setLoadingStatus(true);
       setErrorStatus(null);
       try {
-        // Use relative URL for creator status endpoint
-        // Make sure this endpoint exists and returns an object mapping emails to status
         const res = await fetch(
           `/g/campaigns/${encodeURIComponent(campaignName)}/creators/status`
         );
@@ -102,19 +103,21 @@ export default function CampaignMetaCard({
         } else {
           setCreatorStatus("not applied");
         }
-      } catch (error: any) {
-        setErrorStatus(error.message || "Unknown error fetching status");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setErrorStatus(error.message);
+          console.error(error);
+        } else {
+          setErrorStatus("Unknown error fetching status");
+          console.error(error);
+        }
         setCreatorStatus("not applied");
-        console.error(error);
-      } finally {
-        setLoadingStatus(false);
       }
     }
 
     fetchStatus();
   }, [campaignName, emailuser]);
 
-  // Render loading / error states
   if (loadingCampaign)
     return <div className="p-4 text-gray-500">Loading campaign...</div>;
 
@@ -150,6 +153,10 @@ export default function CampaignMetaCard({
 
       {campaign.imageUrl && (
         <div className="flex justify-center mb-8">
+          {/* 
+            Next.js recommends using next/image for optimization, 
+            but if you want to keep <img>, you can disable the lint warning
+          */}
           <img
             src={campaign.imageUrl}
             alt={`${campaign.campaignName} image`}
