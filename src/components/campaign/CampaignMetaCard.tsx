@@ -42,40 +42,27 @@ export default function CampaignMetaCard({
   const [campaign, setCampaign] = useState<CampaignDetails | null>(null);
   const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
   const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null);
-  const [loadingCampaign, setLoadingCampaign] = useState(true);
-  // Removed loadingStatus since it's unused
-  const [errorCampaign, setErrorCampaign] = useState<string | null>(null);
-  const [errorStatus, setErrorStatus] = useState<string | null>(null);
 
   const emailuser = session?.user?.email;
 
   // Fetch campaign details
   useEffect(() => {
-    if (!campaignName) return;
-
     async function fetchCampaign() {
-      setLoadingCampaign(true);
-      setErrorCampaign(null);
       try {
         const res = await fetch(
-          `/g/campaign/getcampaigns?campaignName=${encodeURIComponent(
+          // `http://localhost:5000/campaign/getcampaigns?campaignName=${encodeURIComponent(
+
+
+                    `https://app.grandeapp.com/g/campaign/cgetcampaigns?campaignName=${encodeURIComponent(
+
             campaignName
           )}`
         );
-        if (!res.ok) throw new Error(`Failed to fetch campaign: ${res.status}`);
+        if (!res.ok) throw new Error("Failed to fetch campaign");
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) setCampaign(data[0]);
-        else setErrorCampaign("No campaign found");
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setErrorCampaign(error.message);
-          console.error(error);
-        } else {
-          setErrorCampaign("Unknown error fetching campaign");
-          console.error(error);
-        }
-      } finally {
-        setLoadingCampaign(false);
+        if (data?.length > 0) setCampaign(data[0]);
+      } catch (error) {
+        console.error(error);
       }
     }
     fetchCampaign();
@@ -83,19 +70,20 @@ export default function CampaignMetaCard({
 
   // Fetch creator status
   useEffect(() => {
-    if (!campaignName || !emailuser) {
-      setCreatorStatus(null);
-      // No loadingStatus state anymore
-      return;
-    }
+    if (!campaignName || !emailuser) return;
 
     async function fetchStatus() {
-      setErrorStatus(null);
       try {
         const res = await fetch(
-          `/g/campaigns/${encodeURIComponent(campaignName)}/creators/status`
+          // `http://localhost:5000/campaigns/${encodeURIComponent(
+
+
+                      `https://app.grandeapp.com/g/campaigns/${encodeURIComponent(
+
+            campaignName
+          )}/creators/status`
         );
-        if (!res.ok) throw new Error(`Failed to fetch status: ${res.status}`);
+        if (!res.ok) throw new Error("Failed to fetch status");
         const data = await res.json();
 
         if (typeof emailuser === "string" && emailuser in data) {
@@ -103,45 +91,22 @@ export default function CampaignMetaCard({
         } else {
           setCreatorStatus("not applied");
         }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setErrorStatus(error.message);
-          console.error(error);
-        } else {
-          setErrorStatus("Unknown error fetching status");
-          console.error(error);
-        }
-        setCreatorStatus("not applied");
+      } catch (error) {
+        console.error(error);
       }
     }
 
     fetchStatus();
   }, [campaignName, emailuser]);
 
-  if (loadingCampaign)
+  if (!campaign)
     return <div className="p-4 text-gray-500">Loading campaign...</div>;
-
-  if (errorCampaign)
-    return (
-      <div className="p-4 text-red-500">
-        Error loading campaign: {errorCampaign}
-      </div>
-    );
-
   if (status === "loading")
     return <div className="p-4 text-gray-500">Checking authentication...</div>;
-
   if (!session?.user?.email)
     return (
       <div className="p-4 text-red-500">
         You must be logged in to apply to this campaign.
-      </div>
-    );
-
-  if (!campaign)
-    return (
-      <div className="p-4 text-gray-500">
-        Campaign not found or unavailable.
       </div>
     );
 
@@ -153,10 +118,6 @@ export default function CampaignMetaCard({
 
       {campaign.imageUrl && (
         <div className="flex justify-center mb-8">
-          {/* 
-            Next.js recommends using next/image for optimization, 
-            but if you want to keep <img>, you can disable the lint warning
-          */}
           <img
             src={campaign.imageUrl}
             alt={`${campaign.campaignName} image`}
@@ -166,66 +127,25 @@ export default function CampaignMetaCard({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-gray-800 dark:text-gray-300 text-lg leading-relaxed">
-        <p>
-          <span className="font-semibold">Industry:</span>{" "}
-          {campaign.industry || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Platform:</span>{" "}
-          {campaign.platform || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Start Date:</span>{" "}
-          {campaign.startDate || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">End Date:</span>{" "}
-          {campaign.endDate || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Deliverables:</span>{" "}
-          {campaign.deliverables || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Product Details:</span>{" "}
-          {campaign.productDetails || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Optional Product Details 1:</span>{" "}
-          {campaign.optionalProductDetails1 || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Optional Product Details 2:</span>{" "}
-          {campaign.optionalProductDetails2 || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Compensation:</span>{" "}
-          {campaign.compensation || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Why We Want This Content:</span>{" "}
-          {campaign.whyWeWantThisContent || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Do not:</span> {campaign.doNot || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Ready to Post:</span>{" "}
-          {campaign.readyToPost || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Target Country:</span>{" "}
-          {campaign.targetCountry || "N/A"}
-        </p>
+        <p><span className="font-semibold">Industry:</span> {campaign.industry || "N/A"}</p>
+        <p><span className="font-semibold">Platform:</span> {campaign.platform || "N/A"}</p>
+        <p><span className="font-semibold">Start Date:</span> {campaign.startDate || "N/A"}</p>
+        <p><span className="font-semibold">End Date:</span> {campaign.endDate || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Deliverables:</span> {campaign.deliverables || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Product Details:</span> {campaign.productDetails || "N/A"}</p>
+        <p><span className="font-semibold">Optional Product Details 1:</span> {campaign.optionalProductDetails1 || "N/A"}</p>
+        <p><span className="font-semibold">Optional Product Details 2:</span> {campaign.optionalProductDetails2 || "N/A"}</p>
+        <p><span className="font-semibold">Compensation:</span> {campaign.compensation || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Why We Want This Content:</span> {campaign.whyWeWantThisContent || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Do not:</span> {campaign.doNot || "N/A"}</p>
+        <p><span className="font-semibold">Ready to Post:</span> {campaign.readyToPost || "N/A"}</p>
+        <p><span className="font-semibold">Target Country:</span> {campaign.targetCountry || "N/A"}</p>
       </div>
 
-      {(creatorStatus || errorStatus) && (
+      {creatorStatus && (
         <p className="mt-4 text-center font-semibold text-blue-600">
-          Your status: {creatorStatus ?? "not applied"}
-          {errorStatus && ` (Error fetching status: ${errorStatus})`}
+          Your status: {creatorStatus}
         </p>
       )}
 
