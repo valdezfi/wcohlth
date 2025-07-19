@@ -7,7 +7,7 @@ import {
   FaTiktok,
   FaTwitch,
   FaGlobe,
-  FaComments,
+  // FaComments,
 } from "react-icons/fa";
 
 type Creator = {
@@ -202,13 +202,13 @@ export default function CreatorGeneralPublicProfileCard({
         )}
 
         <div className="flex gap-4 flex-wrap justify-center mb-8">
-       <button
+       {/* <button
   onClick={() => (window.location.href = "https://grandeapp.com")}
   className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
 >
   <FaComments />
   Chat
-</button>
+</button> */}
 
 
           <button
