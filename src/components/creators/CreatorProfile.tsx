@@ -189,7 +189,7 @@ export default function CreatorGeneralPublicProfileCard({
         {/* Added display for country and howBig */}
         <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4 space-x-2">
           {creator.country && <span>🌍 {creator.country}</span>}
-          {creator.howBig && <span>• Size: {creator.howBig}</span>}
+          {creator.howBig && <span>• {creator.howBig}</span>}
         </div>
 
         {creator.about && (
