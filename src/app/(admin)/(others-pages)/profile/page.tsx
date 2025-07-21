@@ -24,7 +24,7 @@ export default async function Profile() {
           <UserMetaCard />
           <UserInfoCard />
           {/* Pass email as prop here */}
-<CreatorDealsOnly email={email} />
+          <CreatorDealsOnly creatorEmail={email} />
         </div>
       </div>
     </div>
