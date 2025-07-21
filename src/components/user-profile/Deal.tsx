@@ -5,7 +5,7 @@ import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 
 type Deal = {
-  title: string;
+  dealDescription: string;
   price: string | number;
 };
 
@@ -27,9 +27,9 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
         if (!res.ok) throw new Error("Failed to fetch deals");
         const data = await res.json();
         if (data?.deals && Array.isArray(data.deals)) {
-          setDeals(data.deals.length > 0 ? data.deals : [{ title: "", price: "" }]);
+          setDeals(data.deals.length > 0 ? data.deals : [{ dealDescription: "", price: "" }]);
         } else {
-          setDeals([{ title: "", price: "" }]);
+          setDeals([{ dealDescription: "", price: "" }]);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -48,7 +48,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
   };
 
   const handleAddDeal = () => {
-    setDeals([...deals, { title: "", price: "" }]);
+    setDeals([...deals, { dealDescription: "", price: "" }]);
   };
 
   const handleRemoveDeal = (index: number) => {
@@ -58,8 +58,8 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
   const validateDeals = () =>
     deals.every(
       (d) =>
-        typeof d.title === "string" &&
-        d.title.trim() !== "" &&
+        typeof d.dealDescription === "string" &&
+        d.dealDescription.trim() !== "" &&
         (typeof d.price === "string" || typeof d.price === "number") &&
         String(d.price).trim() !== "" &&
         !isNaN(Number(d.price))
@@ -102,8 +102,8 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
         <div key={index} className="flex items-center gap-3 mb-4">
           <Input
             placeholder="e.g. 2 Reels"
-            value={deal.title}
-            onChange={(e) => handleDealChange(index, "title", e.target.value)}
+            value={deal.dealDescription}
+            onChange={(e) => handleDealChange(index, "dealDescription", e.target.value)}
             className="flex-1"
           />
           <Input
