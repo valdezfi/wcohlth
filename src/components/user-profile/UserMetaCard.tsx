@@ -159,8 +159,8 @@ export default function UserMetaCard() {
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center xl:text-left">
                 {about || "No bio provided."}
               </p>
-          <div className="flex justify-center xl:justify-start gap-5 mt-3 text-gray-500 dark:text-gray-400">
-  {instagram && instagram !== "null" && instagram !== "Not Provided" && (
+            <div className="flex justify-center xl:justify-start gap-5 mt-3 text-gray-500 dark:text-gray-400">
+  {instagram && instagram !== "null" && instagram !== "undefined" && (
     <a
       href={
         instagram.startsWith("http")
@@ -175,7 +175,7 @@ export default function UserMetaCard() {
       <FaInstagram size={22} />
     </a>
   )}
-  {tiktokLink && tiktokLink !== "null" && tiktokLink !== "Not Provided" && (
+  {tiktokLink && tiktokLink !== "null" && tiktokLink !== "undefined" && (
     <a
       href={
         tiktokLink.startsWith("http")
@@ -190,7 +190,7 @@ export default function UserMetaCard() {
       <FaTiktok size={22} />
     </a>
   )}
-  {youtube && youtube !== "null" && youtube !== "Not Provided" && (
+  {youtube && youtube !== "null" && youtube !== "undefined" && (
     <a
       href={
         youtube.startsWith("http")
@@ -205,7 +205,7 @@ export default function UserMetaCard() {
       <FaYoutube size={22} />
     </a>
   )}
-  {website && website !== "null" && website !== "Not Provided" && (
+  {website && website !== "null" && website !== "undefined" && (
     <a
       href={
         website.startsWith("http")
@@ -220,7 +220,7 @@ export default function UserMetaCard() {
       <FaGlobe size={22} />
     </a>
   )}
-  {user?.email && user.email !== "null" && user.email !== "Not Provided" && (
+  {user?.email && user.email !== "null" && user.email !== "undefined" && (
     <a
       href={`mailto:${user.email}`}
       aria-label="Email"
@@ -231,6 +231,7 @@ export default function UserMetaCard() {
   )}
 </div>
 
+            </div>
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
               <button
                 onClick={openModal}
