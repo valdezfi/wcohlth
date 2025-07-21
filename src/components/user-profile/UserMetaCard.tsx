@@ -154,83 +154,83 @@ export default function UserMetaCard() {
             </div>
             <div className="order-3 xl:order-2">
               <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
-                {creatorName || "Unnamed Creator"}
+                {creatorName || "Unnamed Creator"} - {howBig}
               </h4>
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center xl:text-left">
                 {about || "No bio provided."}
               </p>
-              <div className="flex justify-center xl:justify-start gap-5 mt-3 text-gray-500 dark:text-gray-400">
-                {instagram && (
-                  <a
-                    href={
-                      instagram.startsWith("http")
-                        ? instagram
-                        : `https://instagram.com/${instagram}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    className="hover:text-pink-600 transition"
-                  >
-                    <FaInstagram size={22} />
-                  </a>
-                )}
-                {tiktokLink && (
-                  <a
-                    href={
-                      tiktokLink.startsWith("http")
-                        ? tiktokLink
-                        : `https://tiktok.com/@${tiktokLink}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="TikTok"
-                    className="hover:text-black dark:hover:text-white transition"
-                  >
-                    <FaTiktok size={22} />
-                  </a>
-                )}
-                {youtube && (
-                  <a
-                    href={
-                      youtube.startsWith("http")
-                        ? youtube
-                        : `https://youtube.com/${youtube}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube"
-                    className="hover:text-red-600 transition"
-                  >
-                    <FaYoutube size={22} />
-                  </a>
-                )}
-                {website && (
-                  <a
-                    href={
-                      website.startsWith("http")
-                        ? website
-                        : `https://${website}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Website"
-                    className="hover:text-blue-600 transition"
-                  >
-                    <FaGlobe size={22} />
-                  </a>
-                )}
-                {user?.email && (
-                  <a
-                    href={`mailto:${user.email}`}
-                    aria-label="Email"
-                    className="hover:text-green-600 transition"
-                  >
-                    <FaEnvelope size={22} />
-                  </a>
-                )}
-              </div>
-            </div>
+          <div className="flex justify-center xl:justify-start gap-5 mt-3 text-gray-500 dark:text-gray-400">
+  {instagram && instagram !== "null" && instagram !== "Not Provided" && (
+    <a
+      href={
+        instagram.startsWith("http")
+          ? instagram
+          : `https://instagram.com/${instagram}`
+      }
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Instagram"
+      className="hover:text-pink-600 transition"
+    >
+      <FaInstagram size={22} />
+    </a>
+  )}
+  {tiktokLink && tiktokLink !== "null" && tiktokLink !== "Not Provided" && (
+    <a
+      href={
+        tiktokLink.startsWith("http")
+          ? tiktokLink
+          : `https://tiktok.com/@${tiktokLink}`
+      }
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="TikTok"
+      className="hover:text-black dark:hover:text-white transition"
+    >
+      <FaTiktok size={22} />
+    </a>
+  )}
+  {youtube && youtube !== "null" && youtube !== "Not Provided" && (
+    <a
+      href={
+        youtube.startsWith("http")
+          ? youtube
+          : `https://youtube.com/${youtube}`
+      }
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="YouTube"
+      className="hover:text-red-600 transition"
+    >
+      <FaYoutube size={22} />
+    </a>
+  )}
+  {website && website !== "null" && website !== "Not Provided" && (
+    <a
+      href={
+        website.startsWith("http")
+          ? website
+          : `https://${website}`
+      }
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Website"
+      className="hover:text-blue-600 transition"
+    >
+      <FaGlobe size={22} />
+    </a>
+  )}
+  {user?.email && user.email !== "null" && user.email !== "Not Provided" && (
+    <a
+      href={`mailto:${user.email}`}
+      aria-label="Email"
+      className="hover:text-green-600 transition"
+    >
+      <FaEnvelope size={22} />
+    </a>
+  )}
+</div>
+
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
               <button
                 onClick={openModal}
