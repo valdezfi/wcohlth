@@ -30,7 +30,7 @@ export default function UserMetaCard() {
   const [youtube, setYoutube] = useState("");
   const [website, setWebsite] = useState("");
   const [agency, setAgency] = useState("");
-  const [country, setCountry] = useState("");
+  const [howBig, sethowBig] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
@@ -52,7 +52,7 @@ export default function UserMetaCard() {
         setYoutube(data.youtube || "");
         setWebsite(data.website || "");
         setAgency(data.agency || "");
-        setCountry(data.country || "");
+        sethowBig(data.howBig || "");
       } catch (err) {
         console.error("Error fetching creator data:", err);
       }
@@ -115,7 +115,7 @@ export default function UserMetaCard() {
       youtube,
       website,
       agency,
-      country,
+      howBig,
       imageUrl: updatedImageUrl || "",
     };
 
@@ -269,7 +269,15 @@ export default function UserMetaCard() {
                 <div><Label>TikTok</Label><Input value={tiktokLink} onChange={(e) => setTiktokLink(e.target.value)} /></div>
                 <div><Label>YouTube</Label><Input value={youtube} onChange={(e) => setYoutube(e.target.value)} /></div>
                 <div><Label>Website</Label><Input value={website} onChange={(e) => setWebsite(e.target.value)} /></div>
-                <div><Label>Country</Label><Input value={country} onChange={(e) => setCountry(e.target.value)} /></div>
+<div>
+  <Label>Type Of Creator</Label>
+  <Input
+    placeholder="Nano, Micro, Macro"
+    value={howBig}
+    onChange={(e) => sethowBig(e.target.value)}
+  />
+</div>
+
                 <div className="col-span-2">
                   <Label>Upload New Profile Image</Label>
                   <input
