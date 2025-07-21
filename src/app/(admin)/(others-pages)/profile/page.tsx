@@ -3,13 +3,16 @@ import { redirect } from "next/navigation";
 
 import UserMetaCard from "@/components/user-profile/UserMetaCard";
 import UserInfoCard from "@/components/user-profile/UserInfoCard";
+import CreatorDealsOnly from "@/components/user-profile/Deal";
 
 export default async function Profile() {
   const session = await getServerSession();
 
-  if (!session) {
+  if (!session || !session.user?.email) {
     redirect("/signin");
   }
+
+  const email = session.user.email;
 
   return (
     <div>
@@ -20,6 +23,8 @@ export default async function Profile() {
         <div className="space-y-6">
           <UserMetaCard />
           <UserInfoCard />
+          {/* Pass email as prop here */}
+          <CreatorDealsOnly creatorEmail={email} />
         </div>
       </div>
     </div>
