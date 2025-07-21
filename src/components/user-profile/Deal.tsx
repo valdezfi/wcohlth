@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Input from "../form/input/InputField";
-// import Label from "../form/Label";
 import Button from "../ui/button/Button";
 
 type Deal = {
@@ -81,43 +80,49 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <h2 className="text-lg font-bold mb-4">Add Your Deals</h2>
+    <div className="max-w-xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+      <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">Add Your Deals</h2>
 
-      {error && <p className="mb-2 text-red-600">{error}</p>}
-      {loading && <p className="mb-2 text-gray-600">Loading...</p>}
+      {error && <p className="mb-4 text-red-600">{error}</p>}
+      {loading && <p className="mb-4 text-gray-600 dark:text-gray-400">Loading...</p>}
 
       {deals.map((deal, index) => (
-        <div key={index} className="flex items-center gap-3 mb-2">
+        <div key={index} className="flex items-center gap-3 mb-4">
           <Input
             placeholder="e.g. 2 Reels"
             value={deal.title}
             onChange={(e) => handleDealChange(index, "title", e.target.value)}
+            className="flex-1"
           />
           <Input
             placeholder="$100"
             value={deal.price}
             onChange={(e) => handleDealChange(index, "price", e.target.value)}
+            className="w-24"
           />
           <button
             onClick={() => handleRemoveDeal(index)}
-            className="text-red-500 text-sm"
+            className="text-red-500 text-sm hover:underline"
             type="button"
+            aria-label="Remove deal"
           >
             Remove
           </button>
         </div>
       ))}
 
-      <Button type="button" onClick={handleAddDeal} className="mt-2">
+      <Button
+        type="button"
+        onClick={handleAddDeal}
+        className="w-full mb-4"
+        aria-label="Add another deal"
+      >
         + Add Another Deal
       </Button>
 
-      <div className="mt-4">
-        <Button onClick={handleSaveDeals} disabled={loading || !validateDeals()}>
-          Save Deals
-        </Button>
-      </div>
+      <Button onClick={handleSaveDeals} disabled={loading || !validateDeals()} className="w-full">
+        Save Deals
+      </Button>
     </div>
   );
 }
