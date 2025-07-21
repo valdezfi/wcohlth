@@ -27,6 +27,7 @@ type Creator = {
   zipcode: string;
   about: string;
   appliedCampaigns: string;
+  howBig?: string;
 };
 
 function isValidUrl(url: string) {
@@ -73,6 +74,7 @@ export default function CreatorGeneralPublicProfileCard({
     zipcode: "",
     about: "",
     appliedCampaigns: "",
+    howBig: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -111,6 +113,7 @@ export default function CreatorGeneralPublicProfileCard({
           tiktokLink: fixUrl(data.tiktokLink),
           twitchLink: fixUrl(data.twitchLink),
           website: fixUrl(data.website),
+          howBig: data.howBig || "",
         });
       } catch (error) {
         console.error("Error loading creator info:", error);
@@ -183,9 +186,11 @@ export default function CreatorGeneralPublicProfileCard({
           {creator.creatorName || "Unknown Creator"}
         </h1>
 
-        {creator.agency && (
-          <p className="text-indigo-500 text-sm mb-4">{creator.agency}</p>
-        )}
+        {/* Added display for country and howBig */}
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4 space-x-2">
+          {creator.country && <span>🌍 {creator.country}</span>}
+          {creator.howBig && <span>• Size: {creator.howBig}</span>}
+        </div>
 
         {creator.about && (
           <p className="text-gray-700 dark:text-gray-300 mb-8 text-center px-6">
