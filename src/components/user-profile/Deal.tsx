@@ -6,7 +6,7 @@ import Button from "../ui/button/Button";
 
 type Deal = {
   title: string;
-  price: string;
+  price: string | number;
 };
 
 export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: string }) {
@@ -21,7 +21,9 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`https://app.grandeapp.com/g/d/getdeal/${encodeURIComponent(creatorEmail)}`);
+        const res = await fetch(
+          `https://app.grandeapp.com/g/d/getdeal/${encodeURIComponent(creatorEmail)}`
+        );
         if (!res.ok) throw new Error("Failed to fetch deals");
         const data = await res.json();
         if (data?.deals && Array.isArray(data.deals)) {
@@ -54,7 +56,14 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
   };
 
   const validateDeals = () =>
-    deals.every((d) => d.title.trim() !== "" && d.price.trim() !== "" && !isNaN(Number(d.price)));
+    deals.every(
+      (d) =>
+        typeof d.title === "string" &&
+        d.title.trim() !== "" &&
+        (typeof d.price === "string" || typeof d.price === "number") &&
+        String(d.price).trim() !== "" &&
+        !isNaN(Number(d.price))
+    );
 
   const handleSaveDeals = async () => {
     if (!validateDeals()) {
@@ -65,11 +74,14 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`https://app.grandeapp.com/g/d/deal/${encodeURIComponent(creatorEmail)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deals }),
-      });
+      const res = await fetch(
+        `https://app.grandeapp.com/g/d/deal/${encodeURIComponent(creatorEmail)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deals }),
+        }
+      );
       if (!res.ok) throw new Error("Failed to save deals");
       alert("Deals saved!");
     } catch (err) {
@@ -96,7 +108,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
           />
           <Input
             placeholder="$100"
-            value={deal.price}
+            value={String(deal.price)}
             onChange={(e) => handleDealChange(index, "price", e.target.value)}
             className="w-24"
           />
