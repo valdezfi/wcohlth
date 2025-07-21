@@ -5,6 +5,7 @@ import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 
 type Deal = {
+  id?: number; // Assuming your backend returns deal IDs
   dealDescription: string;
   price: string | number;
 };
@@ -51,8 +52,32 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
     setDeals([...deals, { dealDescription: "", price: "" }]);
   };
 
-  const handleRemoveDeal = (index: number) => {
-    setDeals(deals.filter((_, i) => i !== index));
+  // New: Remove deal API call + update UI
+  const handleRemoveDeal = async (index: number) => {
+    const dealToRemove = deals[index];
+
+    if (dealToRemove.id) {
+      // If deal has an ID, remove from backend
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `https://app.grandeapp.com/g/d/deal/${encodeURIComponent(creatorEmail)}/${dealToRemove.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (!res.ok) throw new Error("Failed to remove deal");
+        // Remove from state after successful delete
+        setDeals((prev) => prev.filter((_, i) => i !== index));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // If no id (new unsaved deal), just remove locally
+      setDeals((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const validateDeals = () =>
@@ -99,7 +124,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
       {loading && <p className="mb-4 text-gray-600 dark:text-gray-400">Loading...</p>}
 
       {deals.map((deal, index) => (
-        <div key={index} className="flex items-center gap-3 mb-4">
+        <div key={deal.id ?? index} className="flex items-center gap-3 mb-4">
           <Input
             placeholder="e.g. 2 Reels"
             value={deal.dealDescription}
