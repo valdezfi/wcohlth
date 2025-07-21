@@ -21,7 +21,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`https://app.grandeapp.com/g/deal/c/${encodeURIComponent(creatorEmail)}/getdeals`);
+        const res = await fetch(`https://app.grandeapp.com/g/d/getdeal/${encodeURIComponent(creatorEmail)}`);
         if (!res.ok) throw new Error("Failed to fetch deals");
         const data = await res.json();
         if (data?.deals && Array.isArray(data.deals)) {
@@ -65,7 +65,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`https://app.grandeapp.com/g/deal/c/${encodeURIComponent(creatorEmail)}/deals`, {
+      const res = await fetch(`https://app.grandeapp.com/g/d/deal/${encodeURIComponent(creatorEmail)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deals }),
