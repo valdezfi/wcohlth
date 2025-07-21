@@ -272,7 +272,7 @@ export default function UserMetaCard() {
 <div>
   <Label>Type Of Creator</Label>
   <Input
-    placeholder="Nano, Micro, Macro"
+    placeholder="Nano, Micro, Macro, UGC, etc"
     value={howBig}
     onChange={(e) => sethowBig(e.target.value)}
   />
