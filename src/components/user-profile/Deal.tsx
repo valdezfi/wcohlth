@@ -123,9 +123,14 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-      <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
-  Manage Your Collaboration Deals
-      </h2>
+    <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
+  Your Offers for Collaboration — Stay in Control, Set Your Own Price.
+  <br />
+  <small className="text-sm text-gray-600 dark:text-gray-400 mt-2 block">
+    Please list your offers below clearly so potential collaborators know what you provide and at what price.
+  </small>
+</h2>
+
 
       {error && <p className="mb-4 text-red-600">{error}</p>}
       {loading && <p className="mb-4 text-gray-600 dark:text-gray-400">Loading...</p>}
