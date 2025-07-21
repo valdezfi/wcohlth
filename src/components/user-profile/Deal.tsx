@@ -22,7 +22,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`https://app.grandeapp.com/g/deal/c/${creatorEmail}/deals`);
+        const res = await fetch(`https://app.grandeapp.com/g/deal/c/${creatorEmail}/getdeals`);
         if (!res.ok) throw new Error("Failed to fetch deals");
         const data = await res.json();
         if (data?.deals && Array.isArray(data.deals)) {
