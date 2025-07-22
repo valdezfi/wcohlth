@@ -22,9 +22,10 @@ export default async function Profile() {
         </h3>
         <div className="space-y-6">
           <UserMetaCard />
+                    <CreatorDealsOnly creatorEmail={email} />
+
           <UserInfoCard />
           {/* Pass email as prop here */}
-          <CreatorDealsOnly creatorEmail={email} />
         </div>
       </div>
     </div>
