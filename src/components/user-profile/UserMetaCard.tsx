@@ -280,24 +280,32 @@ export default function UserMetaCard() {
 </div>
 
                 <div className="col-span-2">
-                  <Label>Upload New Profile Image</Label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        console.log("Selected image file:", file.name);
-                        setProfileImageFile(file);
-                      }
-                    }}
-                    className="text-sm text-gray-600"
-                  />
-                  {profileImageFile && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      Selected file: {profileImageFile.name}
-                    </p>
-                  )}
+                  <Label htmlFor="profile-image-upload">Upload New Profile Image</Label>
+<label
+  htmlFor="profile-image-upload"
+  className="inline-block cursor-pointer text-blue-600 underline"
+>
+  Tap to select an image
+</label>
+<input
+  id="profile-image-upload"
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      console.log("Selected image file:", file.name);
+      setProfileImageFile(file);
+    }
+  }}
+  className="hidden"
+/ />
+{profileImageFile && (
+  <p className="mt-1 text-sm text-gray-500">
+    Selected file: {profileImageFile.name}
+  </p>
+)}
+
                 </div>
               </div>
             </div>
