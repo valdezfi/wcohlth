@@ -8,7 +8,7 @@ import UserDropdown from "@/components/header/UserDropdown";
 // import CreateCampaignModal from "@/components/postCampaign/PostCamp";
 
 import { useSidebar } from "@/context/SidebarContext";
-import Image from "next/image";
+// import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
@@ -80,10 +80,19 @@ const AppHeader: React.FC = () => {
           </button>
 
           {/* Logo (Mobile) */}
-          <Link href="/" className="lg:hidden">
-            <Image width={154} height={32} className="dark:hidden" src="/images/logo/logoo.png" alt="Logo" />
-            <Image width={154} height={32} className="hidden dark:block" src="/images/logo/logoo.png" alt="Logo" />
-          </Link>
+        <Link href="/" className="lg:hidden">
+  <img
+    src="/images/logo/logoo.png"
+    alt="Logo"
+    className="w-8 h-8 rounded-full dark:hidden"
+  />
+  <img
+    src="/images/logo/logoo.png"
+    alt="Logo"
+    className="hidden dark:block w-8 h-8 rounded-full"
+  />
+</Link>
+
 
           {/* App Menu (Mobile) */}
           <button

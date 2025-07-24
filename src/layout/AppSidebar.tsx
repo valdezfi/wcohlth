@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState,useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
@@ -314,32 +314,28 @@ const AppSidebar: React.FC = () => {
           {isExpanded || isHovered || isMobileOpen ? (
             <>
           <div className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-md">
-  <Image
-    className="rounded-xl dark:hidden"
-    src="/images/logo/logoo.png"
-    alt="Logo"
-    width={150}
-    height={40}
-  />
-  <Image
-    className="rounded-xl hidden dark:block"
-    src="/images/logo/logoo.png"
-    alt="Logo"
-    width={150}
-    height={40}
-  />
+<img
+  className="w-8 h-8 rounded-full dark:hidden"
+  src="/images/logo/logoo.png"
+  alt="Logo"
+/>
+<img
+  className="hidden dark:block w-8 h-8 rounded-full"
+  src="/images/logo/logoo.png"
+  alt="Logo"
+/>
+
 </div>
 
             </>
           ) : (
             
-             <Image
-    className="rounded-xl hidden dark:block"
-    src="/images/logo/logoo.png"
-    alt="Logo"
-    width={150}
-    height={40}
-  />
+ <img
+  className="hidden dark:block w-8 h-8 rounded-full"
+  src="/images/logo/logoo.png"
+  alt="Logo"
+/>
+
           )}
         </Link>
       </div>
