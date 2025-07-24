@@ -299,7 +299,7 @@ export default function UserMetaCard() {
     }
   }}
   className="hidden"
-/ />
+ />
 {profileImageFile && (
   <p className="mt-1 text-sm text-gray-500">
     Selected file: {profileImageFile.name}
