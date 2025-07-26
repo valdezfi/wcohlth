@@ -1,14 +1,9 @@
-
-
 "use client";
 
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-// import CampaignNotificationDropdown from "@/components/header/NotificationDropdownbook";
 import UserDropdown from "@/components/header/UserDropdown";
-// import CreateCampaignModal from "@/components/postCampaign/PostCamp";
 
 import { useSidebar } from "@/context/SidebarContext";
-// import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
@@ -21,7 +16,7 @@ const AppHeader: React.FC = () => {
   const { data: session } = useSession();
   const user = session?.user;
 
-  // ✅ Define toggle handler
+  // Sidebar toggle handler
   const handleToggle = () => {
     if (typeof window !== "undefined" && window.innerWidth >= 1024) {
       toggleSidebar();
@@ -33,6 +28,18 @@ const AppHeader: React.FC = () => {
   const toggleApplicationMenu = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
+
+  // Automatically open mobile menu on small screens and handle resize
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 1024;
+      setApplicationMenuOpen(isMobile);
+    };
+
+    handleResize(); // initial check on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -52,7 +59,7 @@ const AppHeader: React.FC = () => {
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
-          {/* ✅ Always visible sidebar toggle button */}
+          {/* Sidebar toggle button */}
           <button
             className="flex items-center justify-center w-10 h-10 text-gray-500 border border-gray-200 rounded-lg z-[99999] dark:border-gray-800 dark:text-gray-400"
             onClick={handleToggle}
@@ -80,19 +87,18 @@ const AppHeader: React.FC = () => {
           </button>
 
           {/* Logo (Mobile) */}
-        <Link href="/" className="lg:hidden">
-  <img
-    src="/images/logo/logoo.png"
-    alt="Logo"
-    className="w-8 h-8 rounded-full dark:hidden"
-  />
-  <img
-    src="/images/logo/logoo.png"
-    alt="Logo"
-    className="hidden dark:block w-8 h-8 rounded-full"
-  />
-</Link>
-
+          <Link href="/" className="lg:hidden">
+            <img
+              src="/images/logo/logoo.png"
+              alt="Logo"
+              className="w-8 h-8 rounded-full dark:hidden"
+            />
+            <img
+              src="/images/logo/logoo.png"
+              alt="Logo"
+              className="hidden dark:block w-8 h-8 rounded-full"
+            />
+          </Link>
 
           {/* App Menu (Mobile) */}
           <button
@@ -103,7 +109,7 @@ const AppHeader: React.FC = () => {
           </button>
         </div>
 
-        {/* Top Right Menu (Desktop) */}
+        {/* Top Right Menu */}
         <div
           className={`${
             isApplicationMenuOpen ? "flex" : "hidden"
@@ -111,20 +117,11 @@ const AppHeader: React.FC = () => {
         >
           <div className="flex items-center gap-3 2xsm:gap-3">
             <ThemeToggleButton />
-            {/* <CampaignNotificationDropdown  /> */}
-            {/* <button
-              onClick={openModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-full shadow-sm transition"
-            >
-              + Create Campaign
-            </button> */}
           </div>
 
           <UserDropdown />
         </div>
       </div>
-
-      {/* <CreateCampaignModal isOpen={isOpen} onClose={closeModal} /> */}
     </header>
   );
 };
