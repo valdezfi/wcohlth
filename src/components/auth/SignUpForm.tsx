@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
@@ -7,9 +8,6 @@ export default function SignUpForm() {
   const [loading, setLoading] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-
-  // store the email that was successfully signed up
-  const [signedUpEmail, setSignedUpEmail] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,14 +25,9 @@ export default function SignUpForm() {
       });
 
       const data = await res.json();
-
-      // check API response success flag
-      if (!data.success) {
-        throw new Error(data.message || "Signup failed.");
-      }
+      if (!res.ok) throw new Error(data.message || "Signup failed.");
 
       toast.success("Account created successfully.");
-      setSignedUpEmail(form.email); // save email for modal
       setShowVerifyModal(true);
       setForm({ email: "", password: "" });
     } catch (err: unknown) {
@@ -46,21 +39,18 @@ export default function SignUpForm() {
   };
 
   const handleResendVerification = async () => {
-    if (!signedUpEmail) return;
+    if (!form.email) return;
 
     setResendLoading(true);
     try {
-      const res = await fetch(
-        "https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: signedUpEmail }),
-        }
-      );
+      const res = await fetch("https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
 
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Resend failed.");
+      if (!res.ok) throw new Error(data.error || "Resend failed.");
 
       toast.success("Verification email resent.");
     } catch (err: unknown) {
@@ -75,7 +65,7 @@ export default function SignUpForm() {
     <div className="min-h-screen flex items-center justify-center px-4 relative">
       <Toaster position="top-right" />
 
-      {/* Verification modal */}
+      {/* ✅ Email verification modal */}
       {showVerifyModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg max-w-md w-full text-center space-y-4">
@@ -83,9 +73,7 @@ export default function SignUpForm() {
               Verify Your Email
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              A verification link has been sent to{" "}
-              <strong>{signedUpEmail}</strong>. Please check your inbox to activate
-              your account.
+              A verification link has been sent to <strong>{form.email}</strong>. Please check your inbox to activate your account.
             </p>
 
             <button
@@ -108,12 +96,8 @@ export default function SignUpForm() {
 
       <div className="w-full max-w-sm bg-white dark:bg-gray-900 shadow-md rounded-lg p-6 space-y-6 z-10">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Sign Up
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Create your account below.
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Sign Up</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Create your account below.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
