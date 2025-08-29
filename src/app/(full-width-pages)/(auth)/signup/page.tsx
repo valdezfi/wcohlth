@@ -2,7 +2,7 @@
 
 
 import SignUpForm from "@/components/auth/SignUpForm";
-import { Metadata } from 'next';
+import { Metadata } from 'next/types'; // fix import
 
 export const metadata: Metadata = {
   title: 'Influencer, UGC & Podcast Campaigns | GrandeApp USA, LATAM & Beyond',
