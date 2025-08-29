@@ -70,13 +70,14 @@ export default function SignUpForm() {
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
         Launch Campaigns with Top Creators
       </h1>
-      <p className="mt-2 text-gray-600 dark:text-gray-400">
-        We help <strong>Brands & Agencies</strong> grow by connecting them with 
-        <strong> Influencers</strong>, <strong>UGC Creators</strong>, and 
-        <strong> Podcast Creators</strong>—all powered by AI. 
-        Whether you’re running high-performing paid ads or scaling organically, 
-        GrandeApp is your marketing co-pilot.
-      </p>
+     <p className="mt-2 text-gray-600 dark:text-gray-400">
+  Join <strong>GrandeApp</strong> to connect with top brands and agencies, 
+  showcase your work, and collaborate on high-impact campaigns. 
+  Whether you’re an <strong>Influencer</strong>, <strong>UGC Creator</strong>, or 
+  <strong>Podcast Creator</strong>, our AI-powered platform helps you get discovered, 
+  grow your audience, and monetize your content.
+</p>
+
     </div>
 
     {/* ✅ Center signup box */}
