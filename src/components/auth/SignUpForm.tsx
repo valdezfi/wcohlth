@@ -68,7 +68,7 @@ export default function SignUpForm() {
     {/* ✅ Info pinned at top */}
     <div className="w-full max-w-3xl mx-auto text-center pt-10 pb-6">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        Launch Campaigns with Top Creators
+  Get Discovered & Collaborate with Top Brands
       </h1>
      <p className="mt-2 text-gray-600 dark:text-gray-400">
   Join <strong>GrandeApp</strong> to connect with top brands and agencies, 
