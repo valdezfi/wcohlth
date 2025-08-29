@@ -62,38 +62,25 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative">
-      <Toaster position="top-right" />
+  <div className="min-h-screen flex flex-col px-4 relative">
+    <Toaster position="top-right" />
 
-      {/* ✅ Email verification modal */}
-      {showVerifyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg max-w-md w-full text-center space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Verify Your Email
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              A verification link has been sent to <strong>{form.email}</strong>. Please check your inbox to activate your account.
-            </p>
+    {/* ✅ Info pinned at top */}
+    <div className="w-full max-w-3xl mx-auto text-center pt-10 pb-6">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        Launch Campaigns with Top Creators
+      </h1>
+      <p className="mt-2 text-gray-600 dark:text-gray-400">
+        We help <strong>Brands & Agencies</strong> grow by connecting them with 
+        <strong> Influencers</strong>, <strong>UGC Creators</strong>, and 
+        <strong> Podcast Creators</strong>—all powered by AI. 
+        Whether you’re running high-performing paid ads or scaling organically, 
+        GrandeApp is your marketing co-pilot.
+      </p>
+    </div>
 
-            <button
-              onClick={handleResendVerification}
-              className="w-full px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 transition"
-              disabled={resendLoading}
-            >
-              {resendLoading ? "Resending..." : "Didn't get it? Resend Email"}
-            </button>
-
-            <button
-              onClick={() => setShowVerifyModal(false)}
-              className="w-full mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 transition"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
+    {/* ✅ Center signup box */}
+    <div className="flex flex-1 items-center justify-center">
       <div className="w-full max-w-sm bg-white dark:bg-gray-900 shadow-md rounded-lg p-6 space-y-6 z-10">
         <div>
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Sign Up</h2>
@@ -134,7 +121,44 @@ export default function SignUpForm() {
             Sign In
           </Link>
         </p>
+
+        <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          Are you a creator?{" "}
+          <Link href="https://c.grandeapp.com/signup" className="text-brand-500 hover:underline">
+            Signup As Creator
+          </Link>
+        </p>
       </div>
     </div>
-  );
+
+    {/* ✅ Email verification modal */}
+    {showVerifyModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg max-w-md w-full text-center space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Verify Your Email
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            A verification link has been sent to <strong>{form.email}</strong>. Please check your inbox to activate your account.
+          </p>
+
+          <button
+            onClick={handleResendVerification}
+            className="w-full px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 transition"
+            disabled={resendLoading}
+          >
+            {resendLoading ? "Resending..." : "Didn't get it? Resend Email"}
+          </button>
+
+          <button
+            onClick={() => setShowVerifyModal(false)}
+            className="w-full mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
 }
