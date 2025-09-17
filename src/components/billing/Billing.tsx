@@ -1,293 +1,272 @@
+// "use client";
+
+// import React, { useState } from "react";
+
+// const PLANS = {
+//   monthly: {
+//     id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_59,
+//     name: "Pro Monthly",
+//     price: 59.99,
+//     interval: "month",
+//     benefits: [
+//       "All Free plan benefits",
+//       "Priority support",
+//       "Exclusive early feature access",
+//       "Influencer briefs",
+//       "Smart Contract Builder",
+//       "AI Ads Planner",
+//       "Podcast AI Assistant",
+//       "Income Strategy Generator",
+//       "Monetization playbooks",
+//       "AI Idea Engine",
+//       "Pitch decks & SOPs",
+//       "Personalized AI career roadmap",
+//       "AI-backed brand partnership advice",
+//       "Help building digital products",
+//       "Advanced creator analytics",
+//       "Priority campaign access",
+//     ],
+//   },
+//   yearly: {
+//     id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_399,
+//     name: "Pro Yearly",
+//     price: 399,
+//     interval: "year",
+//     benefits: [
+//       "All Free plan benefits",
+//       "Priority support",
+//       "Exclusive early feature access",
+//       "Save over $300/year",
+//       "Influencer briefs",
+//       "Smart Contract Builder",
+//       "AI Ads Planner",
+//       "Podcast AI Assistant",
+//       "Income Strategy Generator",
+//       "Monetization playbooks",
+//       "AI Idea Engine",
+//       "Priority support",
+//     ],
+//   },
+// };
+
+// const FREE_PLAN = {
+//   name: "Free Plan",
+//   price: 0,
+//   benefits: [
+//     "Apply to unlimited campaigns",
+//     "Basic creator insights",
+//     "Community access",
+//     "Light AI career advice",
+//   ],
+// };
+
+// export default function Pricing({ email }) {
+//   const [billingPeriod, setBillingPeriod] = useState("monthly");
+//   const [loading, setLoading] = useState(false);
+
+//   const selectedPlan = PLANS[billingPeriod];
+
+//   const handleSubscribe = async (plan) => {
+//     if (!email) return alert("Email not found");
+
+//     setLoading(true);
+//     try {
+//       const res = await fetch("/api/create-checkout-session", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ email, priceId: plan.id }),
+//       });
+
+//       const data = await res.json();
+//       if (data.error) return alert(data.error);
+
+//       window.location.href = data.url;
+//     } catch (err) {
+//       console.error(err);
+//       alert("Failed to create checkout session");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+//       <h1 className="text-4xl font-extrabold text-center mb-12">Choose Your Plan</h1>
+
+//       <div className="flex justify-center gap-4 mb-8">
+//         {["monthly", "yearly"].map((period) => (
+//           <button
+//             key={period}
+//             onClick={() => setBillingPeriod(period)}
+//             className={`px-4 py-2 rounded ${
+//               billingPeriod === period
+//                 ? "bg-blue-600 text-white"
+//                 : "bg-gray-200 text-gray-700"
+//             }`}
+//           >
+//             {period === "monthly" ? "Monthly" : "Yearly"}
+//           </button>
+//         ))}
+//       </div>
+
+//       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//         {/* Free Plan */}
+//         <div className="flex flex-col p-6 rounded-xl shadow-lg border bg-white">
+//           <h2 className="text-xl font-semibold text-center mb-4">{FREE_PLAN.name}</h2>
+//           <p className="text-3xl font-bold text-center mb-6">Free</p>
+//           <ul className="mb-6 space-y-2 flex-1">
+//             {FREE_PLAN.benefits.map((b) => (
+//               <li key={b} className="flex items-center">
+//                 <span className="mr-2 text-green-500">✔</span> {b}
+//               </li>
+//             ))}
+//           </ul>
+//           <button
+//             onClick={() => handleSubscribe(selectedPlan)}
+//             disabled={loading}
+//             className="w-full py-3 rounded text-white bg-blue-600 hover:bg-blue-500 disabled:bg-gray-400"
+//           >
+//             {loading ? "Redirecting..." : "Upgrade to Paid Plan"}
+//           </button>
+//         </div>
+
+//         {/* Selected Paid Plan */}
+//         <div className="flex flex-col p-6 rounded-xl shadow-lg border border-blue-500 bg-blue-50">
+//           <h2 className="text-xl font-semibold text-center mb-4">{selectedPlan.name}</h2>
+//           <p className="text-3xl font-bold text-center mb-6">
+//             ${selectedPlan.price}/{selectedPlan.interval === "month" ? "mo" : "yr"}
+//           </p>
+//           <ul className="mb-6 space-y-2 flex-1">
+//             {selectedPlan.benefits.map((b) => (
+//               <li key={b} className="flex items-center">
+//                 <span className="mr-2 text-green-500">✔</span> {b}
+//               </li>
+//             ))}
+//           </ul>
+//           <button
+//             onClick={() => handleSubscribe(selectedPlan)}
+//             disabled={loading}
+//             className="w-full py-3 rounded text-white bg-blue-600 hover:bg-blue-500 disabled:bg-gray-400"
+//           >
+//             {loading ? "Redirecting..." : `Select ${selectedPlan.name}`}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import CheckoutForm from "./CheckoutForm";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
-type SubscriptionData = {
-  id: string;
+type Subscription = {
   status: string;
-  cancel_at_period_end: boolean;
-  current_period_end: number;
-  priceId: string;
-  priceAmount: number;
-  interval: "month" | "year";
-  productName: string;
+  current_period_end?: number;
+  plan: string;
+  customerId?: string;
 };
 
-const FREE_PLAN = {
-  name: "Free Plan",
-  price: 0,
-  benefits: [   "Apply to unlimited campaigns",
-      "Basic creator insights",
-      "Community access",
-      "Light AI career advice",],
-};
-
-const PLANS = {
-  monthly: {
-    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_59!,
-    name: "Pro Monthly",
-    price: 59.99,
-    interval: "month" as const,
-    benefits: [
-      "All Free plan benefits",
-      "Priority support",
-      "Exclusive early feature access",
-       "Influencer briefs",
-      "Smart Contract Builder",
-      "AI Ads Planner",
-      "Podcast AI Assistant",
-      "Income Strategy Generator",
-      "Monetization playbooks",
-      "AI Idea Engine",
-      "Pitch decks & SOPs",
-      "Personalized AI career roadmap",
-      "AI-backed brand partnership advice",
-      "Help building digital products",
-      "Advanced creator analytics",
-      "Priority campaign access",
-      "Priority Support"  ],
-  },
-  yearly: {
-    id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_399!,
-    name: "Pro Yearly",
-    price: 399,
-    interval: "year" as const,
-    benefits: [
-      "All Free plan benefits",
-      "Priority support",
-      "Exclusive early feature access",
-      "Save over $300/year",
-       "Influencer briefs",
-      "Smart Contract Builder",
-      "AI Ads Planner",
-      "Podcast AI Assistant",
-      "Income Strategy Generator",
-      "Monetization playbooks",
-      "AI Idea Engine",
-      "Priority support",
-    ],
-  },
-};
-
-function formatPrice(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
-}
-
-export default function Billing({ email }: { email: string }) {
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
-  const [clientSecret, setClientSecret] = useState("");
+export default function ManageSubscription({ email }: { email: string }) {
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
-  const [checkoutStarted, setCheckoutStarted] = useState(false);
 
-  const selectedPlan = PLANS[billingPeriod];
-  const savings = PLANS.monthly.price * 12 - PLANS.yearly.price;
-
+  // Fetch subscription details
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        // const res = await fetch(`http://localhost:5000/api/c/subscription?email=${email}`);
-
-      const res = await fetch(`https://app.grandeapp.com/g/api/c/subscription?email=${email}`);
-
+        const res = await fetch(`/g/api/c/bill/${email}`);
+        if (!res.ok) throw new Error("No subscription found");
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Subscription not found.");
-        setSubscription({
-          id: data.subscription.id,
-          status: data.subscription.status,
-          cancel_at_period_end: data.subscription.cancel_at_period_end,
-          current_period_end: data.subscription.current_period_end,
-          priceId: data.subscription.items.data[0].price.id,
-          priceAmount: data.subscription.items.data[0].price.unit_amount,
-          interval: data.subscription.items.data[0].price.recurring.interval,
-          productName: data.subscription.items.data[0].price.nickname,
-        });
-        setError("");
-      } catch (e: unknown) {
-        const err = e as Error;
-        console.error("Fetch subscription error:", err);
-        setError(err.message);
+        setSubscription(data);
+      } catch (err) {
+        console.warn("No subscription found", err);
+        setSubscription(null);
       }
     };
-
     fetchSubscription();
   }, [email]);
 
-  const cancelSubscription = async () => {
-    if (!confirm("Are you sure you want to cancel your subscription?")) return;
+  // Redirect to Stripe customer portal
+  const handleManage = async () => {
+    if (!subscription?.customerId) return alert("No subscription found");
+
     setLoading(true);
     try {
-      // const res = await fetch("http://localhost:5000/api/c/cancel", {
-
-      const res = await fetch("https://app.grandeapp.com/g/api/c/cancel", {
-
-
-        
+      const res = await fetch("/g/api/c/portal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ stripeCustomerId: subscription.customerId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to cancel subscription");
-      window.location.reload();
-    } catch (e: unknown) {
-      const err = e as Error;
-      console.error("Cancel subscription error:", err);
-      setError(err.message);
+      if (data.url) window.location.href = data.url;
+      else alert("Failed to open portal");
+    } catch (err) {
+      console.error("Portal error", err);
+      alert("Failed to open portal");
     } finally {
       setLoading(false);
     }
   };
 
-  if (clientSecret && checkoutStarted) {
+  // Redirect to pricing page to upgrade
+  const handleUpgrade = () => {
+    window.location.href = "/pricing";
+  };
+
+  if (!subscription) {
     return (
-      <div className="max-w-xl mx-auto p-6 mt-10 bg-white dark:bg-gray-900 border rounded-xl shadow text-gray-900 dark:text-white">
-        <h1 className="text-2xl font-bold mb-4 text-center">Complete Payment</h1>
+      <div className="max-w-md mx-auto bg-white border rounded-xl shadow p-6 text-center">
+        <h2 className="text-xl font-bold mb-4">You have a Free plan now.
+</h2>
+        <p className="mb-6">Start your plan now to unlock all features.</p>
         <button
-          onClick={() => {
-            setCheckoutStarted(false);
-            setClientSecret("");
-          }}
-          className="text-sm underline text-blue-600 hover:text-blue-500 mb-4"
+          onClick={handleUpgrade}
+          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500"
         >
-          ← Back to Plans
+          Upgrade Now
         </button>
-        <Elements stripe={stripePromise} options={{ clientSecret }}>
-          <CheckoutForm
-            onCompleteBilling={async (billingDetails) => {
-              try {
-                setLoading(true);
-                // const res = await fetch("http://localhost:5000/api/c/subscribe", {
-
-                const res = await fetch("https://app.grandeapp.com/g/api/c/subscribe", {
-
-
-
-                  
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    email,
-                    priceId: selectedPlan.id,
-                    billingDetails,
-                  }),
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Failed to create subscription");
-
-                setCheckoutStarted(false);
-                setClientSecret("");
-                window.location.reload();
-              } catch (e: unknown) {
-                const err = e as Error;
-                console.error("Subscription error:", err);
-                alert(err.message);
-              } finally {
-                setLoading(false);
-              }
-            }}
-          />
-        </Elements>
       </div>
     );
   }
 
+  const isFreePlan = subscription.plan.toLowerCase() === "free";
+
   return (
-    <div className="max-w-xl mx-auto p-6 mt-10 bg-white dark:bg-gray-900 border rounded-xl shadow text-gray-900 dark:text-white">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-        {subscription ? "Your Subscription" : "You're on the Free Plan"}
-      </h1>
+    <div className="max-w-md mx-auto bg-white border rounded-xl shadow p-6 text-center">
+      <h2 className="text-xl font-bold mb-4">Your Subscription</h2>
 
-      {error && <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>}
-
-      {!subscription && (
-        <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300 mb-6">
-          {FREE_PLAN.benefits.map((b) => (
-            <li key={b}>{b}</li>
-          ))}
-        </ul>
-      )}
-
-      {subscription && (
-        <>
-          <p>
-            <strong>Plan:</strong> {subscription.productName}
-          </p>
-          <p>
-            <strong>Status:</strong> {subscription.status}
-          </p>
-          <p>
-            <strong>Price:</strong> {formatPrice(subscription.priceAmount)} / {subscription.interval}
-          </p>
-          <p>
-            <strong>Renews On:</strong>{" "}
-            {new Date(subscription.current_period_end * 1000).toLocaleDateString()}
-          </p>
-          {subscription.cancel_at_period_end && (
-            <p className="text-yellow-600 mt-2">Cancels at end of billing period</p>
-          )}
-          <button
-            onClick={cancelSubscription}
-            className="w-full mt-6 bg-red-600 text-white py-2 rounded hover:bg-red-500"
-            disabled={loading}
-          >
-            {loading ? "Cancelling..." : "Cancel Subscription"}
-          </button>
-          <hr className="my-6 border-gray-300 dark:border-gray-700" />
-        </>
-      )}
-
-      <div className="flex justify-center space-x-4 mb-4">
-        <button
-          onClick={() => setBillingPeriod("monthly")}
-          className={`px-4 py-2 rounded ${
-            billingPeriod === "monthly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"
-          }`}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => setBillingPeriod("yearly")}
-          className={`px-4 py-2 rounded ${
-            billingPeriod === "yearly" ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-700"
-          }`}
-        >
-          Yearly (Save {formatPrice(savings * 100)})
-        </button>
-      </div>
-
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold">{selectedPlan.name}</h3>
-        <p className="text-3xl font-bold">
-          {formatPrice(selectedPlan.price * 100)} / {selectedPlan.interval === "month" ? "mo" : "yr"}
+      <p className="mb-2">
+        <strong>Plan:</strong> {subscription.plan}
+      </p>
+      <p className="mb-2">
+        <strong>Status:</strong> {subscription.status}
+      </p>
+      {subscription.current_period_end && (
+        <p className="mb-6">
+          <strong>Next Billing:</strong>{" "}
+          {new Date(subscription.current_period_end * 1000).toLocaleDateString()}
         </p>
-        <ul className="list-disc text-left mt-2 ml-6 text-lg text-gray-600 dark:text-gray-300">
-          {selectedPlan.benefits.map((b) => (
-            <li key={b}>{b}</li>
-          ))}
-        </ul>
-      </div>
+      )}
 
-      <button
-        onClick={() => setCheckoutStarted(true)}
-        disabled={loading || subscription?.priceId === selectedPlan.id}
-        className={`w-full py-3 rounded text-white ${
-          billingPeriod === "yearly" ? "bg-green-600 hover:bg-green-500" : "bg-blue-600 hover:bg-blue-500"
-        } disabled:opacity-50`}
-      >
-        {loading
-          ? "Processing..."
-          : subscription?.priceId === selectedPlan.id
-          ? "Current Plan"
-          : `Continue with ${selectedPlan.name}`}
-      </button>
+      {isFreePlan ? (
+        <button
+          onClick={handleUpgrade}
+          className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-500"
+        >
+          Upgrade to Paid Plan
+        </button>
+      ) : (
+        <button
+          onClick={handleManage}
+          disabled={loading}
+          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500 disabled:bg-gray-400"
+        >
+          {loading ? "Redirecting..." : "Manage Subscription"}
+        </button>
+      )}
     </div>
   );
 }
