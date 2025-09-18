@@ -87,7 +87,7 @@ export default function Pricing({ email }: PricingProps) {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/c/create-checkout-session", {
+      const res = await fetch("https://app.grandeapp.com/g/api/c/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, priceId: plan.id }),

@@ -177,7 +177,7 @@ export default function ManageSubscription({ email }: { email: string }) {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const res = await fetch(`/g/api/c/bill/${email}`);
+        const res = await fetch(`https://app.grandeapp.com//g/api/c/bill/${email}`);
         if (!res.ok) throw new Error("No subscription found");
         const data = await res.json();
         setSubscription(data);
@@ -195,7 +195,7 @@ export default function ManageSubscription({ email }: { email: string }) {
 
     setLoading(true);
     try {
-      const res = await fetch("/g/api/c/portal", {
+      const res = await fetch("https://app.grandeapp.com//g/api/c/portal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stripeCustomerId: subscription.customerId }),
