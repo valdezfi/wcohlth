@@ -29,7 +29,14 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Campaigns", path: "/allcampaigns", pro: false }],
+    subItems: [{ name: "Campaigns", path: "/allcampaigns", pro: false },
+
+ { name: "Billing", path: "/billing", pro: false }
+
+
+    ],
+  
+
   },
   // {
   //   icon: <CalenderIcon />,
@@ -379,7 +386,7 @@ const AppSidebar: React.FC = () => {
         </nav>
         {(isExpanded || isHovered || isMobileOpen) && (
   <div className="mt-auto mb-6 px-2">
-    <Link href="/billing">
+    <Link href="/pricing">
       <button className="w-full py-3 px-4 text-white bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow hover:brightness-110 transition">
         Upgrade Account
       </button>

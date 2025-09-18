@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ManageSubscription from "@/components/billing/Billing"; // ⚡ rename to correct file
+import Pricing from "@/components/billing/Pricing";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -18,7 +18,7 @@ export default function BillingPage() {
   }
 
   if (status === "unauthenticated") {
-    router.push("/signin");
+    router.push("/signin"); // Or your custom login page
     return null;
   }
 
@@ -27,11 +27,9 @@ export default function BillingPage() {
   return (
     <main className="min-h-screen p-6 bg-gray-100 dark:bg-gray-900">
       {email ? (
-        <ManageSubscription email={email} /> 
+        <Pricing email={email} />
       ) : (
-        <div className="text-center text-gray-800 dark:text-white">
-          Email not found in session.
-        </div>
+        <div className="text-center text-gray-800 dark:text-white">Email not found in session.</div>
       )}
     </main>
   );
