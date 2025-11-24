@@ -8,7 +8,6 @@ export default function ProfileReminderBanner() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Always show on mount after login
     setShowBanner(true);
   }, []);
 
@@ -16,10 +15,15 @@ export default function ProfileReminderBanner() {
 
   return (
     <div className="bg-blue-100 text-blue-900 px-4 py-2 text-center text-sm font-medium relative dark:bg-blue-900 dark:text-blue-200">
-👤 Please make sure your profile is complete and up to date. This helps us connect you with the best campaigns and opportunities. Brands and agencies are signing up regularly. We’ve recently updated the site, and the database is being refreshed. Please list your offers clearly so potential collaborators know what you provide and at what price.
- <Link href="/profile" className="underline font-semibold ml-2">
-        Update Now
+      👤 Brands use our AI system to select creators. 
+      Please keep your profile consistently updated — including your category, offers, 
+      and full social media links (not usernames). 
+      A complete and fresh profile increases your chances of being chosen for campaigns.
+
+      <Link href="/profile" className="underline font-semibold ml-2">
+        Update Profile
       </Link>
+
       <button
         onClick={() => setShowBanner(false)}
         className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-900 hover:text-red-500 dark:text-blue-200"
