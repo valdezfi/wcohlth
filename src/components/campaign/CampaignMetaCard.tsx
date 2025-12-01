@@ -5,8 +5,8 @@ import { useSession } from "next-auth/react";
 import Button from "../ui/button/Button";
 import Link from "next/link";
 import ApplyToCampaign from "@/components/campaign/Apply";
-// import { Modal } from "@/components/ui/modal";
-// import ChattingWithCampaign from "@/components/Message/Chat";
+import { Modal } from "@/components/ui/modal";
+import ChattingWithCampaign from "@/components/Message/Chat";
 
 type CampaignDetails = {
   id: string | number;
@@ -31,9 +31,9 @@ type CampaignDetails = {
 
 type CreatorStatusResponse = Record<string, string>;
 
-// type CreatorInfo = {
-//   email: string;
-// };
+type CreatorInfo = {
+  email: string;
+};
 
 export default function CampaignMetaCard({
   campaignName,
@@ -43,7 +43,7 @@ export default function CampaignMetaCard({
   const { data: session, status } = useSession();
   const [campaign, setCampaign] = useState<CampaignDetails | null>(null);
   const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
-  // const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null);
+  const [chatCreator, setChatCreator] = useState<CreatorInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const emailuser = session?.user?.email;
@@ -227,7 +227,7 @@ setCreatorStatus(
           creatorEmail={session.user.email}
         />
 
-        {/* {creatorStatus === "approved" && (
+        {creatorStatus === "approved" && (
           <>
             <Button onClick={() => setChatCreator({ email: campaign.email })}>
               Chat with Brand
@@ -246,7 +246,7 @@ setCreatorStatus(
               )}
             </Modal>
           </>
-        )} */}
+        )}
       </div>
     </div>
   );
