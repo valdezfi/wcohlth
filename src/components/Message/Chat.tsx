@@ -25,52 +25,60 @@ interface ChattingWithCampaignProps {
 const safeId = (email: string) =>
   email.toLowerCase().replace(/[^a-z0-9_\-!]/gi, "_");
 
-function ChattingWithCampaign({ creatorEmail, campaignId }: ChattingWithCampaignProps) {
+export default function ChattingWithCampaign({
+  creatorEmail,
+  campaignId,
+}: ChattingWithCampaignProps) {
   const { data: session, status } = useSession();
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
   const [channel, setChannel] = useState<StreamChannel | null>(null);
 
   useEffect(() => {
-    if (!session?.user?.email || status !== "authenticated" || !creatorEmail || !campaignId) return;
+    if (
+      !session?.user?.email ||
+      status !== "authenticated" ||
+      !creatorEmail ||
+      !campaignId
+    )
+      return;
 
-    let client: StreamChat;
+    let client: StreamChat | null = null;
     let isMounted = true;
-
-    const currentEmail = session.user.email;
-    const userId = safeId(currentEmail);
-    const targetId = safeId(creatorEmail);
 
     const setupChat = async () => {
       try {
-        const res = await fetch(
-          // `http://localhost:5000/api/chat/campaign/${campaignId}/chat?currentEmail=${encodeURIComponent(
+        const currentEmail = session.user.email;
 
-          `https://app.grandeapp.com/g/api/chat/campaign/${campaignId}/chat?currentEmail=${encodeURIComponent(
+        const url = `https://app.grandeapp.com/g/api/chat/campaign/${campaignId}/creator/${creatorEmail}?currentEmail=${currentEmail}`;
 
-
-
-            currentEmail
-          )}&otherEmail=${encodeURIComponent(creatorEmail)}`
-        );
-
+        const res = await fetch(url);
         const data = await res.json();
+
         if (!data.success) {
-          console.error("Failed to fetch chat setup:", data.message);
+          console.error("Chat setup API failed:", data.message);
           return;
         }
+
+        const userId = safeId(currentEmail);
+        const targetId = safeId(creatorEmail);
 
         client = StreamChat.getInstance(apiKey);
 
         await client.connectUser(
           {
             id: userId,
-            name: data.currentUser.name || "User",
-            image: data.currentUser.image,
+            name: data.currentUser?.name || "User",
+            image: data.currentUser?.image || undefined,
           },
           data.token
         );
 
         if (!isMounted) return;
+
+        if (!data.channelId) {
+          console.error("No channelId returned from backend");
+          return;
+        }
 
         const userChannel = client.channel("messaging", data.channelId, {
           members: [userId, targetId],
@@ -110,5 +118,3 @@ function ChattingWithCampaign({ creatorEmail, campaignId }: ChattingWithCampaign
     </Chat>
   );
 }
-
-export default ChattingWithCampaign;
