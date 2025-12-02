@@ -15,7 +15,7 @@ import { useSession } from "next-auth/react";
 import { StreamChat, Channel as StreamChannel } from "stream-chat";
 import "stream-chat-react/dist/css/v2/index.css";
 
-const apiKey = "6ujdvzws3yau";
+const apiKey = "3pyarxmb7yss";
 
 interface ChattingWithCampaignProps {
   creatorEmail: string;
