@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+
 import {
   Chat,
   Channel,
@@ -11,8 +13,12 @@ import {
   Window,
   LoadingIndicator,
 } from "stream-chat-react";
-import { useSession } from "next-auth/react";
-import { StreamChat, Channel as StreamChannel } from "stream-chat";
+
+import {
+  StreamChat,
+  Channel as StreamChannel,
+} from "stream-chat";
+
 import "stream-chat-react/dist/css/v2/index.css";
 
 const apiKey = "3pyarxmb7yss";
@@ -30,80 +36,94 @@ export default function ChattingWithCampaign({
   campaignId,
 }: ChattingWithCampaignProps) {
   const { data: session, status } = useSession();
+
+  // Strict typing — no any
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
   const [channel, setChannel] = useState<StreamChannel | null>(null);
 
+  const [ready, setReady] = useState(false);
+
+  const userEmail = session?.user?.email || null;
+
   useEffect(() => {
-    if (
-      !session?.user?.email ||
-      status !== "authenticated" ||
-      !creatorEmail ||
-      !campaignId
-    )
+    if (status === "loading") return;
+    if (status === "unauthenticated") {
+      setReady(true);
       return;
+    }
+    if (!userEmail) {
+      setReady(true);
+      return;
+    }
+    if (!creatorEmail || !campaignId) {
+      setReady(true);
+      return;
+    }
 
+    let mounted = true;
     let client: StreamChat | null = null;
-    let isMounted = true;
 
-    const setupChat = async () => {
+    const initChat = async () => {
       try {
-        const currentEmail = session.user.email;
-
-        const url = `https://app.grandeapp.com/g/api/chat/campaign/${campaignId}/creator/${creatorEmail}?currentEmail=${currentEmail}`;
+        const url = `https://app.grandeapp.com/g/api/chat/campaign/${campaignId}/creator/${creatorEmail}?currentEmail=${userEmail}`;
 
         const res = await fetch(url);
         const data = await res.json();
 
         if (!data.success) {
-          console.error("Chat setup API failed:", data.message);
+          console.error("Chat API failed:", data.message);
+          setReady(true);
           return;
         }
 
-        const userId = safeId(currentEmail);
-        const targetId = safeId(creatorEmail);
+        const me = safeId(userEmail);
+        const other = safeId(creatorEmail);
 
         client = StreamChat.getInstance(apiKey);
 
         await client.connectUser(
           {
-            id: userId,
+            id: me,
             name: data.currentUser?.name || "User",
-            image: data.currentUser?.image || undefined,
+            image: data.currentUser?.image,
           },
           data.token
         );
 
-        if (!isMounted) return;
+        if (!mounted) return;
 
-        if (!data.channelId) {
-          console.error("No channelId returned from backend");
-          return;
-        }
-
-        const userChannel = client.channel("messaging", data.channelId, {
-          members: [userId, targetId],
+        const ch = client.channel("messaging", data.channelId, {
+          members: [me, other],
         });
 
-        await userChannel.watch();
+        await ch.watch();
 
-        if (isMounted) {
+        if (mounted) {
           setChatClient(client);
-          setChannel(userChannel);
+          setChannel(ch);
+          setReady(true);
         }
-      } catch (error) {
-        console.error("Error setting up campaign chat:", error);
+      } catch (err) {
+        console.error("Chat setup error:", err);
+        setReady(true);
       }
     };
 
-    setupChat();
+    initChat();
 
     return () => {
-      isMounted = false;
-      if (client) client.disconnectUser();
+      mounted = false;
+      client?.disconnectUser();
     };
-  }, [session?.user?.email, status, creatorEmail, campaignId]);
+  }, [status, userEmail, creatorEmail, campaignId]);
 
-  if (!chatClient || !channel) return <LoadingIndicator />;
+  // UI rendering AFTER hooks only
+  if (status === "loading") return <LoadingIndicator />;
+
+  if (status === "unauthenticated")
+    return <div className="p-4 text-center">Please log in.</div>;
+
+  if (!ready || !chatClient || !channel) return <LoadingIndicator />;
 
   return (
     <Chat client={chatClient} theme="str-chat__theme-dark">
