@@ -14,17 +14,13 @@ import {
   LoadingIndicator,
 } from "stream-chat-react";
 
-import {
-  StreamChat,
-  Channel as StreamChannel,
-} from "stream-chat";
-
+import { StreamChat, Channel as StreamChannel } from "stream-chat";
 import "stream-chat-react/dist/css/v2/index.css";
 
 const apiKey = "3pyarxmb7yss";
 
 interface ChattingWithCampaignProps {
-  creatorEmail: string;
+  creatorEmail: string;  // The creator's email from DB
   campaignId: string;
 }
 
@@ -37,10 +33,8 @@ export default function ChattingWithCampaign({
 }: ChattingWithCampaignProps) {
   const { data: session, status } = useSession();
 
-  // Strict typing — no any
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
   const [channel, setChannel] = useState<StreamChannel | null>(null);
-
   const [ready, setReady] = useState(false);
 
   const userEmail = session?.user?.email || null;
@@ -51,11 +45,7 @@ export default function ChattingWithCampaign({
       setReady(true);
       return;
     }
-    if (!userEmail) {
-      setReady(true);
-      return;
-    }
-    if (!creatorEmail || !campaignId) {
+    if (!userEmail || !creatorEmail || !campaignId) {
       setReady(true);
       return;
     }
@@ -66,7 +56,6 @@ export default function ChattingWithCampaign({
     const initChat = async () => {
       try {
         const url = `https://app.grandeapp.com/g/api/chat/campaign/${campaignId}/creator/${creatorEmail}?currentEmail=${userEmail}`;
-
         const res = await fetch(url);
         const data = await res.json();
 
@@ -76,22 +65,47 @@ export default function ChattingWithCampaign({
           return;
         }
 
-        const me = safeId(userEmail);
-        const other = safeId(creatorEmail);
+        // ------------------------------------------------
+        // 1️⃣ Determine ROLE (Brand or Creator?)
+        // ------------------------------------------------
+        const loggedInIsCreator = userEmail.toLowerCase() === creatorEmail.toLowerCase();
 
+        // ------------------------------------------------
+        // 2️⃣ Assign Correct User IDs
+        // Backend creates:
+        //   sender = currentEmail
+        //   target = creatorEmail
+        // ------------------------------------------------
+        const me = safeId(userEmail);                     // logged-in user
+        const other = safeId(
+          loggedInIsCreator
+            ? data.currentUser?.email      // brand email
+            : creatorEmail                 // creator email
+        );
+
+        // ------------------------------------------------
+        // 3️⃣ StreamChat connect
+        // ------------------------------------------------
         client = StreamChat.getInstance(apiKey);
 
         await client.connectUser(
           {
             id: me,
-            name: data.currentUser?.name || "User",
-            image: data.currentUser?.image,
+            name: loggedInIsCreator
+              ? data.targetUser?.name    // creator name
+              : data.currentUser?.name,  // brand name
+            image: loggedInIsCreator
+              ? data.targetUser?.image
+              : data.currentUser?.image,
           },
           data.token
         );
 
         if (!mounted) return;
 
+        // ------------------------------------------------
+        // 4️⃣ Join channel
+        // ------------------------------------------------
         const ch = client.channel("messaging", data.channelId, {
           members: [me, other],
         });
