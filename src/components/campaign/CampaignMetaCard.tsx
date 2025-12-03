@@ -6,7 +6,7 @@ import Button from "../ui/button/Button";
 import Link from "next/link";
 import ApplyToCampaign from "@/components/campaign/Apply";
 import { Modal } from "@/components/ui/modal";
-import ChattingWithCampaign from "@/components/Message/Chat";
+import UniversalCampaignChat from "@/components/Message/Chat";
 
 type CampaignDetails = {
   id: string | number;
@@ -239,11 +239,14 @@ setCreatorStatus(
               className="max-w-2xl"
             >
               {chatCreator && campaign.id && (
-             <ChattingWithCampaign
-  creatorEmail={session.user.email}                 // creator
-  brandEmail={campaign.email}                       // brand (campaign owner)
-  campaignId={campaign.id.toString()}               // campaign
+<UniversalCampaignChat
+  campaignId={campaign.id.toString()}
+  // NO targetEmail
 />
+
+
+
+
 
               )}
             </Modal>
