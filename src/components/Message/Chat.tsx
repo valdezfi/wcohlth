@@ -53,7 +53,7 @@ export default function UniversalCampaignChat({
       // targetEmail only sent on brand side
       if (targetEmail) qs.append("targetEmail", targetEmail);
 
-      const res = await fetch(`/api/chat/campaign-session?` + qs.toString());
+      const res = await fetch(`https://app.grandeapp.com/g/api/chat/campaign-session?` + qs.toString());
       const data = await res.json();
 
       if (!data.success) {
