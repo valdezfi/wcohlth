@@ -20,7 +20,7 @@ const apiKey = "3pyarxmb7yss";
 
 interface ChatProps {
   creatorEmail: string;
-  brandEmail: string;   // required now
+  brandEmail: string;
   campaignId: string;
 }
 
@@ -51,13 +51,15 @@ export default function ChattingWithCampaign({
         currentEmail: userEmail,
       });
 
-      const res = await fetch("https://app.grandeapp.com/g/api/chat/campaign-session?" + qs.toString());
-      const data = await res.json();
+      const res = await fetch(
+        "https://app.grandeapp.com/g/api/chat/campaign-session?" + qs.toString()
+      );
 
+      const data = await res.json();
       if (!data.success) return;
 
-      // Connect StreamChat user
       chatClient = StreamChat.getInstance(apiKey);
+
       await chatClient.connectUser(
         {
           id: data.currentUser.id,
@@ -69,9 +71,8 @@ export default function ChattingWithCampaign({
 
       if (!mounted) return;
 
-      const ch = chatClient.channel("messaging", data.channelId, {
-        members: [data.currentUser.id, data.otherUser.id],
-      });
+      // FIX: Do NOT pass members here
+      const ch = chatClient.channel("messaging", data.channelId);
 
       await ch.watch();
 
