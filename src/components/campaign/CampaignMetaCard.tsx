@@ -239,10 +239,12 @@ setCreatorStatus(
               className="max-w-2xl"
             >
               {chatCreator && campaign.id && (
-                <ChattingWithCampaign
-                  creatorEmail={chatCreator.email}
-                  campaignId={campaign.id.toString()}
-                />
+             <ChattingWithCampaign
+  creatorEmail={session.user.email}                 // creator
+  brandEmail={campaign.email}                       // brand (campaign owner)
+  campaignId={campaign.id.toString()}               // campaign
+/>
+
               )}
             </Modal>
           </>
