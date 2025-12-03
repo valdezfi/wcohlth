@@ -21,7 +21,7 @@ export default function UniversalCampaignChat({
     if (!campaignId) return;
 
     const load = async () => {
-      const res = await fetch(`/api/thread/messages?campaignId=${campaignId}`);
+      const res = await fetch(`https://app.grandeapp.com/g/api/thread/messages?campaignId=${campaignId}`);
       const data = await res.json();
       setMessages(data);
     };
@@ -41,7 +41,7 @@ export default function UniversalCampaignChat({
   const send = async () => {
     if (!text.trim()) return;
 
-    await fetch("/api/thread/send", {
+    await fetch("https://app.grandeapp.com/g/api/thread/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
