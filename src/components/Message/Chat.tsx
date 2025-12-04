@@ -32,7 +32,9 @@ export default function UniversalCampaignChat({
   const listRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Track whether user is at bottom
+  // ---------------------------------------------
+  // Detect scroll bottom
+  // ---------------------------------------------
   const checkIfAtBottom = () => {
     if (!listRef.current) return;
 
@@ -42,19 +44,21 @@ export default function UniversalCampaignChat({
     setShouldScroll(atBottom);
   };
 
-  // Load messages every 1.5s
+  // ---------------------------------------------
+  // LOAD MESSAGES POLLING
+  // ---------------------------------------------
   useEffect(() => {
     if (!campaignId) return;
+    if (!senderEmail) return; // <— allowed inside useEffect
 
     const load = async () => {
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/api/thread/messages?campaignId=${campaignId}`
+          `https://app.grandeapp.com/g/api/thread/messages?campaignId=${campaignId}`,
+          { cache: "no-store" }
         );
-
         const data = await res.json();
-
-        setMessages(data.messages as Message[]);
+        setMessages(data.messages || []);
       } catch (err) {
         console.error("Failed to load messages", err);
       }
@@ -62,20 +66,24 @@ export default function UniversalCampaignChat({
 
     load();
     const interval = setInterval(load, 1500);
-
     return () => clearInterval(interval);
-  }, [campaignId]);
+  }, [campaignId, senderEmail]);
 
-  // Scroll when new messages come in
+  // ---------------------------------------------
+  // AUTO SCROLL
+  // ---------------------------------------------
   useEffect(() => {
     if (shouldScroll) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, shouldScroll]);
 
-  // Send message
+  // ---------------------------------------------
+  // SEND MESSAGE
+  // ---------------------------------------------
   const send = async () => {
     if (!text.trim()) return;
+    if (!senderEmail) return;
 
     try {
       await fetch("https://app.grandeapp.com/g/api/thread/send", {
@@ -95,20 +103,29 @@ export default function UniversalCampaignChat({
     }
   };
 
-  // Helper: Display name
-  const getDisplayName = (msg: Message) => {
-    return msg.brandName || msg.creatorName || msg.senderEmail || "Unknown";
-  };
-
-  // Helper: Display avatar
-  const getAvatar = (msg: Message) => {
+  // ---------------------------------------------
+  // SAFE EARLY RETURN (AFTER hooks)
+  // ---------------------------------------------
+  if (!senderEmail) {
     return (
-      msg.brandImage ||
-      msg.creatorImage ||
-      "/default-profile.png"
+      <div className="p-4 text-center text-gray-500">
+        Loading chat…
+      </div>
     );
-  };
+  }
 
+  // ---------------------------------------------
+  // Helpers
+  // ---------------------------------------------
+  const getDisplayName = (msg: Message) =>
+    msg.brandName || msg.creatorName || msg.senderEmail || "Unknown";
+
+  const getAvatar = (msg: Message) =>
+    msg.brandImage || msg.creatorImage || "/default-profile.png";
+
+  // ---------------------------------------------
+  // UI
+  // ---------------------------------------------
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
 
@@ -119,7 +136,9 @@ export default function UniversalCampaignChat({
         className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4"
       >
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 text-sm">No messages yet.</div>
+          <div className="text-center text-gray-500 text-sm">
+            No messages yet.
+          </div>
         )}
 
         {messages.map((msg) => {
@@ -134,7 +153,6 @@ export default function UniversalCampaignChat({
                   : "mr-auto bg-white dark:bg-gray-700 border"
               }`}
             >
-              {/* Avatar + Name */}
               {!isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <img
@@ -148,12 +166,10 @@ export default function UniversalCampaignChat({
                 </div>
               )}
 
-              {/* Message */}
               <div className="text-sm whitespace-pre-wrap break-words">
                 {msg.message}
               </div>
 
-              {/* Timestamp */}
               <div className="text-[10px] opacity-60 mt-1">
                 {new Date(msg.createdAt).toLocaleString()}
               </div>
@@ -164,7 +180,7 @@ export default function UniversalCampaignChat({
         <div ref={bottomRef} />
       </div>
 
-      {/* TEXT INPUT */}
+      {/* INPUT */}
       <textarea
         className="w-full border rounded px-3 py-2 mb-3 dark:bg-gray-700 dark:text-white"
         placeholder="Write a message…"
