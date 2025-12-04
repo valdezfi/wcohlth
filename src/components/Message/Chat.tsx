@@ -5,44 +5,48 @@ import { useEffect, useRef, useState } from "react";
 type Message = {
   id: number;
   campaignId: string;
-  senderEmail: string;
   message: string;
   createdAt: string;
-
-  brandName?: string | null;
-  brandImage?: string | null;
-
-  creatorName?: string | null;
-  creatorImage?: string | null;
+  senderName: string;
+  senderImage: string;
+  isMine: boolean;
 };
 
 export default function UniversalCampaignChat({
   campaignId,
-  senderEmail,
+  myEmail,
+  otherEmail,
 }: {
   campaignId: string;
-  senderEmail: string;
+  myEmail: string;    // logged-in user email
+  otherEmail: string; // the other side of the chat (brand or creator)
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Load messages
+  /* --------------------------------------------
+      Load messages for this specific 1-on-1 thread
+  --------------------------------------------- */
   useEffect(() => {
-    if (!campaignId) return;
+    if (!campaignId || !myEmail || !otherEmail) return;
 
     const load = async () => {
       try {
-        console.log("📥 FETCHING MESSAGES for campaign:", campaignId);
+        const params = new URLSearchParams({
+          campaignId,
+          me: myEmail,
+          other: otherEmail,
+        }).toString();
 
-        const res = await fetch(
-          `https://app.grandeapp.com/g/api/thread/messages?campaignId=${campaignId}`
-        );
-
+        const res = await fetch(`/api/thread/messages?${params}`);
         const data = await res.json();
 
-        console.log("🟦 RAW API RESPONSE:", data);
-        console.log("📩 MESSAGES RECEIVED:", data.messages);
+        if (!data.success) {
+          console.error("❌ Load messages error:", data.error);
+          return;
+        }
 
         setMessages(data.messages);
       } catch (err) {
@@ -51,60 +55,57 @@ export default function UniversalCampaignChat({
     };
 
     load();
-    const interval = setInterval(load, 1500);
-    return () => clearInterval(interval);
-  }, [campaignId]);
 
-  // Auto scroll
+    // Light polling
+    const interval = setInterval(load, 5000); // 5s
+    return () => clearInterval(interval);
+  }, [campaignId, myEmail, otherEmail]);
+
+  /* --------------------------------------------
+      Auto scroll
+  --------------------------------------------- */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message
+  /* --------------------------------------------
+      Send message
+  --------------------------------------------- */
   const send = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || isSending) return;
 
-    console.log("🟩 SENDING MESSAGE:", {
-      campaignId,
-      senderEmail,
-      message: text,
-    });
+    setIsSending(true);
 
-    await fetch(`https://app.grandeapp.com/g/api/thread/send`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        campaignId,
-        senderEmail,
-        message: text,
-      }),
-    });
+    try {
+      const res = await fetch(`/api/thread/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaignId,
+          senderEmail: myEmail,
+          targetEmail: otherEmail,
+          message: text.trim(),
+        }),
+      });
 
-    setText("");
-  };
-
-  // Get display name (no email)
-  const getDisplayName = (msg: Message) => {
-    console.log("🔎 CHECKING DISPLAY NAME FOR:", msg);
-
-    if (msg.brandName) return msg.brandName;
-    if (msg.creatorName) return msg.creatorName;
-    return "User"; // fallback without exposing email
-  };
-
-  // Get avatar
-  const getAvatar = (msg: Message) => {
-    return msg.brandImage || msg.creatorImage || "/default-profile.png";
+      const data = await res.json();
+      if (!data.success) {
+        console.error("❌ Send failed:", data.error);
+      } else {
+        setText("");
+      }
+    } catch (err) {
+      console.error("❌ Send error:", err);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
       <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
-        
         {messages.map((msg) => {
-          const isMe = msg.senderEmail === senderEmail;
-
-          console.log("💬 RENDERING MESSAGE:", msg);
+          const isMe = msg.isMine;
 
           return (
             <div
@@ -118,12 +119,12 @@ export default function UniversalCampaignChat({
               {!isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <img
-                    src={getAvatar(msg)}
+                    src={msg.senderImage || "/default-profile.png"}
                     className="w-7 h-7 rounded-full object-cover"
                     alt="avatar"
                   />
                   <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                    {getDisplayName(msg)}
+                    {msg.senderName || "User"}
                   </span>
                 </div>
               )}
@@ -151,9 +152,12 @@ export default function UniversalCampaignChat({
 
       <button
         onClick={send}
-        className="w-full bg-blue-600 text-white p-2 rounded"
+        disabled={isSending}
+        className={`w-full p-2 rounded text-white ${
+          isSending ? "bg-gray-400" : "bg-blue-600"
+        }`}
       >
-        Send
+        {isSending ? "Sending…" : "Send"}
       </button>
     </div>
   );

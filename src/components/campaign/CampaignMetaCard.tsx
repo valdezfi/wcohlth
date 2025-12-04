@@ -240,9 +240,11 @@ setCreatorStatus(
             >
               {chatCreator && campaign.id && (
 <UniversalCampaignChat
-  campaignId={campaign.id.toString()}
-  senderEmail={session.user.email}   // 👈 FIXED
+  campaignId={String(campaign.id)}
+  myEmail={session.user.email}           // brand email
+otherEmail={campaign.email}
 />
+
 
 
 
