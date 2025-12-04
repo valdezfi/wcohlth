@@ -2,66 +2,82 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Message = {
+type RawMessage = {
   id: number;
   campaignId: string;
   message: string;
   createdAt: string;
+  senderType: "brand" | "creator";
   senderName: string;
   senderImage: string;
+};
+
+type Message = RawMessage & {
   isMine: boolean;
 };
 
 export default function UniversalCampaignChat({
   campaignId,
-  myEmail,
-  otherEmail,
+  brandEmail,
+  creatorEmail,
+  meType, // "brand" | "creator"
 }: {
   campaignId: string;
-  myEmail: string;
-  otherEmail: string;
+  brandEmail: string;
+  creatorEmail: string;
+  meType: "brand" | "creator";
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // -------------------------- Load messages --------------------------
+  // ---------------- Load messages ----------------
   useEffect(() => {
-    if (!campaignId || !myEmail || !otherEmail) return;
+    if (!campaignId || !brandEmail || !creatorEmail) return;
 
     const load = async () => {
-      const params = new URLSearchParams({
-        campaignId,
-        me: myEmail,
-        other: otherEmail,
-      }).toString();
-
       try {
+        const params = new URLSearchParams({
+          campaignId,
+          brandEmail,
+          creatorEmail,
+        }).toString();
+
+        // If Next proxies Express under /g, keep the /g prefix:
         const res = await fetch(
           `https://app.grandeapp.com/g/api/thread/messages?${params}`
         );
         const data = await res.json();
 
-        if (data.success) {
-          setMessages(data.messages);
+        if (!data.success) {
+          console.error("❌ Load messages error:", data.error);
+          return;
         }
+
+        const withFlags: Message[] = data.messages.map((m: RawMessage) => ({
+          ...m,
+          isMine: m.senderType === meType,
+        }));
+
+        setMessages(withFlags);
       } catch (err) {
-        console.error("❌ Load failed:", err);
+        console.error("❌ Load messages failed", err);
       }
     };
 
     load();
-    const interval = setInterval(load, 2500);
-    return () => clearInterval(interval);
-  }, [campaignId, myEmail, otherEmail]);
 
-  // -------------------------- Auto scroll --------------------------
+    const interval = setInterval(load, 5000);
+    return () => clearInterval(interval);
+  }, [campaignId, brandEmail, creatorEmail, meType]);
+
+  // ---------------- Auto scroll ----------------
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // -------------------------- Send message --------------------------
+  // ---------------- Send message ----------------
   const send = async () => {
     if (!text.trim() || isSending) return;
 
@@ -75,22 +91,25 @@ export default function UniversalCampaignChat({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             campaignId,
-            senderEmail: myEmail,
-            targetEmail: otherEmail,
+            brandEmail,
+            creatorEmail,
+            senderType: meType, // "brand" or "creator"
             message: text.trim(),
           }),
         }
       );
 
       const data = await res.json();
-      if (data.success) {
+      if (!data.success) {
+        console.error("❌ Send failed:", data.error);
+      } else {
         setText("");
       }
     } catch (err) {
       console.error("❌ Send error:", err);
+    } finally {
+      setIsSending(false);
     }
-
-    setIsSending(false);
   };
 
   return (
@@ -108,10 +127,13 @@ export default function UniversalCampaignChat({
             {!msg.isMine && (
               <div className="flex items-center gap-2 mb-1">
                 <img
-                  src={msg.senderImage}
+                  src={msg.senderImage || "/default-profile.png"}
                   className="w-7 h-7 rounded-full object-cover"
+                  alt="avatar"
                 />
-                <span className="text-sm font-semibold">{msg.senderName}</span>
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  {msg.senderName || "User"}
+                </span>
               </div>
             )}
 

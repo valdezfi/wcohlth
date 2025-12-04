@@ -239,11 +239,12 @@ setCreatorStatus(
               className="max-w-2xl"
             >
               {chatCreator && campaign.id && (
-<UniversalCampaignChat
-  campaignId={String(campaign.id)}
-  myEmail={session.user.email}           // brand email
-otherEmail={campaign.email}
-/>
+    <UniversalCampaignChat
+      campaignId={String(campaign.id)}
+      brandEmail={campaign.email}           // brand from campaign
+      creatorEmail={session.user.email}     // creator = logged in
+      meType="creator"
+    />
 
 
 
