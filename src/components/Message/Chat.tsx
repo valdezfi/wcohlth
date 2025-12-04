@@ -33,13 +33,20 @@ export default function UniversalCampaignChat({
 
     const load = async () => {
       try {
+        console.log("📥 FETCHING MESSAGES for campaign:", campaignId);
+
         const res = await fetch(
           `/g/api/thread/messages?campaignId=${campaignId}`
         );
+
         const data = await res.json();
+
+        console.log("🟦 RAW API RESPONSE:", data);
+        console.log("📩 MESSAGES RECEIVED:", data.messages);
+
         setMessages(data.messages);
       } catch (err) {
-        console.error("Load messages failed", err);
+        console.error("❌ Load messages failed", err);
       }
     };
 
@@ -57,6 +64,12 @@ export default function UniversalCampaignChat({
   const send = async () => {
     if (!text.trim()) return;
 
+    console.log("🟩 SENDING MESSAGE:", {
+      campaignId,
+      senderEmail,
+      message: text,
+    });
+
     await fetch(`/g/api/thread/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -72,6 +85,8 @@ export default function UniversalCampaignChat({
 
   // Get display name (no email)
   const getDisplayName = (msg: Message) => {
+    console.log("🔎 CHECKING DISPLAY NAME FOR:", msg);
+
     if (msg.brandName) return msg.brandName;
     if (msg.creatorName) return msg.creatorName;
     return "User"; // fallback without exposing email
@@ -79,16 +94,17 @@ export default function UniversalCampaignChat({
 
   // Get avatar
   const getAvatar = (msg: Message) => {
-    if (msg.brandImage) return msg.brandImage;
-    if (msg.creatorImage) return msg.creatorImage;
-    return "/default-profile.png";
+    return msg.brandImage || msg.creatorImage || "/default-profile.png";
   };
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
       <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
+        
         {messages.map((msg) => {
           const isMe = msg.senderEmail === senderEmail;
+
+          console.log("💬 RENDERING MESSAGE:", msg);
 
           return (
             <div
@@ -99,7 +115,6 @@ export default function UniversalCampaignChat({
                   : "mr-auto bg-white dark:bg-gray-700 border"
               }`}
             >
-              {/* Avatar + Name */}
               {!isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <img
@@ -113,12 +128,10 @@ export default function UniversalCampaignChat({
                 </div>
               )}
 
-              {/* Message */}
               <div className="text-sm whitespace-pre-wrap break-words">
                 {msg.message}
               </div>
 
-              {/* Timestamp */}
               <div className="text-[10px] opacity-60 mt-1">
                 {new Date(msg.createdAt).toLocaleString()}
               </div>
