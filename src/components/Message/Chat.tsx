@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
+type Message = {
+  id: number;
+  campaignId: number;
+  senderEmail: string;
+  message: string;
+  createdAt: string;
+};
+
 export default function UniversalCampaignChat({
   campaignId,
   senderEmail,
@@ -11,7 +19,7 @@ export default function UniversalCampaignChat({
   senderEmail: string;
   targetEmail: string;
 }) {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -27,7 +35,7 @@ export default function UniversalCampaignChat({
         );
 
         const data = await res.json();
-        setMessages(data.messages || []);
+        setMessages(data.messages as Message[]);
       } catch (err) {
         console.error("Failed to load messages", err);
       }
@@ -35,12 +43,11 @@ export default function UniversalCampaignChat({
 
     load();
 
-    // Poll every 1.5 seconds
     const interval = setInterval(load, 1500);
     return () => clearInterval(interval);
   }, [campaignId]);
 
-  // Auto scroll to bottom on new messages
+  // Auto scroll on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -63,13 +70,12 @@ export default function UniversalCampaignChat({
 
       setText("");
 
-      // OPTIONAL: instantly refresh messages after sending
+      // Refresh messages
       const res = await fetch(
         `https://app.grandeapp.com/g/api/thread/messages?campaignId=${campaignId}`
       );
       const data = await res.json();
-      setMessages(data.messages || []);
-
+      setMessages(data.messages as Message[]);
     } catch (err) {
       console.error("Failed to send message", err);
     }
@@ -117,7 +123,7 @@ export default function UniversalCampaignChat({
         <div ref={bottomRef} />
       </div>
 
-      {/* TEXT INPUT */}
+      {/* INPUT */}
       <textarea
         className="w-full border rounded p-2 mb-3 dark:bg-gray-700 dark:text-white"
         placeholder="Write a message…"
