@@ -42,33 +42,37 @@ export default function CampaignChat({
   const { data: session } = useSession();
   const loggedEmail = session?.user?.email || "";
 
-  const userType = loggedEmail === brandEmail ? "brand" : "creator";
+  /** Detect if this user is brand or creator */
+  const userType: "brand" | "creator" =
+    loggedEmail === brandEmail ? "brand" : "creator";
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [brand, setBrand] = useState<BrandProfile | null>(null);
   const [creator, setCreator] = useState<CreatorProfile | null>(null);
   const [message, setMessage] = useState("");
 
-  // Load chat
+  /** Load chat messages + brand + creator info */
   const loadChat = async () => {
     const res = await fetch(
       `https://app.grandeapp.com/g/api/campaign/chat?campaignId=${campaignId}&brandEmail=${brandEmail}&creatorEmail=${creatorEmail}`
     );
+
     const data = await res.json();
     if (!data.success) return;
 
-    setMessages(data.messages);
-    setBrand(data.brand);
-    setCreator(data.creator);
+    setMessages(data.messages || []);
+    setBrand(data.brand || null);
+    setCreator(data.creator || null);
   };
 
+  /** Load chat every 3.5s */
   useEffect(() => {
     loadChat();
     const interval = setInterval(loadChat, 3500);
     return () => clearInterval(interval);
-  }, []);
+  }, [campaignId, brandEmail, creatorEmail]);
 
-  // Send message
+  /** Send a chat message */
   const sendMessage = async () => {
     if (!message.trim()) return;
 
@@ -77,9 +81,9 @@ export default function CampaignChat({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         campaignId,
+        userType,
         brandEmail: userType === "brand" ? loggedEmail : null,
         creatorEmail: userType === "creator" ? loggedEmail : null,
-        userType,
         comment: message
       }),
     });
@@ -88,6 +92,7 @@ export default function CampaignChat({
     loadChat();
   };
 
+  /** Avatar helpers */
   const getAvatar = (msg: Message) => {
     return msg.userType === "brand"
       ? brand?.imageUrl
@@ -104,7 +109,7 @@ export default function CampaignChat({
     <div className="border rounded-lg p-4 bg-white shadow-sm">
       <h2 className="text-xl font-bold mb-4">Campaign Chat</h2>
 
-      {/* CHAT WINDOW */}
+      {/* Chat box */}
       <div className="h-80 overflow-y-auto border p-3 rounded bg-gray-50">
         {messages.map((msg) => (
           <div
@@ -113,6 +118,7 @@ export default function CampaignChat({
               msg.userType === userType ? "justify-end" : "justify-start"
             }`}
           >
+            {/* Avatar (left for creator, right for brand) */}
             {msg.userType !== userType && (
               <img
                 src={getAvatar(msg) || "/default-avatar.png"}
@@ -144,7 +150,7 @@ export default function CampaignChat({
         ))}
       </div>
 
-      {/* INPUT */}
+      {/* Input */}
       <div className="flex gap-2 mt-3">
         <input
           className="flex-1 border rounded p-2"
