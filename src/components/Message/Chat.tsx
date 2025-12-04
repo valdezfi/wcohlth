@@ -28,9 +28,7 @@ export default function UniversalCampaignChat({
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  /* --------------------------------------------
-      Load messages for ONLY this brand + creator
-  --------------------------------------------- */
+  // Load messages
   useEffect(() => {
     if (!campaignId || !brandEmail || !creatorEmail) return;
 
@@ -42,59 +40,48 @@ export default function UniversalCampaignChat({
           creatorEmail,
         }).toString();
 
-        const res = await fetch(`https://app.grandeapp.com/g/api/thread/messages?${params}`);
+        const res = await fetch(`/g/api/thread/messages?${params}`);
         const data = await res.json();
 
         if (data.success) {
           setMessages(data.messages);
         } else {
-          console.error("❌ Load error:", data.error);
+          console.error("❌ Load messages error:", data.error);
         }
       } catch (err) {
-        console.error("❌ Load failed:", err);
+        console.error("❌ Load messages failed", err);
       }
     };
 
     load();
-    const int = setInterval(load, 3000);
-    return () => clearInterval(int);
+    const interval = setInterval(load, 3000);
+    return () => clearInterval(interval);
   }, [campaignId, brandEmail, creatorEmail]);
 
-  /* --------------------------------------------
-      Auto-scroll to bottom
-  --------------------------------------------- */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /* --------------------------------------------
-      Send a message
-  --------------------------------------------- */
   const send = async () => {
     if (!text.trim() || isSending) return;
     setIsSending(true);
 
     try {
-      const res = await fetch(`https://app.grandeapp.com/g/api/thread/send`, {
+      const res = await fetch(`/g/api/thread/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           campaignId,
-          brandEmail,
-          creatorEmail,
-          senderType: meType, // "brand" or "creator"
+          senderEmail: meType === "brand" ? brandEmail : creatorEmail,
+          targetEmail: meType === "brand" ? creatorEmail : brandEmail,
           message: text.trim(),
         }),
       });
 
       const data = await res.json();
-      if (data.success) {
-        setText(""); // Clear input
-      } else {
-        console.error("❌ Send failed:", data.error);
-      }
+      if (data.success) setText("");
     } catch (err) {
-      console.error("❌ Send error:", err);
+      console.error("❌ Send error", err);
     } finally {
       setIsSending(false);
     }
@@ -102,8 +89,6 @@ export default function UniversalCampaignChat({
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
-
-      {/* Chat Window */}
       <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
         {messages.map((msg) => {
           const isMe = msg.senderType === meType;
@@ -117,7 +102,6 @@ export default function UniversalCampaignChat({
                   : "mr-auto bg-white dark:bg-gray-700 border"
               }`}
             >
-              {/* Avatar shown only for OTHER person */}
               {!isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <img
@@ -130,12 +114,10 @@ export default function UniversalCampaignChat({
                 </div>
               )}
 
-              {/* Message text */}
               <div className="text-sm whitespace-pre-wrap break-words">
                 {msg.message}
               </div>
 
-              {/* Time */}
               <div className="text-[10px] opacity-60 mt-1">
                 {new Date(msg.createdAt).toLocaleString()}
               </div>
@@ -145,7 +127,6 @@ export default function UniversalCampaignChat({
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <textarea
         className="w-full border rounded p-2 mb-3 dark:bg-gray-700 dark:text-white"
         placeholder="Write a message…"
@@ -153,7 +134,6 @@ export default function UniversalCampaignChat({
         onChange={(e) => setText(e.target.value)}
       />
 
-      {/* Send Button */}
       <button
         onClick={send}
         disabled={isSending}
