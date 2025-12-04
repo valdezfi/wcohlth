@@ -25,25 +25,21 @@ export default function UniversalCampaignChat({
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Load messages
+  /* --------------------------------------------
+      FIXED: NO FAST POLLING — now every 6 seconds
+  --------------------------------------------- */
   useEffect(() => {
     if (!campaignId) return;
 
     const load = async () => {
       try {
-        console.log("📥 FETCHING MESSAGES for campaign:", campaignId);
-
         const res = await fetch(
           `/g/api/thread/messages?campaignId=${campaignId}`
         );
-
         const data = await res.json();
-
-        console.log("🟦 RAW API RESPONSE:", data);
-        console.log("📩 MESSAGES RECEIVED:", data.messages);
-
         setMessages(data.messages);
       } catch (err) {
         console.error("❌ Load messages failed", err);
@@ -51,24 +47,24 @@ export default function UniversalCampaignChat({
     };
 
     load();
-    const interval = setInterval(load, 1500);
+    const interval = setInterval(load, 6000);
     return () => clearInterval(interval);
   }, [campaignId]);
 
-  // Auto scroll
+  /* --------------------------------------------
+      AUTOSCROLL
+  --------------------------------------------- */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message
+  /* --------------------------------------------
+      FIXED SEND — prevents duplicate sends
+  --------------------------------------------- */
   const send = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || isSending) return;
 
-    console.log("🟩 SENDING MESSAGE:", {
-      campaignId,
-      senderEmail,
-      message: text,
-    });
+    setIsSending(true);
 
     await fetch(`/g/api/thread/send`, {
       method: "POST",
@@ -76,23 +72,20 @@ export default function UniversalCampaignChat({
       body: JSON.stringify({
         campaignId,
         senderEmail,
-        message: text,
+        message: text.trim(),
       }),
     });
 
     setText("");
+    setIsSending(false);
   };
 
-  // Get display name (no email)
   const getDisplayName = (msg: Message) => {
-    console.log("🔎 CHECKING DISPLAY NAME FOR:", msg);
-
     if (msg.brandName) return msg.brandName;
     if (msg.creatorName) return msg.creatorName;
-    return "User"; // fallback without exposing email
+    return "User";
   };
 
-  // Get avatar
   const getAvatar = (msg: Message) => {
     return msg.brandImage || msg.creatorImage || "/default-profile.png";
   };
@@ -100,11 +93,8 @@ export default function UniversalCampaignChat({
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
       <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
-        
         {messages.map((msg) => {
           const isMe = msg.senderEmail === senderEmail;
-
-          console.log("💬 RENDERING MESSAGE:", msg);
 
           return (
             <div
@@ -151,9 +141,12 @@ export default function UniversalCampaignChat({
 
       <button
         onClick={send}
-        className="w-full bg-blue-600 text-white p-2 rounded"
+        disabled={isSending}
+        className={`w-full p-2 rounded text-white ${
+          isSending ? "bg-gray-400" : "bg-blue-600"
+        }`}
       >
-        Send
+        {isSending ? "Sending…" : "Send"}
       </button>
     </div>
   );
