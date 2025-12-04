@@ -40,7 +40,7 @@ export default function UniversalCampaignChat({
           other: otherEmail,
         }).toString();
 
-        const res = await fetch(`/api/thread/messages?${params}`);
+        const res = await fetch(`https://app.grandeapp.com/g/api/thread/messages?${params}`);
         const data = await res.json();
 
         if (!data.success) {
@@ -77,7 +77,7 @@ export default function UniversalCampaignChat({
     setIsSending(true);
 
     try {
-      const res = await fetch(`/api/thread/send`, {
+      const res = await fetch(`https://app.grandeapp.com/g/api/thread/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
