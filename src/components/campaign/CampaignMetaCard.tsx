@@ -30,16 +30,9 @@ type CampaignDetails = {
 };
 
 type CreatorStatusResponse = Record<string, string>;
+type CreatorInfo = { email: string };
 
-type CreatorInfo = {
-  email: string;
-};
-
-export default function CampaignMetaCard({
-  campaignName,
-}: {
-  campaignName: string;
-}) {
+export default function CampaignMetaCard({ campaignName }: { campaignName: string }) {
   const { data: session, status } = useSession();
   const [campaign, setCampaign] = useState<CampaignDetails | null>(null);
   const [creatorStatus, setCreatorStatus] = useState<string | null>(null);
@@ -48,7 +41,7 @@ export default function CampaignMetaCard({
 
   const emailuser = session?.user?.email;
 
-  // Fetch campaign details
+  /* ------------------------------- FETCH CAMPAIGN ------------------------------- */
   useEffect(() => {
     async function fetchCampaign() {
       if (!campaignName) return;
@@ -57,72 +50,73 @@ export default function CampaignMetaCard({
         const res = await fetch(
           `https://app.grandeapp.com/g/campaign/getcampaigns?campaignName=${campaignName}`
         );
+
         if (!res.ok) {
-          setError(`Failed to fetch campaign: ${res.status} ${res.statusText}`);
-          setCampaign(null);
+          setError(`Failed to fetch campaign`);
           return;
         }
+
         const data: CampaignDetails[] = await res.json();
         if (data.length > 0) {
           setCampaign(data[0]);
           setError(null);
         } else {
           setError("No campaign found.");
-          setCampaign(null);
         }
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(`Error fetching campaign: ${err.message}`);
-        } else {
-          setError("Unknown error fetching campaign");
-        }
-        setCampaign(null);
+
+      } catch {
+        setError("Failed to load campaign.");
       }
     }
+
     fetchCampaign();
   }, [campaignName]);
 
-  // Fetch creator status
+  /* -------------------------- FETCH CREATOR STATUS (ID) ------------------------- */
   useEffect(() => {
     async function fetchStatus() {
-      if (!campaignName || !emailuser) return;
+      if (!campaign?.id || !emailuser) return;
 
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/campaigns/${campaignName}/creators/status`
+          `https://app.grandeapp.com/g/campaigns/${campaign.id}/creators/status`
         );
+
         if (!res.ok) {
           setCreatorStatus(null);
           return;
         }
+
         const data: CreatorStatusResponse = await res.json();
 
         if (emailuser in data) {
           setCreatorStatus(data[emailuser]);
         } else {
-setCreatorStatus(
-  "Please apply and be patient. Brand or Agency is in review process and will get back shortly."
-);        }
-     } catch {
-  setError("Unknown error fetching campaign");
-  setCampaign(null);
-}
+          setCreatorStatus(
+            "Please apply and be patient. Brand or Agency is in review process and will get back shortly."
+          );
+        }
+
+      } catch {
+        setCreatorStatus(null);
+      }
     }
 
     fetchStatus();
-  }, [campaignName, emailuser]);
+  }, [campaign?.id, emailuser]);
 
+  /* ----------------------------- LOADING / ERRORS ------------------------------ */
   if (error)
-    return (
-      <div className="p-4 text-red-500 text-center font-semibold">{error}</div>
-    );
+    return <div className="p-4 text-red-500 text-center font-semibold">{error}</div>;
 
   if (!campaign)
     return <div className="p-4 text-gray-500 text-center">Loading campaign...</div>;
 
   if (status === "loading")
     return (
-      <div className="p-4 text-gray-500 text-center">Checking authentication...</div>
+      <div className="p-4 text-gray-500 text-center">
+        Checking authentication...
+      </div>
     );
 
   if (!session?.user?.email)
@@ -132,8 +126,10 @@ setCreatorStatus(
       </div>
     );
 
+  /* ----------------------------- RENDER COMPONENT ------------------------------ */
   return (
     <div className="p-8 border border-gray-300 rounded-xl dark:border-gray-700 bg-white dark:bg-gray-900 max-w-4xl mx-auto shadow-lg">
+      
       <h2 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
         {campaign.campaignName}
       </h2>
@@ -148,61 +144,28 @@ setCreatorStatus(
         </div>
       )}
 
+      {/* DETAILS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-gray-800 dark:text-gray-300 text-lg leading-relaxed">
-        <p>
-          <span className="font-semibold">Industry:</span>{" "}
-          {campaign.industry || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Platform:</span>{" "}
-          {campaign.platform || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Start Date:</span>{" "}
-          {campaign.startDate || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">End Date:</span>{" "}
-          {campaign.endDate || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Deliverables:</span>{" "}
-          {campaign.deliverables || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Product Details:</span>{" "}
-          {campaign.productDetails || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Optional Product Details 1:</span>{" "}
-          {campaign.optionalProductDetails1 || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Optional Product Details 2:</span>{" "}
-          {campaign.optionalProductDetails2 || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Compensation:</span>{" "}
-          {campaign.compensation || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Why We Want This Content:</span>{" "}
-          {campaign.whyWeWantThisContent || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Dos:</span> {campaign.dos || "N/A"}
-        </p>
-        <p className="sm:col-span-2">
-          <span className="font-semibold">Do not:</span> {campaign.doNot || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Ready to Post:</span>{" "}
-          {campaign.readyToPost || "N/A"}
-        </p>
-        <p>
-          <span className="font-semibold">Target Country:</span>{" "}
-          {campaign.targetCountry || "N/A"}
-        </p>
+        <p><span className="font-semibold">Industry:</span> {campaign.industry}</p>
+        <p><span className="font-semibold">Platform:</span> {campaign.platform}</p>
+        <p><span className="font-semibold">Start Date:</span> {campaign.startDate}</p>
+        <p><span className="font-semibold">End Date:</span> {campaign.endDate}</p>
+
+        <p className="sm:col-span-2"><span className="font-semibold">Deliverables:</span> {campaign.deliverables}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Product Details:</span> {campaign.productDetails}</p>
+
+        <p><span className="font-semibold">Optional 1:</span> {campaign.optionalProductDetails1}</p>
+        <p><span className="font-semibold">Optional 2:</span> {campaign.optionalProductDetails2}</p>
+
+        <p><span className="font-semibold">Compensation:</span> {campaign.compensation}</p>
+
+        <p className="sm:col-span-2"><span className="font-semibold">Why:</span> {campaign.whyWeWantThisContent}</p>
+
+        <p className="sm:col-span-2"><span className="font-semibold">Dos:</span> {campaign.dos}</p>
+        <p className="sm:col-span-2"><span className="font-semibold">Do Not:</span> {campaign.doNot}</p>
+
+        <p><span className="font-semibold">Ready to Post:</span> {campaign.readyToPost}</p>
+        <p><span className="font-semibold">Target Country:</span> {campaign.targetCountry}</p>
       </div>
 
       {creatorStatus && (
@@ -211,15 +174,14 @@ setCreatorStatus(
         </p>
       )}
 
+      {/* ACTIONS */}
       <div className="mt-8 flex flex-col items-center gap-6">
         <Link
           href={`/camp/${encodeURIComponent(campaign.campaignName)}`}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button variant="outline" size="md">
-            Public Campaign To Share
-          </Button>
+          <Button variant="outline" size="md">Public Campaign To Share</Button>
         </Link>
 
         <ApplyToCampaign
@@ -238,18 +200,12 @@ setCreatorStatus(
               onClose={() => setChatCreator(null)}
               className="max-w-2xl"
             >
-              {chatCreator && campaign.id && (
-<CampaignComments
-  campaignId={Number(campaign.id)}   // ✅ FIXED
-  brandEmail={campaign.email}
-  creatorEmail={session.user.email}
-/>
-
-
-
-
-
-
+              {chatCreator && (
+                <CampaignComments
+                  campaignId={Number(campaign.id)}
+                  brandEmail={campaign.email}
+                  creatorEmail={session.user.email}
+                />
               )}
             </Modal>
           </>
@@ -258,9 +214,6 @@ setCreatorStatus(
     </div>
   );
 }
-
-
-
 
 
 // "use client";
