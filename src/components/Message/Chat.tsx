@@ -28,7 +28,9 @@ export default function UniversalCampaignChat({
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Load messages
+  /* --------------------------------------------
+      LOAD MESSAGES (correct API)
+  --------------------------------------------- */
   useEffect(() => {
     if (!campaignId || !brandEmail || !creatorEmail) return;
 
@@ -40,7 +42,7 @@ export default function UniversalCampaignChat({
           creatorEmail,
         }).toString();
 
-        const res = await fetch(`https://app.grandeapp.com/g/api/thread/messages?${params}`);
+        const res = await fetch(`/g/api/thread/messages?${params}`);
         const data = await res.json();
 
         if (data.success) {
@@ -49,37 +51,46 @@ export default function UniversalCampaignChat({
           console.error("❌ Load messages error:", data.error);
         }
       } catch (err) {
-        console.error("❌ Load messages failed", err);
+        console.error("❌ Load failed", err);
       }
     };
 
     load();
-    const interval = setInterval(load, 3000);
-    return () => clearInterval(interval);
+    const int = setInterval(load, 2500);
+    return () => clearInterval(int);
   }, [campaignId, brandEmail, creatorEmail]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  /* --------------------------------------------
+      FIXED SEND() FUNCTION  
+      (MATCHES NEW BACKEND PAYLOAD)
+  --------------------------------------------- */
   const send = async () => {
     if (!text.trim() || isSending) return;
     setIsSending(true);
 
     try {
-      const res = await fetch(`https://app.grandeapp.com/g/api/thread/send`, {
+      const res = await fetch(`/g/api/thread/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           campaignId,
-          senderEmail: meType === "brand" ? brandEmail : creatorEmail,
-          targetEmail: meType === "brand" ? creatorEmail : brandEmail,
+          brandEmail,
+          creatorEmail,
+          senderType: meType,       // IMPORTANT FIX
           message: text.trim(),
         }),
       });
 
       const data = await res.json();
-      if (data.success) setText("");
+      if (data.success) {
+        setText("");
+      } else {
+        console.error("❌ Send failed:", data.error);
+      }
     } catch (err) {
       console.error("❌ Send error", err);
     } finally {
@@ -89,6 +100,7 @@ export default function UniversalCampaignChat({
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+
       <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
         {messages.map((msg) => {
           const isMe = msg.senderType === meType;
@@ -105,7 +117,7 @@ export default function UniversalCampaignChat({
               {!isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <img
-                    src={msg.senderImage}
+                    src={msg.senderImage || "/default-profile.png"}
                     className="w-7 h-7 rounded-full object-cover"
                   />
                   <span className="text-sm font-semibold">
@@ -124,6 +136,7 @@ export default function UniversalCampaignChat({
             </div>
           );
         })}
+
         <div ref={bottomRef} />
       </div>
 
