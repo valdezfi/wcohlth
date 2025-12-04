@@ -242,7 +242,6 @@ setCreatorStatus(
 <UniversalCampaignChat
   campaignId={campaign.id.toString()}
   senderEmail={session.user.email}   // 👈 FIXED
-  targetEmail={campaign.email}       // brand email
 />
 
 
