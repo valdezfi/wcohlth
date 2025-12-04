@@ -75,10 +75,12 @@ export default function CampaignChat({
     await fetch("https://app.grandeapp.com/g/api/campaign/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      
       body: JSON.stringify({
         campaignId,
-        brandEmail: userType === "brand" ? loggedEmail : null,
-        creatorEmail: userType === "creator" ? loggedEmail : null,
+       brandEmail,
+creatorEmail,
+
         userType,
         comment: message
       }),
