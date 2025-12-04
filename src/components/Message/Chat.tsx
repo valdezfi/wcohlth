@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Message = {
   id: number;
-  campaignId: number;
+  campaignId: string;
   senderEmail: string;
   message: string;
   createdAt: string;
@@ -19,128 +19,74 @@ type Message = {
 export default function UniversalCampaignChat({
   campaignId,
   senderEmail,
-  targetEmail,
 }: {
   campaignId: string;
   senderEmail: string;
-  targetEmail: string;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
-  const [shouldScroll, setShouldScroll] = useState(true);
-
-  const listRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // ---------------------------------------------
-  // Detect scroll bottom
-  // ---------------------------------------------
-  const checkIfAtBottom = () => {
-    if (!listRef.current) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = listRef.current;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 20;
-
-    setShouldScroll(atBottom);
-  };
-
-  // ---------------------------------------------
-  // LOAD MESSAGES POLLING
-  // ---------------------------------------------
+  // Load messages
   useEffect(() => {
     if (!campaignId) return;
-    if (!senderEmail) return; // <— allowed inside useEffect
 
     const load = async () => {
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/api/thread/messages?campaignId=${campaignId}`,
-          { cache: "no-store" }
+          `/g/api/thread/messages?campaignId=${campaignId}`
         );
         const data = await res.json();
-        setMessages(data.messages || []);
+        setMessages(data.messages);
       } catch (err) {
-        console.error("Failed to load messages", err);
+        console.error("Load messages failed", err);
       }
     };
 
     load();
     const interval = setInterval(load, 1500);
     return () => clearInterval(interval);
-  }, [campaignId, senderEmail]);
+  }, [campaignId]);
 
-  // ---------------------------------------------
-  // AUTO SCROLL
-  // ---------------------------------------------
+  // Auto scroll
   useEffect(() => {
-    if (shouldScroll) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, shouldScroll]);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  // ---------------------------------------------
-  // SEND MESSAGE
-  // ---------------------------------------------
+  // Send message
   const send = async () => {
     if (!text.trim()) return;
-    if (!senderEmail) return;
 
-    try {
-      await fetch("https://app.grandeapp.com/g/api/thread/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          campaignId,
-          senderEmail,
-          targetEmail,
-          message: text,
-        }),
-      });
+    await fetch(`/g/api/thread/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        campaignId,
+        senderEmail,
+        message: text,
+      }),
+    });
 
-      setText("");
-    } catch (err) {
-      console.error("Failed to send message", err);
-    }
+    setText("");
   };
 
-  // ---------------------------------------------
-  // SAFE EARLY RETURN (AFTER hooks)
-  // ---------------------------------------------
-  if (!senderEmail) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        Loading chat…
-      </div>
-    );
-  }
+  // Get display name (no email)
+  const getDisplayName = (msg: Message) => {
+    if (msg.brandName) return msg.brandName;
+    if (msg.creatorName) return msg.creatorName;
+    return "User"; // fallback without exposing email
+  };
 
-  // ---------------------------------------------
-  // Helpers
-  // ---------------------------------------------
-  const getDisplayName = (msg: Message) =>
-    msg.brandName || msg.creatorName || msg.senderEmail || "Unknown";
+  // Get avatar
+  const getAvatar = (msg: Message) => {
+    if (msg.brandImage) return msg.brandImage;
+    if (msg.creatorImage) return msg.creatorImage;
+    return "/default-profile.png";
+  };
 
-  const getAvatar = (msg: Message) =>
-    msg.brandImage || msg.creatorImage || "/default-profile.png";
-
-  // ---------------------------------------------
-  // UI
-  // ---------------------------------------------
   return (
     <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
-
-      {/* MESSAGE LIST */}
-      <div
-        ref={listRef}
-        onScroll={checkIfAtBottom}
-        className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4"
-      >
-        {messages.length === 0 && (
-          <div className="text-center text-gray-500 text-sm">
-            No messages yet.
-          </div>
-        )}
-
+      <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
         {messages.map((msg) => {
           const isMe = msg.senderEmail === senderEmail;
 
@@ -153,23 +99,26 @@ export default function UniversalCampaignChat({
                   : "mr-auto bg-white dark:bg-gray-700 border"
               }`}
             >
+              {/* Avatar + Name */}
               {!isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <img
                     src={getAvatar(msg)}
+                    className="w-7 h-7 rounded-full object-cover"
                     alt="avatar"
-                    className="w-6 h-6 rounded-full"
                   />
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                     {getDisplayName(msg)}
                   </span>
                 </div>
               )}
 
+              {/* Message */}
               <div className="text-sm whitespace-pre-wrap break-words">
                 {msg.message}
               </div>
 
+              {/* Timestamp */}
               <div className="text-[10px] opacity-60 mt-1">
                 {new Date(msg.createdAt).toLocaleString()}
               </div>
@@ -180,9 +129,8 @@ export default function UniversalCampaignChat({
         <div ref={bottomRef} />
       </div>
 
-      {/* INPUT */}
       <textarea
-        className="w-full border rounded px-3 py-2 mb-3 dark:bg-gray-700 dark:text-white"
+        className="w-full border rounded p-2 mb-3 dark:bg-gray-700 dark:text-white"
         placeholder="Write a message…"
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -190,7 +138,7 @@ export default function UniversalCampaignChat({
 
       <button
         onClick={send}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
+        className="w-full bg-blue-600 text-white p-2 rounded"
       >
         Send
       </button>
