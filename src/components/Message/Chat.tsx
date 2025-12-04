@@ -1,160 +1,103 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-type Message = {
+interface CommentItem {
   id: number;
-  campaignId: string;
-  message: string;
+  comment: string;
+  userType: "brand" | "creator";
   createdAt: string;
-  senderType: "brand" | "creator";
-  senderName: string;
-  senderImage: string;
-};
+}
 
-export default function UniversalCampaignChat({
-  campaignId,
-  brandEmail,
-  creatorEmail,
-  meType, // "brand" or "creator"
-}: {
+interface CampaignCommentsProps {
   campaignId: string;
   brandEmail: string;
   creatorEmail: string;
-  meType: "brand" | "creator";
-}) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  userType: "brand" | "creator";
+}
+
+export default function CampaignComments({
+  campaignId,
+  brandEmail,
+  creatorEmail,
+  userType,
+}: CampaignCommentsProps) {
+  const [comments, setComments] = useState<CommentItem[]>([]);
   const [text, setText] = useState("");
-  const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  /* --------------------------------------------
-      LOAD MESSAGES (correct API)
-  --------------------------------------------- */
+  const load = async () => {
+    const params = new URLSearchParams({
+      campaignId,
+      brandEmail,
+      creatorEmail,
+    }).toString();
+
+    const res = await fetch(`https://app.grandeapp.com/g/api/campaign/comments?${params}`);
+    const data = await res.json();
+    if (data.success) setComments(data.comments);
+  };
+
   useEffect(() => {
-    if (!campaignId || !brandEmail || !creatorEmail) return;
-
-    const load = async () => {
-      try {
-        const params = new URLSearchParams({
-          campaignId,
-          brandEmail,
-          creatorEmail,
-        }).toString();
-
-        const res = await fetch(`/g/api/thread/messages?${params}`);
-        const data = await res.json();
-
-        if (data.success) {
-          setMessages(data.messages);
-        } else {
-          console.error("❌ Load messages error:", data.error);
-        }
-      } catch (err) {
-        console.error("❌ Load failed", err);
-      }
-    };
-
     load();
-    const int = setInterval(load, 2500);
-    return () => clearInterval(int);
-  }, [campaignId, brandEmail, creatorEmail]);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [comments]);
 
-  /* --------------------------------------------
-      FIXED SEND() FUNCTION  
-      (MATCHES NEW BACKEND PAYLOAD)
-  --------------------------------------------- */
-  const send = async () => {
-    if (!text.trim() || isSending) return;
-    setIsSending(true);
+  const submit = async () => {
+    if (!text.trim()) return;
 
-    try {
-      const res = await fetch(`/g/api/thread/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          campaignId,
-          brandEmail,
-          creatorEmail,
-          senderType: meType,       // IMPORTANT FIX
-          message: text.trim(),
-        }),
-      });
+    await fetch(`https://app.grandeapp.com/g/api/campaign/comment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        campaignId,
+        brandEmail,
+        creatorEmail,
+        userType,
+        comment: text.trim(),
+      }),
+    });
 
-      const data = await res.json();
-      if (data.success) {
-        setText("");
-      } else {
-        console.error("❌ Send failed:", data.error);
-      }
-    } catch (err) {
-      console.error("❌ Send error", err);
-    } finally {
-      setIsSending(false);
-    }
+    setText("");
+    load();
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
-
-      <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 rounded mb-4">
-        {messages.map((msg) => {
-          const isMe = msg.senderType === meType;
-
-          return (
-            <div
-              key={msg.id}
-              className={`mb-3 p-2 rounded max-w-[80%] ${
-                isMe
-                  ? "ml-auto bg-blue-600 text-white"
-                  : "mr-auto bg-white dark:bg-gray-700 border"
-              }`}
-            >
-              {!isMe && (
-                <div className="flex items-center gap-2 mb-1">
-                  <img
-                    src={msg.senderImage || "/default-profile.png"}
-                    className="w-7 h-7 rounded-full object-cover"
-                  />
-                  <span className="text-sm font-semibold">
-                    {msg.senderName}
-                  </span>
-                </div>
-              )}
-
-              <div className="text-sm whitespace-pre-wrap break-words">
-                {msg.message}
-              </div>
-
-              <div className="text-[10px] opacity-60 mt-1">
-                {new Date(msg.createdAt).toLocaleString()}
-              </div>
+    <div className="p-4 bg-white dark:bg-gray-900 rounded border">
+      <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 mb-4 rounded">
+        {comments.map((msg) => (
+          <div
+            key={msg.id}
+            className={`mb-3 p-2 rounded max-w-[80%] ${
+              msg.userType === userType
+                ? "ml-auto bg-blue-600 text-white"
+                : "mr-auto bg-white dark:bg-gray-700 border"
+            }`}
+          >
+            <div>{msg.comment}</div>
+            <div className="text-[10px] opacity-60">
+              {new Date(msg.createdAt).toLocaleString()}
             </div>
-          );
-        })}
-
+          </div>
+        ))}
         <div ref={bottomRef} />
       </div>
 
       <textarea
-        className="w-full border rounded p-2 mb-3 dark:bg-gray-700 dark:text-white"
-        placeholder="Write a message…"
         value={text}
         onChange={(e) => setText(e.target.value)}
+        className="w-full border rounded p-2 mb-3"
+        placeholder="Write a private comment..."
       />
 
       <button
-        onClick={send}
-        disabled={isSending}
-        className={`w-full p-2 rounded text-white ${
-          isSending ? "bg-gray-400" : "bg-blue-600"
-        }`}
+        onClick={submit}
+        className="w-full bg-blue-600 text-white p-2 rounded"
       >
-        {isSending ? "Sending…" : "Send"}
+        Post Comment
       </button>
     </div>
   );

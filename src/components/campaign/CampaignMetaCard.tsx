@@ -6,7 +6,7 @@ import Button from "../ui/button/Button";
 import Link from "next/link";
 import ApplyToCampaign from "@/components/campaign/Apply";
 import { Modal } from "@/components/ui/modal";
-import UniversalCampaignChat from "@/components/Message/Chat";
+import CampaignComments from "@/components/Message/Chat";
 
 type CampaignDetails = {
   id: string | number;
@@ -239,11 +239,11 @@ setCreatorStatus(
               className="max-w-2xl"
             >
               {chatCreator && campaign.id && (
-    <UniversalCampaignChat
+    <CampaignComments
       campaignId={String(campaign.id)}
       brandEmail={campaign.email}           // brand from campaign
       creatorEmail={session.user.email}     // creator = logged in
-      meType="creator"
+  userType="creator"  // <-- THIS IS WHAT YOU MUST PASS
     />
 
 
