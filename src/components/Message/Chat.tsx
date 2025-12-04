@@ -1,104 +1,164 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
-interface CommentItem {
+interface Message {
   id: number;
+  userType: "brand" | "creator";
   comment: string;
-  userType: "brand" | "creator";
   createdAt: string;
+  brandEmail: string | null;
+  creatorEmail: string | null;
 }
 
-interface CampaignCommentsProps {
-  campaignId: string;
-  brandEmail: string;
-  creatorEmail: string;
-  userType: "brand" | "creator";
+interface BrandProfile {
+  brandname: string;
+  imageUrl: string;
+  industry: string;
+  country: string;
+  website: string;
 }
 
-export default function CampaignComments({
+interface CreatorProfile {
+  creatorName: string;
+  imageUrl: string;
+  niche: string;
+  country: string;
+  instagram: string;
+  youtube: string;
+  tiktokLink: string;
+}
+
+export default function CampaignChat({
   campaignId,
   brandEmail,
-  creatorEmail,
-  userType,
-}: CampaignCommentsProps) {
-  const [comments, setComments] = useState<CommentItem[]>([]);
-  const [text, setText] = useState("");
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  creatorEmail
+}: {
+  campaignId: number;
+  brandEmail: string;
+  creatorEmail: string;
+}) {
+  const { data: session } = useSession();
+  const loggedEmail = session?.user?.email || "";
 
-  const load = async () => {
-    const params = new URLSearchParams({
-      campaignId,
-      brandEmail,
-      creatorEmail,
-    }).toString();
+  const userType = loggedEmail === brandEmail ? "brand" : "creator";
 
-    const res = await fetch(`https://app.grandeapp.com/g/api/campaign/comments?${params}`);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [brand, setBrand] = useState<BrandProfile | null>(null);
+  const [creator, setCreator] = useState<CreatorProfile | null>(null);
+  const [message, setMessage] = useState("");
+
+  // Load chat
+  const loadChat = async () => {
+    const res = await fetch(
+      `https://app.grandeapp.com/g/api/campaign/chat?campaignId=${campaignId}&brandEmail=${brandEmail}&creatorEmail=${creatorEmail}`
+    );
     const data = await res.json();
-    if (data.success) setComments(data.comments);
+    if (!data.success) return;
+
+    setMessages(data.messages);
+    setBrand(data.brand);
+    setCreator(data.creator);
   };
 
   useEffect(() => {
-    load();
+    loadChat();
+    const interval = setInterval(loadChat, 3500);
+    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [comments]);
+  // Send message
+  const sendMessage = async () => {
+    if (!message.trim()) return;
 
-  const submit = async () => {
-    if (!text.trim()) return;
-
-    await fetch(`https://app.grandeapp.com/g/api/campaign/comment`, {
+    await fetch("https://app.grandeapp.com/g/api/campaign/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         campaignId,
-        brandEmail,
-        creatorEmail,
+        brandEmail: userType === "brand" ? loggedEmail : null,
+        creatorEmail: userType === "creator" ? loggedEmail : null,
         userType,
-        comment: text.trim(),
+        comment: message
       }),
     });
 
-    setText("");
-    load();
+    setMessage("");
+    loadChat();
+  };
+
+  const getAvatar = (msg: Message) => {
+    return msg.userType === "brand"
+      ? brand?.imageUrl
+      : creator?.imageUrl;
+  };
+
+  const getName = (msg: Message) => {
+    return msg.userType === "brand"
+      ? brand?.brandname
+      : creator?.creatorName;
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 rounded border">
-      <div className="h-80 overflow-y-auto p-3 bg-gray-100 dark:bg-gray-800 mb-4 rounded">
-        {comments.map((msg) => (
+    <div className="border rounded-lg p-4 bg-white shadow-sm">
+      <h2 className="text-xl font-bold mb-4">Campaign Chat</h2>
+
+      {/* CHAT WINDOW */}
+      <div className="h-80 overflow-y-auto border p-3 rounded bg-gray-50">
+        {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`mb-3 p-2 rounded max-w-[80%] ${
-              msg.userType === userType
-                ? "ml-auto bg-blue-600 text-white"
-                : "mr-auto bg-white dark:bg-gray-700 border"
+            className={`flex gap-2 mb-3 ${
+              msg.userType === userType ? "justify-end" : "justify-start"
             }`}
           >
-            <div>{msg.comment}</div>
-            <div className="text-[10px] opacity-60">
-              {new Date(msg.createdAt).toLocaleString()}
+            {msg.userType !== userType && (
+              <img
+                src={getAvatar(msg) || "/default-avatar.png"}
+                className="w-8 h-8 rounded-full"
+              />
+            )}
+
+            <div
+              className={`max-w-xs p-3 rounded-lg ${
+                msg.userType === userType
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              <div className="text-xs font-bold">{getName(msg)}</div>
+              <div className="mt-1">{msg.comment}</div>
+              <div className="text-[10px] opacity-70 mt-1">
+                {msg.createdAt}
+              </div>
             </div>
+
+            {msg.userType === userType && (
+              <img
+                src={getAvatar(msg) || "/default-avatar.png"}
+                className="w-8 h-8 rounded-full"
+              />
+            )}
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
 
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        className="w-full border rounded p-2 mb-3"
-        placeholder="Write a private comment..."
-      />
-
-      <button
-        onClick={submit}
-        className="w-full bg-blue-600 text-white p-2 rounded"
-      >
-        Post Comment
-      </button>
+      {/* INPUT */}
+      <div className="flex gap-2 mt-3">
+        <input
+          className="flex-1 border rounded p-2"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Write a message..."
+        />
+        <button
+          onClick={sendMessage}
+          className="bg-blue-600 text-white px-4 rounded"
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 }

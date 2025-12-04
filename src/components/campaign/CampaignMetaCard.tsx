@@ -239,12 +239,13 @@ setCreatorStatus(
               className="max-w-2xl"
             >
               {chatCreator && campaign.id && (
-    <CampaignComments
-      campaignId={String(campaign.id)}
-      brandEmail={campaign.email}           // brand from campaign
-      creatorEmail={session.user.email}     // creator = logged in
-  userType="creator"  // <-- THIS IS WHAT YOU MUST PASS
-    />
+<CampaignComments
+  campaignId={Number(campaign.id)}   // ✅ FIXED
+  brandEmail={campaign.email}
+  creatorEmail={session.user.email}
+/>
+
+
 
 
 
