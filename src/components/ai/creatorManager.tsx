@@ -126,6 +126,7 @@ const T = {
 /* -------------------------------------
    TEMPLATE SECTIONS (BILINGUAL)
 -------------------------------------- */
+
 const TEMPLATE_SECTIONS = {
   en: [
     {
@@ -160,6 +161,26 @@ const TEMPLATE_SECTIONS = {
         "What content should I post to look premium?",
       ],
     },
+    {
+      title: "Media Kit",
+      items: [
+        "Create a full media kit template for my niche.",
+        "Write a professional creator bio for my media kit.",
+        "Generate a case study section for my media kit.",
+        "Help me design a clean portfolio layout for brands.",
+      ],
+    },
+    {
+      title: "Legal & Contracts",
+      items: [
+        "Create a UGC contract template with usage rights.",
+        "Write a sponsored post agreement for brands.",
+        "Create a revision policy I can send to clients.",
+        "Write a professional invoice template for creators.",
+        "Create a content rights licensing agreement.",
+        "Write a talent release form for UGC shoots.",
+      ],
+    },
   ],
 
   es: [
@@ -176,7 +197,7 @@ const TEMPLATE_SECTIONS = {
       items: [
         "Escríbeme un email de pitch profesional.",
         "Convierte este pitch básico en uno profesional.",
-        "Dame 5 plantillas de DM para marcas.",
+        "Dame 5 plantillas de DM para contactar marcas.",
       ],
     },
     {
@@ -195,8 +216,29 @@ const TEMPLATE_SECTIONS = {
         "¿Qué contenido debo publicar para verme premium?",
       ],
     },
+    {
+      title: "Media Kit",
+      items: [
+        "Créame una plantilla completa de media kit.",
+        "Escribe una biografía profesional para mi media kit.",
+        "Genera una sección de casos de estudio.",
+        "Ayúdame a diseñar un portafolio limpio para marcas.",
+      ],
+    },
+    {
+      title: "Legal & Contratos",
+      items: [
+        "Crea un contrato UGC con derechos de uso.",
+        "Escribe un acuerdo de colaboración patrocinada.",
+        "Crea una política de revisiones profesional.",
+        "Escribe una plantilla de factura para creadores.",
+        "Crea un acuerdo de licencias y derechos de contenido.",
+        "Escribe un formulario de autorización de talento.",
+      ],
+    },
   ],
 };
+
 
 export default function CreatorAIManager({ email }: { email: string }) {
   const [input, setInput] = useState("");
