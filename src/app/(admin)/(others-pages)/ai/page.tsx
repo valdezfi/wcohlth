@@ -105,10 +105,12 @@ export default function AiPage() {
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-white">
         AI Marketing Manager
       </h1>
-
+  <p className="text-xs text-gray-600 dark:text-gray-400">
+            Smart help for pricing, pitching, strategy & content.
+          </p>
       {trialUsed && (
         <div className="mb-6 max-w-xl mx-auto rounded-md bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 text-center font-semibold">
-          You are currently on your free 1-hour trial.
+          You are currently on your free 2 day trial.
         </div>
       )}
 
