@@ -32,42 +32,117 @@ interface ApiHistoryItem {
 }
 
 /* -------------------------------------
-   TEMPLATE SECTIONS
+   UI TEXT DICTIONARY
 -------------------------------------- */
-const TEMPLATE_SECTIONS = [
-  {
-    title: "Pricing & Money",
-    items: [
-      "Help me set my UGC rates for video, raw footage & usage rights.",
-      "Audit my rates and tell me what to increase.",
-      "Create a simple UGC rate card I can send to brands.",
-    ],
+const T = {
+  en: {
+    managerTitle: "AI Creator Manager",
+    managerDesc: "Smart help for pricing, pitching, strategy & content.",
+    language: "Language",
+    templates: "One-click templates",
+    saved: "Your past tasks are saved.",
+    inputTitle: "What do you need help with?",
+    inputDesc: "Describe the task like you are talking to a manager.",
+    inputPlaceholder: "Example: Help me write a professional pitch...",
+    sendTip: "Press Ctrl+Enter / Cmd+Enter to send.",
+    generating: "Generating...",
+    generate: "Generate",
+    empty: "No tasks yet — use a template or type your first task.",
+    request: "Request",
   },
-  {
-    title: "Pitching & Outreach",
-    items: [
-      "Write me a pitch email to a skincare brand.",
-      "Turn this rough pitch into a professional email.",
-      "Give me 5 Instagram DM templates to pitch brands.",
-    ],
+  es: {
+    managerTitle: "AI Manager de Creadores",
+    managerDesc:
+      "Asistencia inteligente para precios, pitching, estrategia y contenido.",
+    language: "Idioma",
+    templates: "Plantillas rápidas",
+    saved: "Tus tareas anteriores se guardan automáticamente.",
+    inputTitle: "¿Con qué necesitas ayuda?",
+    inputDesc:
+      "Describe la tarea como si estuvieras hablando con tu representante.",
+    inputPlaceholder: "Ejemplo: Ayúdame a escribir un pitch profesional...",
+    sendTip: "Presiona Ctrl+Enter / Cmd+Enter para enviar.",
+    generating: "Generando...",
+    generate: "Generar",
+    empty: "Aún no hay tareas — usa una plantilla o escribe tu primera solicitud.",
+    request: "Consulta",
   },
-  {
-    title: "Strategy & Growth",
-    items: [
-      "Give me a 30-day plan to grow & land brand deals.",
-      "Audit my profile and tell me what to fix.",
-      "What are the best platforms for my niche?",
-    ],
-  },
-  {
-    title: "Content Ideas",
-    items: [
-      "Give me 10 content ideas brands would love.",
-      "Help me build a weekly content schedule.",
-      "What content should I post to look premium?",
-    ],
-  },
-];
+};
+
+/* -------------------------------------
+   TEMPLATE SECTIONS (BILINGUAL)
+-------------------------------------- */
+const TEMPLATE_SECTIONS = {
+  en: [
+    {
+      title: "Pricing & Money",
+      items: [
+        "Help me set my UGC rates for video, raw footage & usage rights.",
+        "Audit my rates and tell me what to increase.",
+        "Create a simple UGC rate card I can send to brands.",
+      ],
+    },
+    {
+      title: "Pitching & Outreach",
+      items: [
+        "Write me a pitch email to a skincare brand.",
+        "Turn this rough pitch into a professional email.",
+        "Give me 5 Instagram DM templates to pitch brands.",
+      ],
+    },
+    {
+      title: "Strategy & Growth",
+      items: [
+        "Give me a 30-day plan to grow & land brand deals.",
+        "Audit my profile and tell me what to fix.",
+        "What are the best platforms for my niche?",
+      ],
+    },
+    {
+      title: "Content Ideas",
+      items: [
+        "Give me 10 content ideas brands would love.",
+        "Help me build a weekly content schedule.",
+        "What content should I post to look premium?",
+      ],
+    },
+  ],
+
+  es: [
+    {
+      title: "Precios y Dinero",
+      items: [
+        "Ayúdame a definir mis tarifas UGC para video, material crudo y derechos de uso.",
+        "Audita mis tarifas y dime qué debería aumentar.",
+        "Crea una tarjeta de tarifas UGC simple para enviar a marcas.",
+      ],
+    },
+    {
+      title: "Pitching y Alcance",
+      items: [
+        "Escríbeme un correo de pitch para una marca de skincare.",
+        "Convierte este pitch básico en un mensaje profesional.",
+        "Dame 5 plantillas de DM para contactar marcas en Instagram.",
+      ],
+    },
+    {
+      title: "Estrategia y Crecimiento",
+      items: [
+        "Dame un plan de 30 días para crecer y conseguir colaboraciones.",
+        "Audita mi perfil y dime qué debo mejorar.",
+        "¿Cuáles son las mejores plataformas para mi nicho?",
+      ],
+    },
+    {
+      title: "Ideas de Contenido",
+      items: [
+        "Dame 10 ideas de contenido que gusten a las marcas.",
+        "Ayúdame a crear un calendario semanal de contenido.",
+        "¿Qué contenido debo publicar para verme más premium?",
+      ],
+    },
+  ],
+};
 
 export default function CreatorAIManager({ email }: { email: string }) {
   const [input, setInput] = useState("");
@@ -75,45 +150,47 @@ export default function CreatorAIManager({ email }: { email: string }) {
   const [loading, setLoading] = useState(false);
   const [lang, setLang] = useState<Lang>("en");
 
+  const t = T[lang];
+  const templates = TEMPLATE_SECTIONS[lang];
+
   /* -------------------------------------
-      LOAD HISTORY FROM BACKEND
+      LOAD HISTORY
   -------------------------------------- */
   useEffect(() => {
-    if (!email) return;
+    const load = async () => {
+      if (!email) return;
 
-    const loadHistory = async () => {
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/api/ai/creatormanager/history?email=${encodeURIComponent(
-            email
-          )}`
+          `https://app.grandeapp.com/g/api/ai/creatormanager/history?email=${email}`
         );
-
         const data = await res.json();
 
         if (!Array.isArray(data.history)) return;
 
         const cleaned: Task[] = data.history
-          .map((item: ApiHistoryItem): Task => ({
-            id: String(item.id ?? crypto.randomUUID()),
-            userText: item.userText,
-            aiResponse: item.aiResponse,
-            createdAt: item.createdAt ?? new Date().toISOString(),
-            language: item.language ?? "en",
-          }))
+          .map(
+            (i: ApiHistoryItem): Task => ({
+              id: String(i.id ?? crypto.randomUUID()),
+              userText: i.userText,
+              aiResponse: i.aiResponse,
+              createdAt: i.createdAt ?? new Date().toISOString(),
+              language: i.language ?? "en",
+            })
+          )
           .reverse();
 
         setTasks(cleaned);
-      } catch (error) {
-        console.error("Failed loading history:", error);
+      } catch (e) {
+        console.error("History load error:", e);
       }
     };
 
-    loadHistory();
+    load();
   }, [email]);
 
   /* -------------------------------------
-      CALL AI MANAGER API
+      AI CALL
   -------------------------------------- */
   const fetchAI = async (text: string): Promise<string> => {
     setLoading(true);
@@ -129,50 +206,46 @@ export default function CreatorAIManager({ email }: { email: string }) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            message: finalMessage,
-            language: lang,
-          }),
+          body: JSON.stringify({ email, message: finalMessage, language: lang }),
         }
       );
 
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || "AI error");
-
       return data.reply;
     } catch {
       return lang === "es"
-        ? "❌ Hubo un problema. Intenta de nuevo más tarde."
-        : "❌ Something went wrong. Please try again.";
+        ? "❌ Hubo un problema. Intenta nuevamente."
+        : "❌ Something went wrong. Try again.";
     } finally {
       setLoading(false);
     }
   };
 
   /* -------------------------------------
-      SAVE TASK TO DATABASE
+      SAVE TASK
   -------------------------------------- */
-  const saveToHistory = async (task: Task) => {
+  const saveHistory = async (task: Task) => {
     try {
-      await fetch("https://app.grandeapp.com/g/api/ai/creatormanager/history", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          userText: task.userText,
-          aiResponse: task.aiResponse,
-          language: task.language,
-        }),
-      });
-    } catch (error) {
-      console.error("Failed saving task:", error);
+      await fetch(
+        "https://app.grandeapp.com/g/api/ai/creatormanager/history",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            userText: task.userText,
+            aiResponse: task.aiResponse,
+            language: task.language,
+          }),
+        }
+      );
+    } catch (e) {
+      console.error("Save error:", e);
     }
   };
 
   /* -------------------------------------
-      MAIN SUBMIT HANDLER
+      SUBMIT
   -------------------------------------- */
   const handleSubmit = async (override?: string) => {
     if (loading) return;
@@ -182,18 +255,18 @@ export default function CreatorAIManager({ email }: { email: string }) {
 
     setInput("");
 
-    const aiText = await fetchAI(userText);
+    const ai = await fetchAI(userText);
 
-    const newTask: Task = {
+    const task: Task = {
       id: crypto.randomUUID(),
       userText,
-      aiResponse: aiText,
+      aiResponse: ai,
       createdAt: new Date().toISOString(),
       language: lang,
     };
 
-    setTasks((prev) => [newTask, ...prev]);
-    saveToHistory(newTask);
+    setTasks((prev) => [task, ...prev]);
+    saveHistory(task);
   };
 
   /* -------------------------------------
@@ -203,54 +276,50 @@ export default function CreatorAIManager({ email }: { email: string }) {
     <div className="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-6">
 
       {/* SIDEBAR */}
-      <aside className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 p-4 flex flex-col gap-4">
+      <aside className="border rounded-xl bg-white dark:bg-gray-900 p-4 flex flex-col gap-4">
 
+        {/* HEADER */}
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-5 h-5 text-blue-600" />
-            <h2 className="font-semibold text-sm">AI Creator Manager</h2>
+            <h2 className="font-semibold text-sm">{t.managerTitle}</h2>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            Smart help for pricing, pitching, strategy & content.
-          </p>
+          <p className="text-xs text-gray-600">{t.managerDesc}</p>
         </div>
 
-        {/* Language toggle */}
+        {/* LANGUAGE TOGGLE */}
         <div>
           <p className="text-xs font-medium mb-1 flex items-center gap-1">
-            <Globe2 className="w-3 h-3" /> Language / Idioma
+            <Globe2 className="w-3 h-3" /> {t.language}
           </p>
 
-          <div className="inline-flex rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
+          <div className="inline-flex rounded-full border overflow-hidden text-xs">
             <button
               onClick={() => setLang("en")}
-              className={`px-3 py-1 ${
-                lang === "en" ? "bg-blue-600 text-white" : ""
-              }`}
+              className={`px-3 py-1 ${lang === "en" ? "bg-blue-600 text-white" : ""}`}
             >
               EN
             </button>
             <button
               onClick={() => setLang("es")}
-              className={`px-3 py-1 ${
-                lang === "es" ? "bg-blue-600 text-white" : ""
-              }`}
+              className={`px-3 py-1 ${lang === "es" ? "bg-blue-600 text-white" : ""}`}
             >
               ES
             </button>
           </div>
         </div>
 
-        {/* Templates */}
+        {/* TEMPLATES */}
         <div className="flex items-center gap-2 text-xs font-medium mt-1">
           <LayoutTemplate className="w-4 h-4 text-blue-500" />
-          One-click templates
+          {t.templates}
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-          {TEMPLATE_SECTIONS.map((section) => (
+          {templates.map((section) => (
             <div key={section.title}>
               <p className="text-xs font-semibold mb-1">{section.title}</p>
+
               <div className="flex flex-col gap-1">
                 {section.items.map((item) => (
                   <button
@@ -266,28 +335,26 @@ export default function CreatorAIManager({ email }: { email: string }) {
           ))}
         </div>
 
-        <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+        <div className="text-[11px] text-gray-500 flex items-center gap-1">
           <HistoryIcon className="w-3 h-3" />
-          Your past tasks are saved.
+          {t.saved}
         </div>
       </aside>
 
-      {/* MAIN PANEL */}
+      {/* MAIN SECTION */}
       <main className="flex flex-col gap-4">
 
-        {/* INPUT */}
-        <section className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm">
-          <h1 className="text-lg font-semibold mb-1">What do you need help with?</h1>
+        {/* INPUT CARD */}
+        <section className="border rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <h1 className="text-lg font-semibold mb-1">{t.inputTitle}</h1>
+
+          <p className="text-xs text-gray-600 mb-3">{t.inputDesc}</p>
 
           <textarea
             rows={3}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              lang === "es"
-                ? "Ejemplo: Ayúdame a escribir un pitch profesional..."
-                : "Example: Help me write a professional pitch..."
-            }
+            placeholder={t.inputPlaceholder}
             className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:text-white"
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -298,17 +365,15 @@ export default function CreatorAIManager({ email }: { email: string }) {
           />
 
           <div className="mt-3 flex justify-between items-center">
-            <p className="text-[11px] text-gray-500">
-              Press <strong>Ctrl+Enter</strong> / <strong>Cmd+Enter</strong> to send.
-            </p>
+            <p className="text-[11px] text-gray-500">{t.sendTip}</p>
 
             <button
               onClick={() => handleSubmit()}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
-              {loading ? (lang === "es" ? "Generando..." : "Generating...") : "Generate"}
+              {loading ? t.generating : t.generate}
             </button>
           </div>
         </section>
@@ -319,13 +384,13 @@ export default function CreatorAIManager({ email }: { email: string }) {
           {/* EMPTY STATE */}
           {tasks.length === 0 && !loading && (
             <div className="border border-dashed rounded-xl p-6 text-center text-sm text-gray-500">
-              No tasks yet — use a template or type your first task.
+              {t.empty}
             </div>
           )}
 
           {/* LOADING SHIMMER */}
           {loading && (
-            <div className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-800 animate-pulse">
+            <div className="border rounded-xl p-4 bg-gray-50 animate-pulse">
               <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
               <div className="h-3 bg-gray-300 rounded w-full mb-1"></div>
               <div className="h-3 bg-gray-300 rounded w-5/6"></div>
@@ -339,7 +404,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
               className="border rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm"
             >
               <div className="text-xs text-gray-500 flex justify-between mb-2">
-                <span>{task.language === "es" ? "Consulta" : "Request"}</span>
+                <span>{t.request}</span>
                 <span>{new Date(task.createdAt).toLocaleString()}</span>
               </div>
 
@@ -347,7 +412,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
                 {task.userText}
               </h2>
 
-              <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div className="prose prose-sm dark:prose-invert">
                 <ReactMarkdown>{task.aiResponse}</ReactMarkdown>
               </div>
             </article>
