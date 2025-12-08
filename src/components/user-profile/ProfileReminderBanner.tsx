@@ -33,7 +33,7 @@ export default function ProfileReminderBanner() {
           bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-200
           px-4 py-3 text-sm font-medium 
           relative w-full
-          md:pl-[260px]   /* sidebar offset fix */
+          md:pl-[290px]   /* sidebar offset fix */
         "
       >
         {/* Top Row */}
