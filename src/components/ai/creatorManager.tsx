@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import {
   Sparkles,
-  Send,
   Globe2,
   LayoutTemplate,
   History as HistoryIcon,
@@ -29,10 +28,7 @@ type HistoryItemFromApi = {
 };
 
 // Sidebar templates
-const TEMPLATE_SECTIONS: {
-  title: string;
-  items: string[];
-}[] = [
+const TEMPLATE_SECTIONS = [
   {
     title: "Pricing & Money",
     items: [
@@ -74,18 +70,19 @@ export default function CampaignAIChat({ email }: { email: string }) {
   const [lang, setLang] = useState<Lang>("en");
 
   /* ----------------------------------------------------
-   *  Load history from backend (per creator)
-   *  GET https://app.grandeapp.com/g/api/ai/creatormanager/history?email=...
+   * Load history
    * -------------------------------------------------- */
   useEffect(() => {
     const loadHistory = async () => {
       if (!email) return;
+
       try {
         const res = await fetch(
           `https://app.grandeapp.com/g/api/ai/creatormanager/history?email=${encodeURIComponent(
             email
           )}`
         );
+
         if (!res.ok) return;
 
         const data = await res.json();
@@ -99,10 +96,9 @@ export default function CampaignAIChat({ email }: { email: string }) {
           language: item.language ?? "en",
         }));
 
-        // Newest first
         setTasks(loaded.reverse());
       } catch (err) {
-        console.error("Error loading AI history:", err);
+        console.error("History error:", err);
       }
     };
 
@@ -110,44 +106,37 @@ export default function CampaignAIChat({ email }: { email: string }) {
   }, [email]);
 
   /* ----------------------------------------------------
-   *  Call AI manager
-   *  POST https://app.grandeapp.com/g/api/ai/creatormanager
+   * AI Request (catch removed)
    * -------------------------------------------------- */
   const fetchAI = async (text: string, language: Lang): Promise<string> => {
     setLoading(true);
-    try {
-      const finalMessage =
-        language === "es"
-          ? `Responde en español de forma clara y profesional. ${text}`
-          : text;
 
-      const res = await fetch(
-        "https://app.grandeapp.com/g/api/ai/creatormanager",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            message: finalMessage,
-            language, // optional, if your backend wants it
-          }),
-        }
-      );
+    const finalMessage =
+      language === "es"
+        ? `Responde en español de forma clara y profesional. ${text}`
+        : text;
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "AI error");
-      return data.reply as string;
-    } catch (err: any) {
-      console.error("AI manager error:", err);
-      return "❌ Hubo un problema contactando a tu AI Manager. Intenta de nuevo en unos segundos.";
-    } finally {
-      setLoading(false);
-    }
+    const res = await fetch(
+      "https://app.grandeapp.com/g/api/ai/creatormanager",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          message: finalMessage,
+          language,
+        }),
+      }
+    );
+
+    const data = await res.json();
+    setLoading(false);
+
+    return data.reply;
   };
 
   /* ----------------------------------------------------
-   *  Save task to history (DB)
-   *  POST https://app.grandeapp.com/g/api/ai/creatormanager/history
+   * Save History
    * -------------------------------------------------- */
   const saveTaskToHistory = async (task: Task, language: Lang) => {
     try {
@@ -165,12 +154,12 @@ export default function CampaignAIChat({ email }: { email: string }) {
         }
       );
     } catch (err) {
-      console.error("Error saving AI history:", err);
+      console.error("Save history error:", err);
     }
   };
 
   /* ----------------------------------------------------
-   *  Main submit (from textarea OR one-click template)
+   * Submit request
    * -------------------------------------------------- */
   const handleSubmit = async (overrideText?: string) => {
     if (loading) return;
@@ -194,12 +183,12 @@ export default function CampaignAIChat({ email }: { email: string }) {
   };
 
   /* ----------------------------------------------------
-   *  UI
+   * UI
    * -------------------------------------------------- */
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-[260px,minmax(0,1fr)] gap-6">
+    <div className="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-6">
       {/* SIDEBAR */}
-      <aside className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 p-4 flex flex-col gap-4">
+      <aside className="border rounded-xl bg-white dark:bg-gray-900 p-4 flex flex-col gap-4">
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -207,23 +196,21 @@ export default function CampaignAIChat({ email }: { email: string }) {
             <h2 className="font-semibold text-sm">AI Creator Manager</h2>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Get help with pricing, pitching, strategy & content — in English or
-            Spanish.
+            Pricing, pitching, strategy & content — English or Spanish.
           </p>
         </div>
 
         {/* Language toggle */}
         <div>
           <p className="text-xs font-medium mb-1 flex items-center gap-1">
-            <Globe2 className="w-3 h-3" /> Language / Idioma
+            <Globe2 className="w-3 h-3" /> Language
           </p>
-          <div className="inline-flex rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
+
+          <div className="inline-flex rounded-full border overflow-hidden text-xs">
             <button
               onClick={() => setLang("en")}
               className={`px-3 py-1 ${
-                lang === "en"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300"
+                lang === "en" ? "bg-blue-600 text-white" : ""
               }`}
             >
               EN
@@ -231,9 +218,7 @@ export default function CampaignAIChat({ email }: { email: string }) {
             <button
               onClick={() => setLang("es")}
               className={`px-3 py-1 ${
-                lang === "es"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300"
+                lang === "es" ? "bg-blue-600 text-white" : ""
               }`}
             >
               ES
@@ -250,123 +235,65 @@ export default function CampaignAIChat({ email }: { email: string }) {
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
           {TEMPLATE_SECTIONS.map((section) => (
             <div key={section.title}>
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                {section.title}
-              </p>
-              <div className="flex flex-col gap-1">
-                {section.items.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => handleSubmit(item)}
-                    className="text-xs text-left px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs font-semibold mb-1">{section.title}</p>
+              {section.items.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => handleSubmit(item)}
+                  className="text-xs text-left px-2 py-2 rounded-lg border bg-gray-50 hover:border-blue-500"
+                >
+                  {item}
+                </button>
+              ))}
             </div>
           ))}
         </div>
 
-        {/* History hint */}
-        <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+        <div className="mt-1 text-[11px] text-gray-500 flex items-center gap-1">
           <HistoryIcon className="w-3 h-3" />
-          Your last answers are saved and loaded automatically.
+          Your last answers are saved automatically.
         </div>
       </aside>
 
       {/* MAIN PANEL */}
       <main className="flex flex-col gap-4">
-        {/* Input card */}
-        <section className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm">
-          <h1 className="text-lg font-semibold mb-1">
-            What do you want help with right now?
-          </h1>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-            Describe the task like you would talk to your manager. For example:
-            “Help me write a pitch to a skincare brand offering UGC” or “Fix my
-            rate card so I charge more professionally.”
-          </p>
+        {/* Input */}
+        <section className="border rounded-xl p-4 bg-white dark:bg-gray-900">
+          <h1 className="text-lg font-semibold mb-1">What do you need help with?</h1>
 
           <textarea
             rows={3}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              lang === "es"
-                ? "Ejemplo: Ayúdame a escribir un mensaje profesional para una marca de maquillaje..."
-                : "Example: Help me write a professional pitch for a beauty brand..."
-            }
-            className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
+            placeholder={lang === "es" ? "Escribe tu pregunta aquí..." : "Type your request..."}
+            className="w-full p-3 border rounded-lg bg-gray-50"
           />
 
-          <div className="mt-3 flex items-center justify-between">
-            <p className="text-[11px] text-gray-500 dark:text-gray-400">
-              Tip: Press <span className="font-semibold">Ctrl+Enter</span> /{" "}
-              <span className="font-semibold">Cmd+Enter</span> to send.
-            </p>
+          <div className="mt-3 flex justify-between">
             <button
               onClick={() => handleSubmit()}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
-              <Send className="w-4 h-4" />
-              {loading
-                ? lang === "es"
-                  ? "Pensando..."
-                  : "Thinking..."
-                : lang === "es"
-                ? "Generar"
-                : "Generate"}
+              {loading ? "Thinking..." : "Generate"}
             </button>
           </div>
         </section>
 
-        {/* Tasks / results */}
-        <section className="flex-1 space-y-4 overflow-y-auto">
-          {tasks.length === 0 && !loading && (
-            <div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6 text-center text-sm text-gray-500 dark:text-gray-400">
-              No tasks yet. Use a template on the left or describe what you need
-              — pricing help, pitch writing, strategy, content ideas, or
-              negotiation.
-            </div>
-          )}
-
+        {/* Results */}
+        <section className="space-y-4">
           {tasks.map((task) => (
-            <article
+            <div
               key={task.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm"
+              className="border rounded-xl p-4 bg-white dark:bg-gray-900"
             >
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex justify-between">
-                <span>
-                  {task.language === "es" ? "Consulta" : "Request"}
-                </span>
-                {task.createdAt && (
-                  <span>
-                    {new Date(task.createdAt).toLocaleString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                )}
-              </div>
-
-              <h2 className="font-semibold text-sm mb-2 text-blue-700 dark:text-blue-300">
+              <h2 className="font-semibold text-sm mb-2 text-blue-700">
                 {task.userText}
               </h2>
-
-              <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div className="prose prose-sm dark:prose-invert">
                 <ReactMarkdown>{task.aiResponse}</ReactMarkdown>
               </div>
-            </article>
+            </div>
           ))}
         </section>
       </main>
