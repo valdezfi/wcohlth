@@ -32,7 +32,55 @@ interface ApiHistoryItem {
 }
 
 /* -------------------------------------
-   UI TEXT DICTIONARY
+   COPY / EXPORT / IMPROVE HELPERS
+-------------------------------------- */
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Copied!");
+  } catch {
+    alert("Copy failed.");
+  }
+};
+
+const exportTextFile = (filename: string, content: string) => {
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
+
+const improveAnswer = async (
+  task: Task,
+  lang: Lang,
+  fetchAI: (prompt: string) => Promise<string>,
+  pushTask: (t: Task) => void
+) => {
+  const prompt =
+    lang === "es"
+      ? `Mejora esta respuesta. Hazla más clara y profesional:\n\n${task.aiResponse}`
+      : `Improve this answer. Make it more clear and professional:\n\n${task.aiResponse}`;
+
+  const improved = await fetchAI(prompt);
+
+  const newTask: Task = {
+    id: crypto.randomUUID(),
+    userText: lang === "es" ? "Mejorar respuesta" : "Improve answer",
+    aiResponse: improved,
+    createdAt: new Date().toISOString(),
+    language: lang,
+  };
+
+  pushTask(newTask);
+};
+
+/* -------------------------------------
+   TEXT DICTIONARY
 -------------------------------------- */
 const T = {
   en: {
@@ -47,8 +95,11 @@ const T = {
     sendTip: "Press Ctrl+Enter / Cmd+Enter to send.",
     generating: "Generating...",
     generate: "Generate",
-    empty: "No tasks yet — use a template or type your first task.",
+    empty: "No tasks yet — use a template or type your first request.",
     request: "Request",
+    copy: "Copy",
+    export: "Export",
+    improve: "Improve",
   },
   es: {
     managerTitle: "AI Manager de Creadores",
@@ -66,6 +117,9 @@ const T = {
     generate: "Generar",
     empty: "Aún no hay tareas — usa una plantilla o escribe tu primera solicitud.",
     request: "Consulta",
+    copy: "Copiar",
+    export: "Exportar",
+    improve: "Mejorar",
   },
 };
 
@@ -112,33 +166,33 @@ const TEMPLATE_SECTIONS = {
     {
       title: "Precios y Dinero",
       items: [
-        "Ayúdame a definir mis tarifas UGC para video, material crudo y derechos de uso.",
-        "Audita mis tarifas y dime qué debería aumentar.",
-        "Crea una tarjeta de tarifas UGC simple para enviar a marcas.",
+        "Ayúdame a definir mis tarifas UGC.",
+        "Audita mis tarifas y dime qué aumentar.",
+        "Crea una tarjeta de tarifas profesional.",
       ],
     },
     {
       title: "Pitching y Alcance",
       items: [
-        "Escríbeme un correo de pitch para una marca de skincare.",
-        "Convierte este pitch básico en un mensaje profesional.",
-        "Dame 5 plantillas de DM para contactar marcas en Instagram.",
+        "Escríbeme un email de pitch profesional.",
+        "Convierte este pitch básico en uno profesional.",
+        "Dame 5 plantillas de DM para marcas.",
       ],
     },
     {
       title: "Estrategia y Crecimiento",
       items: [
-        "Dame un plan de 30 días para crecer y conseguir colaboraciones.",
-        "Audita mi perfil y dime qué debo mejorar.",
+        "Dame un plan de 30 días para crecer.",
+        "Audita mi perfil y dime qué mejorar.",
         "¿Cuáles son las mejores plataformas para mi nicho?",
       ],
     },
     {
       title: "Ideas de Contenido",
       items: [
-        "Dame 10 ideas de contenido que gusten a las marcas.",
-        "Ayúdame a crear un calendario semanal de contenido.",
-        "¿Qué contenido debo publicar para verme más premium?",
+        "Dame 10 ideas de contenido que gusten a marcas.",
+        "Ayúdame a crear un calendario semanal.",
+        "¿Qué contenido debo publicar para verme premium?",
       ],
     },
   ],
@@ -152,6 +206,14 @@ export default function CreatorAIManager({ email }: { email: string }) {
 
   const t = T[lang];
   const templates = TEMPLATE_SECTIONS[lang];
+
+  /* -------------------------------------
+      PUSH NEW TASK
+  -------------------------------------- */
+  const pushTask = (task: Task) => {
+    setTasks((prev) => [task, ...prev]);
+    saveHistory(task);
+  };
 
   /* -------------------------------------
       LOAD HISTORY
@@ -169,15 +231,13 @@ export default function CreatorAIManager({ email }: { email: string }) {
         if (!Array.isArray(data.history)) return;
 
         const cleaned: Task[] = data.history
-          .map(
-            (i: ApiHistoryItem): Task => ({
-              id: String(i.id ?? crypto.randomUUID()),
-              userText: i.userText,
-              aiResponse: i.aiResponse,
-              createdAt: i.createdAt ?? new Date().toISOString(),
-              language: i.language ?? "en",
-            })
-          )
+          .map((i: ApiHistoryItem): Task => ({
+            id: String(i.id ?? crypto.randomUUID()),
+            userText: i.userText,
+            aiResponse: i.aiResponse,
+            createdAt: i.createdAt ?? new Date().toISOString(),
+            language: i.language ?? "en",
+          }))
           .reverse();
 
         setTasks(cleaned);
@@ -198,7 +258,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
     try {
       const finalMessage =
         lang === "es"
-          ? `Responde en español de forma clara y profesional: ${text}`
+          ? `Responde en español de forma clara y profesional:\n${text}`
           : text;
 
       const res = await fetch(
@@ -215,7 +275,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
     } catch {
       return lang === "es"
         ? "❌ Hubo un problema. Intenta nuevamente."
-        : "❌ Something went wrong. Try again.";
+        : "❌ Something went wrong.";
     } finally {
       setLoading(false);
     }
@@ -257,16 +317,13 @@ export default function CreatorAIManager({ email }: { email: string }) {
 
     const ai = await fetchAI(userText);
 
-    const task: Task = {
+    pushTask({
       id: crypto.randomUUID(),
       userText,
       aiResponse: ai,
       createdAt: new Date().toISOString(),
       language: lang,
-    };
-
-    setTasks((prev) => [task, ...prev]);
-    saveHistory(task);
+    });
   };
 
   /* -------------------------------------
@@ -287,7 +344,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
           <p className="text-xs text-gray-600">{t.managerDesc}</p>
         </div>
 
-        {/* LANGUAGE TOGGLE */}
+        {/* LANGUAGE */}
         <div>
           <p className="text-xs font-medium mb-1 flex items-center gap-1">
             <Globe2 className="w-3 h-3" /> {t.language}
@@ -296,13 +353,17 @@ export default function CreatorAIManager({ email }: { email: string }) {
           <div className="inline-flex rounded-full border overflow-hidden text-xs">
             <button
               onClick={() => setLang("en")}
-              className={`px-3 py-1 ${lang === "en" ? "bg-blue-600 text-white" : ""}`}
+              className={`px-3 py-1 ${
+                lang === "en" ? "bg-blue-600 text-white" : ""
+              }`}
             >
               EN
             </button>
             <button
               onClick={() => setLang("es")}
-              className={`px-3 py-1 ${lang === "es" ? "bg-blue-600 text-white" : ""}`}
+              className={`px-3 py-1 ${
+                lang === "es" ? "bg-blue-600 text-white" : ""
+              }`}
             >
               ES
             </button>
@@ -341,10 +402,10 @@ export default function CreatorAIManager({ email }: { email: string }) {
         </div>
       </aside>
 
-      {/* MAIN SECTION */}
+      {/* MAIN */}
       <main className="flex flex-col gap-4">
 
-        {/* INPUT CARD */}
+        {/* INPUT */}
         <section className="border rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm">
           <h1 className="text-lg font-semibold mb-1">{t.inputTitle}</h1>
 
@@ -370,7 +431,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
             <button
               onClick={() => handleSubmit()}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
               {loading ? t.generating : t.generate}
@@ -381,14 +442,14 @@ export default function CreatorAIManager({ email }: { email: string }) {
         {/* RESULTS */}
         <section className="flex-1 overflow-y-auto space-y-4">
 
-          {/* EMPTY STATE */}
+          {/* EMPTY */}
           {tasks.length === 0 && !loading && (
             <div className="border border-dashed rounded-xl p-6 text-center text-sm text-gray-500">
               {t.empty}
             </div>
           )}
 
-          {/* LOADING SHIMMER */}
+          {/* LOADING */}
           {loading && (
             <div className="border rounded-xl p-4 bg-gray-50 animate-pulse">
               <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
@@ -408,12 +469,41 @@ export default function CreatorAIManager({ email }: { email: string }) {
                 <span>{new Date(task.createdAt).toLocaleString()}</span>
               </div>
 
-              <h2 className="font-semibold text-sm mb-2 text-blue-700">
+              <h2 className="font-semibold text-sm mb-2 text-blue-700 dark:text-blue-300">
                 {task.userText}
               </h2>
 
-              <div className="prose prose-sm dark:prose-invert">
+              <div className="prose prose-sm dark:prose-invert max-w-none mb-3">
                 <ReactMarkdown>{task.aiResponse}</ReactMarkdown>
+              </div>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => copyToClipboard(task.aiResponse)}
+                  className="px-3 py-1 text-xs rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300"
+                >
+                  📋 {t.copy}
+                </button>
+
+                <button
+                  onClick={() =>
+                    exportTextFile(
+                      `AI-Response-${task.id}.txt`,
+                      task.aiResponse
+                    )
+                  }
+                  className="px-3 py-1 text-xs rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300"
+                >
+                  ⬇️ {t.export}
+                </button>
+
+                <button
+                  onClick={() => improveAnswer(task, lang, fetchAI, pushTask)}
+                  className="px-3 py-1 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-500"
+                >
+                  ✨ {t.improve}
+                </button>
               </div>
             </article>
           ))}
