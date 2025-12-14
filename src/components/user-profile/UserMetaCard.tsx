@@ -65,7 +65,7 @@ export default function UserMetaCard() {
   const [agency, setAgency] = useState("");
   const [howBig, sethowBig] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileImageFile] = useState<File | null>(null);
 
   /* ===============================
      FETCH & NORMALIZE
