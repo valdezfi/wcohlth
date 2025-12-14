@@ -17,6 +17,39 @@ import {
   FaEnvelope,
 } from "react-icons/fa";
 
+/* ===============================
+   🔒 HARD SANITIZERS
+================================ */
+
+const INVALID_VALUES = ["not provided", "null", "undefined", "-", ""];
+
+const sanitizeSocial = (value?: string) => {
+  if (!value) return "";
+
+  let v = value.toLowerCase().trim();
+  if (INVALID_VALUES.includes(v)) return "";
+
+  v = v.replace(/https?:\/\//g, "");
+  v = v.replace(/www\./g, "");
+
+  const parts = v.split("/").filter(Boolean);
+  const last = parts[parts.length - 1];
+
+  if (!last || INVALID_VALUES.includes(last)) return "";
+  return last;
+};
+
+const sanitizeWebsite = (value?: string) => {
+  if (!value) return "";
+
+  let v = value.toLowerCase().trim();
+  if (INVALID_VALUES.includes(v)) return "";
+
+  v = v.replace(/https?:\/\//g, "");
+  v = v.replace(/www\./g, "");
+  return v;
+};
+
 export default function UserMetaCard() {
   const { data: session } = useSession();
   const user = session?.user;
@@ -25,8 +58,8 @@ export default function UserMetaCard() {
 
   const [creatorName, setCreatorName] = useState("");
   const [about, setAbout] = useState("");
-  const [tiktokLink, setTiktokLink] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [tiktokLink, setTiktokLink] = useState("");
   const [youtube, setYoutube] = useState("");
   const [website, setWebsite] = useState("");
   const [agency, setAgency] = useState("");
@@ -34,6 +67,9 @@ export default function UserMetaCard() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
+  /* ===============================
+     FETCH & NORMALIZE
+  ================================ */
   useEffect(() => {
     if (!email) return;
 
@@ -47,10 +83,10 @@ export default function UserMetaCard() {
 
         setCreatorName(data.creatorName || "");
         setAbout(data.about || "");
-        setTiktokLink(data.tiktokLink || "");
-        setInstagram(data.instagram || "");
-        setYoutube(data.youtube || "");
-        setWebsite(data.website || "");
+        setInstagram(sanitizeSocial(data.instagram));
+        setTiktokLink(sanitizeSocial(data.tiktokLink));
+        setYoutube(sanitizeSocial(data.youtube));
+        setWebsite(sanitizeWebsite(data.website));
         setAgency(data.agency || "");
         sethowBig(data.howBig || "");
       } catch (err) {
@@ -63,14 +99,10 @@ export default function UserMetaCard() {
         const imgRes = await fetch(
           `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
         );
-        if (!imgRes.ok) {
-          setProfileImage(null);
-          return;
-        }
+        if (!imgRes.ok) return setProfileImage(null);
         const imgData = await imgRes.json();
         setProfileImage(imgData.imageUrl || null);
-      } catch (err) {
-        console.error("Error fetching profile image:", err);
+      } catch {
         setProfileImage(null);
       }
     };
@@ -79,41 +111,37 @@ export default function UserMetaCard() {
     fetchProfileImage();
   }, [email]);
 
+  /* ===============================
+     SAVE (SAFE)
+  ================================ */
   const handleSave = async () => {
     if (!email) return;
 
     try {
       let updatedImageUrl = profileImage;
 
-      // 1. Upload image if selected
       if (profileImageFile) {
-        console.log("Uploading image:", profileImageFile.name);
         const formData = new FormData();
         formData.append("image", profileImageFile);
 
         const imageRes = await fetch(
           `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
-          {
-            method: "POST",
-            body: formData,
-          }
+          { method: "POST", body: formData }
         );
 
         if (!imageRes.ok) throw new Error("Image upload failed");
-
         const imageData = await imageRes.json();
         updatedImageUrl = imageData.imageUrl || null;
         setProfileImage(updatedImageUrl);
       }
 
-      // 2. AUTO-SOCIAL LINKS
       const requestBody = {
         creatorName,
         about,
-        instagram: instagram ? `https://instagram.com/${instagram.replace("@", "")}` : "",
-        tiktokLink: tiktokLink ? `https://tiktok.com/@${tiktokLink.replace("@", "")}` : "",
-        youtube: youtube ? `https://youtube.com/${youtube.replace("@", "")}` : "",
-        website: website ? `https://${website.replace("https://", "").replace("http://", "")}` : "",
+        instagram: instagram ? `https://instagram.com/${instagram}` : "",
+        tiktokLink: tiktokLink ? `https://tiktok.com/@${tiktokLink}` : "",
+        youtube: youtube ? `https://youtube.com/${youtube}` : "",
+        website: website ? `https://${website}` : "",
         agency,
         howBig,
         imageUrl: updatedImageUrl || "",
@@ -128,230 +156,155 @@ export default function UserMetaCard() {
         }
       );
 
-      if (!infoRes.ok) {
-        const errText = await infoRes.text();
-        throw new Error(`Update failed: ${errText}`);
-      }
-
+      if (!infoRes.ok) throw new Error(await infoRes.text());
       closeModal();
     } catch (err) {
       console.error("Save error:", err);
     }
   };
 
+  /* ===============================
+     UI
+  ================================ */
   return (
     <>
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-            <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
-              <img
-                src={profileImage || "/images/user/placeholder.svg"}
-                alt={creatorName || "User"}
-                className="w-full h-full object-cover rounded-full"
-              />
-            </div>
-            <div className="order-3 xl:order-2">
-              <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
-                {creatorName || "Unnamed Creator"} - {howBig}
-              </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center xl:text-left">
-                {about || "No bio provided."}
-              </p>
+      <div className="p-5 border rounded-2xl">
+        <div className="flex items-center gap-6">
+          <div className="w-20 h-20 overflow-hidden rounded-full border">
+            <img
+              src={profileImage || "/images/user/placeholder.svg"}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-              <div className="flex justify-center xl:justify-start gap-5 mt-3 text-gray-500 dark:text-gray-400">
-                {instagram && instagram !== "null" && instagram !== "Not Provided" && (
-                  <a
-                    href={
-                      instagram.startsWith("http")
-                        ? instagram
-                        : `https://instagram.com/${instagram}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    className="hover:text-pink-600 transition"
-                  >
-                    <FaInstagram size={22} />
-                  </a>
-                )}
+          <div>
+            <h4 className="text-lg font-semibold">
+              {creatorName || "Unnamed Creator"} {howBig && `- ${howBig}`}
+            </h4>
+            <p className="text-sm text-gray-500">{about || "No bio provided."}</p>
 
-                {tiktokLink && tiktokLink !== "null" && tiktokLink !== "Not Provided" && (
-                  <a
-                    href={
-                      tiktokLink.startsWith("http")
-                        ? tiktokLink
-                        : `https://tiktok.com/@${tiktokLink}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="TikTok"
-                    className="hover:text-black dark:hover:text-white transition"
-                  >
-                    <FaTiktok size={22} />
-                  </a>
-                )}
-
-                {youtube && youtube !== "null" && youtube !== "Not Provided" && (
-                  <a
-                    href={
-                      youtube.startsWith("http")
-                        ? youtube
-                        : `https://youtube.com/${youtube}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube"
-                    className="hover:text-red-600 transition"
-                  >
-                    <FaYoutube size={22} />
-                  </a>
-                )}
-
-                {website && website !== "null" && website !== "Not Provided" && (
-                  <a
-                    href={
-                      website.startsWith("http")
-                        ? website
-                        : `https://${website}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Website"
-                    className="hover:text-blue-600 transition"
-                  >
-                    <FaGlobe size={22} />
-                  </a>
-                )}
-
-                {user?.email && (
-                  <a
-                    href={`mailto:${user.email}`}
-                    aria-label="Email"
-                    className="hover:text-green-600 transition"
-                  >
-                    <FaEnvelope size={22} />
-                  </a>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
-              <button
-                onClick={openModal}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-              >
-                Edit
-              </button>
+            <div className="flex gap-5 mt-3 text-gray-500">
+              {instagram && (
+                <a href={`https://instagram.com/${instagram}`} target="_blank">
+                  <FaInstagram size={22} />
+                </a>
+              )}
+              {tiktokLink && (
+                <a href={`https://tiktok.com/@${tiktokLink}`} target="_blank">
+                  <FaTiktok size={22} />
+                </a>
+              )}
+              {youtube && (
+                <a href={`https://youtube.com/${youtube}`} target="_blank">
+                  <FaYoutube size={22} />
+                </a>
+              )}
+              {website && (
+                <a href={`https://${website}`} target="_blank">
+                  <FaGlobe size={22} />
+                </a>
+              )}
+              {user?.email && (
+                <a href={`mailto:${user.email}`}>
+                  <FaEnvelope size={22} />
+                </a>
+              )}
             </div>
           </div>
+
+          <button onClick={openModal} className="ml-auto border rounded-full px-4 py-2">
+            Edit
+          </button>
         </div>
       </div>
 
-      {/* Modal */}
-
+      {/* MODAL */}
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-
-          <div className="px-2 pr-14">
-            <h4 className="text-2xl font-semibold mb-2">Edit Creator Information</h4>
-            <p className="text-sm text-gray-500 mb-6">Update your profile details.</p>
-          </div>
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl">
+          <h4 className="text-2xl font-semibold mb-2">Edit Creator Information</h4>
+          <p className="text-sm text-gray-500 mb-6">
+            Tip: Enter usernames only (no full URLs). We automatically format links for you.
+          </p>
 
           <form
-            className="flex flex-col"
             onSubmit={(e) => {
               e.preventDefault();
               handleSave();
             }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-5"
           >
-            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-
-                <div><Label>Creator Name</Label><Input value={creatorName} onChange={(e) => setCreatorName(e.target.value)} /></div>
-
-                <div><Label>Agency</Label><Input value={agency} onChange={(e) => setAgency(e.target.value)} /></div>
-
-                <div><Label>Bio</Label><Input value={about} onChange={(e) => setAbout(e.target.value)} /></div>
-
-                <div>
-                  <Label>Instagram</Label>
-                  <Input
-                    placeholder="username only (example: grandeapp)"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value.replace("@", ""))}
-                  />
-                </div>
-
-                <div>
-                  <Label>TikTok</Label>
-                  <Input
-                    placeholder="username only (example: grandeapp)"
-                    value={tiktokLink}
-                    onChange={(e) => setTiktokLink(e.target.value.replace("@", ""))}
-                  />
-                </div>
-
-                <div>
-                  <Label>YouTube</Label>
-                  <Input
-                    placeholder="username only (example: grandeapp)"
-                    value={youtube}
-                    onChange={(e) => setYoutube(e.target.value.replace("@", ""))}
-                  />
-                </div>
-
-                <div>
-                  <Label>Website</Label>
-                  <Input
-                    placeholder="example: grandeapp.com"
-                    value={website}
-                    onChange={(e) =>
-                      setWebsite(
-                        e.target.value
-                          .replace("https://", "")
-                          .replace("http://", "")
-                        )
-                    }
-                  />
-                </div>
-
-                <div>
-                  <Label>Type Of Creator</Label>
-                  <Input
-                    placeholder="Nano, Micro, Macro, UGC, etc"
-                    value={howBig}
-                    onChange={(e) => sethowBig(e.target.value)}
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="profile-image-upload">Upload New Profile Image</Label>
-                  <label htmlFor="profile-image-upload" className="text-blue-600 underline cursor-pointer">
-                    Tap to select an image
-                  </label>
-                  <input
-                    id="profile-image-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) setProfileImageFile(file);
-                    }}
-                    className="hidden"
-                  />
-
-                  {profileImageFile && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      Selected file: {profileImageFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
+            <div>
+              <Label>Creator Name</Label>
+              <Input value={creatorName} onChange={(e) => setCreatorName(e.target.value)} />
             </div>
 
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" type="submit" variant="primary">
+            <div>
+              <Label>Agency</Label>
+              <Input value={agency} onChange={(e) => setAgency(e.target.value)} />
+            </div>
+
+            <div className="lg:col-span-2">
+              <Label>Bio</Label>
+              <Input value={about} onChange={(e) => setAbout(e.target.value)} />
+            </div>
+
+            <div>
+              <Label>Instagram (username only)</Label>
+              <Input
+                placeholder="grandeapp"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value.replace("@", ""))}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter only your username. We generate the link automatically.
+              </p>
+            </div>
+
+            <div>
+              <Label>TikTok (username only)</Label>
+              <Input
+                placeholder="grandeapp"
+                value={tiktokLink}
+                onChange={(e) => setTiktokLink(e.target.value.replace("@", ""))}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                No @, no https:// — just the username.
+              </p>
+            </div>
+
+            <div>
+              <Label>YouTube (handle or channel)</Label>
+              <Input
+                placeholder="grandeapp"
+                value={youtube}
+                onChange={(e) => setYoutube(e.target.value.replace("@", ""))}
+              />
+            </div>
+
+            <div>
+              <Label>Website (domain only)</Label>
+              <Input
+                placeholder="grandeapp.com"
+                value={website}
+                onChange={(e) =>
+                  setWebsite(
+                    e.target.value.replace("https://", "").replace("http://", "")
+                  )
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Type of Creator</Label>
+              <Input
+                placeholder="Nano, Micro, Macro, UGC"
+                value={howBig}
+                onChange={(e) => sethowBig(e.target.value)}
+              />
+            </div>
+
+            <div className="lg:col-span-2 mt-4 flex justify-end">
+              <Button type="submit" variant="primary">
                 Save Changes
               </Button>
             </div>
