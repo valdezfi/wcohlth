@@ -154,48 +154,52 @@ export default function UserMetaCard() {
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Creator Info
-          </h4>
+     <div>
+  <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+    Creator Info
+  </h4>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            {/* Avatar */}
-            <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border">
-                <img
-                  src={profileImage || "/images/user/placeholder.svg"}
-                  className="w-full h-full object-cover"
-                />
-                <label className="absolute inset-0 cursor-pointer">
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                </label>
-              </div>
+  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
+    {/* Avatar + Name */}
+    <div className="flex items-start gap-4">
+      <div className="relative flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700">
+        <img
+          src={profileImage || "/images/user/placeholder.svg"}
+          className="w-full h-full object-cover"
+          alt="Profile"
+        />
+        <label className="absolute inset-0 cursor-pointer">
+          <input
+            type="file"
+            hidden
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+        </label>
+      </div>
 
-              <div>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {creatorName || "—"}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {howBig || "Creator type"}
-                </p>
-              </div>
-            </div>
+      <div className="pt-1">
+        <p className="text-sm font-medium text-gray-800 dark:text-white/90 leading-tight">
+          {creatorName || "—"}
+        </p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {howBig || "Creator type"}
+        </p>
+      </div>
+    </div>
 
-            <div>
-              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                Bio
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {about || "—"}
-              </p>
-            </div>
-          </div>
+    {/* Bio */}
+    <div className="flex flex-col justify-center">
+      <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+        Bio
+      </p>
+      <p className="text-sm font-medium text-gray-800 dark:text-white/90 leading-relaxed">
+        {about || "—"}
+      </p>
+    </div>
+  </div>
+
+
 
           <div className="flex gap-4 mt-4 text-gray-500 dark:text-gray-400">
             {instagram && <FaInstagram size={18} />}
