@@ -25,36 +25,28 @@ const INVALID_VALUES = ["not provided", "null", "undefined", "-", ""];
 
 const sanitizeSocial = (value?: string) => {
   if (!value) return "";
-
   let v = value.toLowerCase().trim();
   if (INVALID_VALUES.includes(v)) return "";
-
-  v = v.replace(/https?:\/\//g, "");
-  v = v.replace(/www\./g, "");
-
+  v = v.replace(/https?:\/\//g, "").replace(/www\./g, "");
   const parts = v.split("/").filter(Boolean);
-  const last = parts[parts.length - 1];
-
-  if (!last || INVALID_VALUES.includes(last)) return "";
-  return last;
+  return parts[parts.length - 1] || "";
 };
 
 const sanitizeWebsite = (value?: string) => {
   if (!value) return "";
 
-  let v = value.toLowerCase().trim();
+  const v = value.toLowerCase().trim();
   if (INVALID_VALUES.includes(v)) return "";
 
-  v = v.replace(/https?:\/\//g, "");
-  v = v.replace(/www\./g, "");
-  return v;
+  return v.replace(/https?:\/\//g, "").replace(/www\./g, "");
 };
+
 
 export default function UserMetaCard() {
   const { data: session } = useSession();
   const user = session?.user;
-  const { isOpen, openModal, closeModal } = useModal();
   const email = session?.user?.email;
+  const { isOpen, openModal, closeModal } = useModal();
 
   const [creatorName, setCreatorName] = useState("");
   const [about, setAbout] = useState("");
@@ -65,195 +57,236 @@ export default function UserMetaCard() {
   const [agency, setAgency] = useState("");
   const [howBig, sethowBig] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
-
-  // ✅ FIX: allow image file to be set
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
   /* ===============================
-     FETCH & NORMALIZE
+     FETCH DATA
   ================================ */
   useEffect(() => {
     if (!email) return;
 
-    const fetchUserInfo = async () => {
+    (async () => {
+      const res = await fetch(
+        `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(email)}`
+      );
+      const data = await res.json();
+
+      setCreatorName(data.creatorName || "");
+      setAbout(data.about || "");
+      setInstagram(sanitizeSocial(data.instagram));
+      setTiktokLink(sanitizeSocial(data.tiktokLink));
+      setYoutube(sanitizeSocial(data.youtube));
+      setWebsite(sanitizeWebsite(data.website));
+      setAgency(data.agency || "");
+      sethowBig(data.howBig || "");
+    })();
+
+    (async () => {
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(email)}`
-        );
-        const data = await res.json();
-
-        setCreatorName(data.creatorName || "");
-        setAbout(data.about || "");
-        setInstagram(sanitizeSocial(data.instagram));
-        setTiktokLink(sanitizeSocial(data.tiktokLink));
-        setYoutube(sanitizeSocial(data.youtube));
-        setWebsite(sanitizeWebsite(data.website));
-        setAgency(data.agency || "");
-        sethowBig(data.howBig || "");
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    const fetchProfileImage = async () => {
-      try {
-        const imgRes = await fetch(
           `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
         );
-        const imgData = await imgRes.json();
-        setProfileImage(imgData.imageUrl || null);
+        const data = await res.json();
+        setProfileImage(data.imageUrl || null);
       } catch {
         setProfileImage(null);
       }
-    };
-
-    fetchUserInfo();
-    fetchProfileImage();
+    })();
   }, [email]);
 
   /* ===============================
-     IMAGE HANDLER (NEW)
+     IMAGE HANDLER
   ================================ */
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setProfileImageFile(file);
-    setProfileImage(URL.createObjectURL(file)); // preview
+    setProfileImage(URL.createObjectURL(file));
   };
 
   /* ===============================
-     SAVE (SAFE)
+     SAVE
   ================================ */
   const handleSave = async () => {
     if (!email) return;
 
-    try {
-      let updatedImageUrl = profileImage;
+    let imageUrl = profileImage;
 
-      if (profileImageFile) {
-        const formData = new FormData();
-        formData.append("image", profileImageFile);
-
-        const imageRes = await fetch(
-          `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
-          { method: "POST", body: formData }
-        );
-
-        const imageData = await imageRes.json();
-        updatedImageUrl = imageData.imageUrl || updatedImageUrl;
-        setProfileImage(updatedImageUrl);
-      }
-
-      await fetch(
-        `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            creatorName,
-            about,
-            instagram: instagram ? `https://instagram.com/${instagram}` : "",
-            tiktokLink: tiktokLink ? `https://tiktok.com/@${tiktokLink}` : "",
-            youtube: youtube ? `https://youtube.com/${youtube}` : "",
-            website: website ? `https://${website}` : "",
-            agency,
-            howBig,
-            imageUrl: updatedImageUrl || "",
-          }),
-        }
+    if (profileImageFile) {
+      const formData = new FormData();
+      formData.append("image", profileImageFile);
+      const res = await fetch(
+        `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
+        { method: "POST", body: formData }
       );
-
-      closeModal();
-    } catch (err) {
-      console.error("Save error:", err);
+      const data = await res.json();
+      imageUrl = data.imageUrl || imageUrl;
     }
+
+    await fetch(
+      `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creatorName,
+          about,
+          instagram: instagram ? `https://instagram.com/${instagram}` : "",
+          tiktokLink: tiktokLink ? `https://tiktok.com/@${tiktokLink}` : "",
+          youtube: youtube ? `https://youtube.com/${youtube}` : "",
+          website: website ? `https://${website}` : "",
+          agency,
+          howBig,
+          imageUrl,
+        }),
+      }
+    );
+
+    closeModal();
   };
 
   /* ===============================
-     UI
+     UI (MATCHED)
   ================================ */
   return (
-    <>
-      <div className="p-5 border rounded-2xl">
-        <div className="flex items-center gap-6">
-          {/* ✅ SAME UI — now clickable */}
-          <div className="relative w-20 h-20 overflow-hidden rounded-full border">
-            <img
-              src={profileImage || "/images/user/placeholder.svg"}
-              className="w-full h-full object-cover"
-            />
-            <label className="absolute inset-0 cursor-pointer">
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageChange}
-              />
-            </label>
-          </div>
+    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+            Creator Info
+          </h4>
 
-          <div>
-            <h4 className="text-lg font-semibold">
-              {creatorName || "Unnamed Creator"} {howBig && `- ${howBig}`}
-            </h4>
-            <p className="text-sm text-gray-500">{about || "No bio provided."}</p>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
+            {/* Avatar */}
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden border">
+                <img
+                  src={profileImage || "/images/user/placeholder.svg"}
+                  className="w-full h-full object-cover"
+                />
+                <label className="absolute inset-0 cursor-pointer">
+                  <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+                </label>
+              </div>
 
-            <div className="flex gap-5 mt-3 text-gray-500">
-              {instagram && <a href={`https://instagram.com/${instagram}`} target="_blank"><FaInstagram size={22} /></a>}
-              {tiktokLink && <a href={`https://tiktok.com/@${tiktokLink}`} target="_blank"><FaTiktok size={22} /></a>}
-              {youtube && <a href={`https://youtube.com/${youtube}`} target="_blank"><FaYoutube size={22} /></a>}
-              {website && <a href={`https://${website}`} target="_blank"><FaGlobe size={22} /></a>}
-              {user?.email && <a href={`mailto:${user.email}`}><FaEnvelope size={22} /></a>}
+              <div>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {creatorName || "—"}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {howBig || "Creator type"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                Bio
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {about || "—"}
+              </p>
             </div>
           </div>
 
-          <button onClick={openModal} className="ml-auto border rounded-full px-4 py-2">
-            Edit
-          </button>
+          <div className="flex gap-4 mt-4 text-gray-500">
+            {instagram && <FaInstagram size={18} />}
+            {tiktokLink && <FaTiktok size={18} />}
+            {youtube && <FaYoutube size={18} />}
+            {website && <FaGlobe size={18} />}
+            {user?.email && <FaEnvelope size={18} />}
+          </div>
         </div>
+
+        <button
+          onClick={openModal}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:w-auto"
+        >
+          Edit
+        </button>
       </div>
 
-      {/* MODAL — unchanged except image button */}
+      {/* MODAL */}
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl">
-          <h4 className="text-2xl font-semibold mb-6">Edit Creator Information</h4>
+        <div className="relative w-full p-4 overflow-y-auto bg-white rounded-3xl dark:bg-gray-900 lg:p-11">
+          <div className="px-2 pr-14">
+            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
+              Edit Creator Info
+            </h4>
+            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+              Update your public creator profile below.
+            </p>
+          </div>
 
           <form
+            className="flex flex-col"
             onSubmit={(e) => {
               e.preventDefault();
               handleSave();
             }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-5"
           >
-            {/* ✅ Image button + preview */}
-            <div className="lg:col-span-2 flex items-center gap-4">
-              <img
-                src={profileImage || "/images/user/placeholder.svg"}
-                className="w-16 h-16 rounded-full object-cover border"
-              />
-              <label className="cursor-pointer rounded-full border px-4 py-2 text-sm">
-                Upload Image
-                <input type="file" accept="image/*" hidden onChange={handleImageChange} />
-              </label>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-5 px-2 lg:grid-cols-2">
+              <div>
+                <Label>Creator Name</Label>
+                <Input value={creatorName} onChange={(e) => setCreatorName(e.target.value)} />
+              </div>
+
+              <div>
+                <Label>Agency</Label>
+                <Input value={agency} onChange={(e) => setAgency(e.target.value)} />
+              </div>
+
+              <div className="lg:col-span-2">
+                <Label>Bio</Label>
+                <Input value={about} onChange={(e) => setAbout(e.target.value)} />
+              </div>
+
+              <div>
+                <Label>Instagram (username only)</Label>
+                <Input value={instagram} onChange={(e) => setInstagram(e.target.value.replace("@", ""))} />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Username only. No @ or full URL.
+                </p>
+              </div>
+
+              <div>
+                <Label>TikTok (username only)</Label>
+                <Input value={tiktokLink} onChange={(e) => setTiktokLink(e.target.value.replace("@", ""))} />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Username only.
+                </p>
+              </div>
+
+              <div>
+                <Label>YouTube (handle or channel)</Label>
+                <Input value={youtube} onChange={(e) => setYoutube(e.target.value.replace("@", ""))} />
+              </div>
+
+              <div>
+                <Label>Website (domain only)</Label>
+                <Input value={website} onChange={(e) => setWebsite(e.target.value.replace(/https?:\/\//g, ""))} />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Example: grandeapp.com
+                </p>
+              </div>
+
+              <div>
+                <Label>Type of Creator</Label>
+                <Input value={howBig} onChange={(e) => sethowBig(e.target.value)} />
+              </div>
             </div>
 
-            {/* rest of your form — unchanged */}
-            <div><Label>Creator Name</Label><Input value={creatorName} onChange={(e) => setCreatorName(e.target.value)} /></div>
-            <div><Label>Agency</Label><Input value={agency} onChange={(e) => setAgency(e.target.value)} /></div>
-            <div className="lg:col-span-2"><Label>Bio</Label><Input value={about} onChange={(e) => setAbout(e.target.value)} /></div>
-            <div><Label>Instagram</Label><Input value={instagram} onChange={(e) => setInstagram(e.target.value.replace("@", ""))} /></div>
-            <div><Label>TikTok</Label><Input value={tiktokLink} onChange={(e) => setTiktokLink(e.target.value.replace("@", ""))} /></div>
-            <div><Label>YouTube</Label><Input value={youtube} onChange={(e) => setYoutube(e.target.value.replace("@", ""))} /></div>
-            <div><Label>Website</Label><Input value={website} onChange={(e) => setWebsite(e.target.value.replace(/https?:\/\//g, ""))} /></div>
-            <div><Label>Type of Creator</Label><Input value={howBig} onChange={(e) => sethowBig(e.target.value)} /></div>
-
-            <div className="lg:col-span-2 flex justify-end">
-              <Button type="submit" variant="primary">Save Changes</Button>
+            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+              <Button size="sm" variant="outline" onClick={closeModal}>
+                Close
+              </Button>
+              <Button size="sm" type="submit">
+                Save Changes
+              </Button>
             </div>
           </form>
         </div>
       </Modal>
-    </>
+    </div>
   );
 }
