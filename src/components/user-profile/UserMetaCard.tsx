@@ -241,7 +241,7 @@ export default function UserMetaCard() {
                   src={profileImage || "/images/user/placeholder.svg"}
                   className="w-16 h-16 rounded-full object-cover border"
                 />
-                <label className="cursor-pointer rounded-full border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/[0.05]">
+                <label className="cursor-pointer rounded-full border px-4 py-2 text-sm text-amber-50 font-medium hover:bg-gray-50 dark:hover:bg-white/[0.05]">
                   Upload Image
                   <input
                     type="file"
