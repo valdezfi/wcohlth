@@ -27,6 +27,7 @@ const sanitizeSocial = (value?: string) => {
   if (!value) return "";
   let v = value.toLowerCase().trim();
   if (INVALID_VALUES.includes(v)) return "";
+
   v = v.replace(/https?:\/\//g, "").replace(/www\./g, "");
   const parts = v.split("/").filter(Boolean);
   return parts[parts.length - 1] || "";
@@ -40,7 +41,6 @@ const sanitizeWebsite = (value?: string) => {
 
   return v.replace(/https?:\/\//g, "").replace(/www\./g, "");
 };
-
 
 export default function UserMetaCard() {
   const { data: session } = useSession();
@@ -100,8 +100,9 @@ export default function UserMetaCard() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setProfileImageFile(file);
-    setProfileImage(URL.createObjectURL(file));
+    setProfileImage(URL.createObjectURL(file)); // preview
   };
 
   /* ===============================
@@ -115,10 +116,12 @@ export default function UserMetaCard() {
     if (profileImageFile) {
       const formData = new FormData();
       formData.append("image", profileImageFile);
+
       const res = await fetch(
         `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
         { method: "POST", body: formData }
       );
+
       const data = await res.json();
       imageUrl = data.imageUrl || imageUrl;
     }
@@ -146,7 +149,7 @@ export default function UserMetaCard() {
   };
 
   /* ===============================
-     UI (MATCHED)
+     UI
   ================================ */
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -165,7 +168,12 @@ export default function UserMetaCard() {
                   className="w-full h-full object-cover"
                 />
                 <label className="absolute inset-0 cursor-pointer">
-                  <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
                 </label>
               </div>
 
@@ -189,7 +197,7 @@ export default function UserMetaCard() {
             </div>
           </div>
 
-          <div className="flex gap-4 mt-4 text-gray-500">
+          <div className="flex gap-4 mt-4 text-gray-500 dark:text-gray-400">
             {instagram && <FaInstagram size={18} />}
             {tiktokLink && <FaTiktok size={18} />}
             {youtube && <FaYoutube size={18} />}
@@ -198,6 +206,7 @@ export default function UserMetaCard() {
           </div>
         </div>
 
+        {/* ✅ Stand-out Edit button */}
         <button
           onClick={openModal}
           className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:w-auto"
@@ -214,7 +223,7 @@ export default function UserMetaCard() {
               Edit Creator Info
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-              Update your public creator profile below.
+              Enter usernames only. Links are generated automatically.
             </p>
           </div>
 
@@ -226,6 +235,23 @@ export default function UserMetaCard() {
             }}
           >
             <div className="grid grid-cols-1 gap-x-6 gap-y-5 px-2 lg:grid-cols-2">
+              {/* Image upload */}
+              <div className="lg:col-span-2 flex items-center gap-4">
+                <img
+                  src={profileImage || "/images/user/placeholder.svg"}
+                  className="w-16 h-16 rounded-full object-cover border"
+                />
+                <label className="cursor-pointer rounded-full border px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/[0.05]">
+                  Upload Image
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </label>
+              </div>
+
               <div>
                 <Label>Creator Name</Label>
                 <Input value={creatorName} onChange={(e) => setCreatorName(e.target.value)} />
