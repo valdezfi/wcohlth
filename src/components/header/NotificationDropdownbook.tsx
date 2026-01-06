@@ -32,7 +32,7 @@ export default function CampaignNotificationDropdown() {
 
                 // `http://localhost:5000/campaign/getcampaigns?email=${encodeURIComponent(email)}`
 
-        `https://app.grandeapp.com/g/campaign/getcampaigns?email=${encodeURIComponent(email)}`
+        `https://app.cohlth.com/g/campaign/getcampaigns?email=${encodeURIComponent(email)}`
       );
       if (!res.ok) {
         setNotifications([]);

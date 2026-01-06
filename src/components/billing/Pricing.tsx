@@ -92,7 +92,7 @@ export default function Pricing({ email }: PricingProps) {
 
     setLoading(true);
     try {
-      const res = await fetch("https://app.grandeapp.com/g/api/c/create-subscription-session", {
+      const res = await fetch("https://app.cohlth.com/g/api/c/create-subscription-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, priceId: plan.id }),

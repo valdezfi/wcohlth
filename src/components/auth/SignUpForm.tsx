@@ -18,7 +18,7 @@ export default function SignUpForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://app.grandeapp.com/g/creator/signup", {
+      const res = await fetch("https://app.cohlth.com/g/creator/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -43,7 +43,7 @@ export default function SignUpForm() {
 
     setResendLoading(true);
     try {
-      const res = await fetch("https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail", {
+      const res = await fetch("https://app.cohlth.com/g/c/api/auth/resendVerificationEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),

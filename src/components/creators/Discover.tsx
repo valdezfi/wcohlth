@@ -25,7 +25,7 @@ export default function CreatorDiscovery() {
   const fetchCreators = async () => {
     try {
       // const res = await fetch("http://localhost:5000/creators/all");
-      const res = await fetch("https://app.grandeapp.com/g/creators/all");
+      const res = await fetch("https://app.cohlth.com/g/creators/all");
 
 
       

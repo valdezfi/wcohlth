@@ -35,7 +35,7 @@ export default function CreatorGeneralPublicProfileCard() {
       try {
         // const res = await fetch(`http://localhost:5000/creator/getgeneralinfo/${email}`);
 
-        const res = await fetch(`https://app.grandeapp.com/g/creator/getgeneralinfo/${email}`);
+        const res = await fetch(`https://app.cohlth.com/g/creator/getgeneralinfo/${email}`);
 
 
 

@@ -17,7 +17,7 @@ export default function AiPage() {
       if (!email) return;
 
       try {
-        const subRes = await fetch(`https://app.grandeapp.com/g/api/c/subscription?email=${email}`);
+        const subRes = await fetch(`https://app.cohlth.com//g/api/c/subscription?email=${email}`);
         const subData = await subRes.json();
         const isSubscribed = subData.subscription?.status === "active";
 
@@ -26,11 +26,11 @@ export default function AiPage() {
           return;
         }
 
-        const trialRes = await fetch(`https://app.grandeapp.com/g/api/c/ai/trial-status?email=${email}`);
+        const trialRes = await fetch(`https://app.cohlth.com//g/api/c/ai/trial-status?email=${email}`);
         const trialData = await trialRes.json();
 
         if (!trialData.used) {
-          await fetch("https://app.grandeapp.com/g/api/c/ai/trial-used", {
+          await fetch("https://app.cohlth.com//g/api/c/ai/trial-used", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),

@@ -24,7 +24,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
         setLoading(true);
         setError(null);
         const res = await fetch(
-          `https://app.grandeapp.com/g/d/getdeal/${encodeURIComponent(creatorEmail)}`
+          `https://app.cohlth.com/g/d/getdeal/${encodeURIComponent(creatorEmail)}`
         );
         if (!res.ok) throw new Error("Failed to fetch deals");
         const data = await res.json();
@@ -68,7 +68,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
       try {
         setRemovingId(dealToRemove.id);
         const res = await fetch(
-          `https://app.grandeapp.com/g/d/deal/${encodeURIComponent(
+          `https://app.cohlth.com/g/d/deal/${encodeURIComponent(
             creatorEmail
           )}/${dealToRemove.id}`,
           { method: "DELETE" }
@@ -105,7 +105,7 @@ export default function CreatorDealsOnly({ creatorEmail }: { creatorEmail: strin
       setLoading(true);
       setError(null);
       const res = await fetch(
-        `https://app.grandeapp.com/g/d/deal/${encodeURIComponent(creatorEmail)}`,
+        `https://app.cohlth.com/g/d/deal/${encodeURIComponent(creatorEmail)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

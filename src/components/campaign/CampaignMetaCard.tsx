@@ -48,7 +48,7 @@ export default function CampaignMetaCard({ campaignName }: { campaignName: strin
 
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/campaign/getcampaigns?campaignName=${campaignName}`
+          `https://app.cohlth.com/g/campaign/getcampaigns?campaignName=${campaignName}`
         );
 
         if (!res.ok) {
@@ -79,7 +79,7 @@ export default function CampaignMetaCard({ campaignName }: { campaignName: strin
 
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/campaigns/${campaign.id}/creators/status`
+          `https://app.cohlth.com/g/campaigns/${campaign.id}/creators/status`
         );
 
         if (!res.ok) {

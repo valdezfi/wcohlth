@@ -170,7 +170,7 @@ export default function UserInfoCard() {
         const res = await fetch(
           // `http://localhost:5000/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
 
-                    `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
+                    `https://app.cohlth.com/g/creator/getgeneralinfoemail/${encodeURIComponent(userEmail)}`
 
         );
         if (!res.ok) throw new Error("Failed to fetch brand info");
@@ -203,7 +203,7 @@ export default function UserInfoCard() {
       const res = await fetch(
         // `http://localhost:5000/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
 
-                `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
+                `https://app.cohlth.com/g/creator/updategeneralinfo/${encodeURIComponent(userEmail)}`,
 
         {
           method: "POST",

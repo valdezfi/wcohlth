@@ -33,7 +33,7 @@ export default function UserAddressCard() {
           // `http://localhost:5000/brand/getgeneralinfo/${user.email}`
 
 
-                    `https://app.grandeapp.com/g/brand/getgeneralinfo/${user.email}`
+                    `https://app.cohlth.com/g/brand/getgeneralinfo/${user.email}`
 
         );
         const data = await res.json();

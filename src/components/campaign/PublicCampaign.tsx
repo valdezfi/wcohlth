@@ -29,7 +29,7 @@ export default function PublicCampaignView({ campaignName }: { campaignName: str
     const fetchCampaign = async () => {
       // const res = await fetch(`http://localhost:5000/campaign/getcampaigns?campaignName=${campaignName}`);
 
-      const res = await fetch(`https://app.grandeapp.com/g/campaign/getcampaigns?campaignName=${campaignName}`);
+      const res = await fetch(`https://app.cohlth.com/g/campaign/getcampaigns?campaignName=${campaignName}`);
 
 
       

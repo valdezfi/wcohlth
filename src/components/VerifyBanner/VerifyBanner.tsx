@@ -17,7 +17,7 @@ export default function VerifyBanner() {
 
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/c/api/checkverified?email=${encodeURIComponent(email)}`
+          `https://app.cohlth.com/g/c/api/checkverified?email=${encodeURIComponent(email)}`
         );
         const data = await res.json();
 
@@ -44,7 +44,7 @@ export default function VerifyBanner() {
 
     try {
       const res = await fetch(
-        'https://app.grandeapp.com/g/c/api/auth/resendVerificationEmail',
+        'https://app.cohlth.com/g/c/api/auth/resendVerificationEmail',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

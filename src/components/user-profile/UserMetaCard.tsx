@@ -1,4 +1,3 @@
-// TOP of file: no change
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -67,7 +66,7 @@ export default function UserMetaCard() {
 
     (async () => {
       const res = await fetch(
-        `https://app.grandeapp.com/g/creator/getgeneralinfoemail/${encodeURIComponent(email)}`
+        `https://app.cohlth.com/g/creator/getgeneralinfoemail/${encodeURIComponent(email)}`
       );
       const data = await res.json();
 
@@ -84,7 +83,7 @@ export default function UserMetaCard() {
     (async () => {
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
+          `https://app.cohlth.com/g/creator/getprofileimage/${encodeURIComponent(email)}`
         );
         const data = await res.json();
         setProfileImage(data.imageUrl || null);
@@ -118,7 +117,7 @@ export default function UserMetaCard() {
       formData.append("image", profileImageFile);
 
       const res = await fetch(
-        `https://app.grandeapp.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
+        `https://app.cohlth.com/g/creator/postprofileimage/${encodeURIComponent(email)}`,
         { method: "POST", body: formData }
       );
 
@@ -127,7 +126,7 @@ export default function UserMetaCard() {
     }
 
     await fetch(
-      `https://app.grandeapp.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
+      `https://app.cohlth.com/g/creator/updategeneralinfo/${encodeURIComponent(email)}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

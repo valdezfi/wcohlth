@@ -61,7 +61,7 @@ export default function CreateCampaignModal({
       // `http://localhost:5000/campaign/postcampaign/${email}`,
 
 
-      `https://app.grandeapp.com/g/campaign/postcampaign/${email}`,
+      `https://app.cohlth.com/g/campaign/postcampaign/${email}`,
 
 
       {

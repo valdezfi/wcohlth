@@ -41,7 +41,7 @@ export default function NewPasswordForm() {
     try {
       // const res = await fetch("http://localhost:5000/creator/api/newpassword", {
 
-      const res = await fetch("https://app.grandeapp.com/g/creator/api/newpassword", {
+      const res = await fetch("https://app.cohlth.com/g/creator/api/newpassword", {
 
 
 

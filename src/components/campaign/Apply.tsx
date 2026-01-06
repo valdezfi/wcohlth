@@ -21,7 +21,7 @@ export default function ApplyToCampaign({
       try {
         // const res = await fetch(`http://localhost:5000/campaigncreator/${campaignId}`);
 
-        const res = await fetch(`https://app.grandeapp.com/g/campaigncreator/${campaignId}`);
+        const res = await fetch(`https://app.cohlth.com/g/campaigncreator/${campaignId}`);
 
 
 
@@ -61,7 +61,7 @@ export default function ApplyToCampaign({
         // `http://localhost:5000/campaigncreator/${campaignId}/apply`,
 
 
-                `https://app.grandeapp.com/g/campaigncreator/${campaignId}/apply`,
+                `https://app.cohlth.com/g/campaigncreator/${campaignId}/apply`,
 
         {
           method: "POST",

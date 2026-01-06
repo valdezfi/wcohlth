@@ -24,7 +24,7 @@ export default function StartResetPassword() {
     try {
       // const res = await fetch("http://localhost:5000/creator/api/auth/forgot-password", {
 
-      const res = await fetch(" https://app.grandeapp.com/g/creator/api/auth/forgot-password", {
+      const res = await fetch("https://app.cohlth.com//g/creator/api/auth/forgot-password", {
 
 
 

@@ -20,7 +20,7 @@ export default function SettingsCard() {
       setLoading(true);
       // const res = await fetch("http://localhost:5000/creator/api/auth/request-password-reset", {
 
-      const res = await fetch(" https://app.grandeapp.com/g/creator/api/auth/request-password-reset", {
+      const res = await fetch("https://app.cohlth.com/g/creator/api/auth/request-password-reset", {
 
        
         method: "POST",

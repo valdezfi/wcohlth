@@ -52,7 +52,7 @@ export default function CampaignChat({
   // Load chat
   const loadChat = async () => {
     const res = await fetch(
-      `https://app.grandeapp.com/g/api/campaign/chat?campaignId=${campaignId}&brandEmail=${brandEmail}&creatorEmail=${creatorEmail}`
+      `https://app.cohlth.com/g/api/campaign/chat?campaignId=${campaignId}&brandEmail=${brandEmail}&creatorEmail=${creatorEmail}`
     );
     const data = await res.json();
     if (!data.success) return;
@@ -72,7 +72,7 @@ export default function CampaignChat({
   const sendMessage = async () => {
     if (!message.trim()) return;
 
-    await fetch("https://app.grandeapp.com/g/api/campaign/comments", {
+    await fetch("https://app.cohlth.com/g/api/campaign/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       

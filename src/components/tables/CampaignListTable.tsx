@@ -30,7 +30,7 @@ export default function CampaignListTable() {
         // const res = await fetch(`http://localhost:5000/creator/allcampaigns`);
 
 
-                const res = await fetch(`https://app.grandeapp.com/g/creator/allcampaigns`);
+                const res = await fetch(`https://app.cohlth.com/g/creator/allcampaigns`);
 
         if (!res.ok) throw new Error("Failed to fetch campaigns");
         const data = await res.json();

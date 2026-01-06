@@ -266,7 +266,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
 
       try {
         const res = await fetch(
-          `https://app.grandeapp.com/g/api/ai/creatormanager/history?email=${email}`
+          `https://app.cohlth.com/g/api/ai/creatormanager/history?email=${email}`
         );
         const data = await res.json();
 
@@ -304,7 +304,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
           : text;
 
       const res = await fetch(
-        "https://app.grandeapp.com/g/api/ai/creatormanager",
+        "https://app.cohlth.com//g/api/ai/creatormanager",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -329,7 +329,7 @@ export default function CreatorAIManager({ email }: { email: string }) {
   const saveHistory = async (task: Task) => {
     try {
       await fetch(
-        "https://app.grandeapp.com/g/api/ai/creatormanager/history",
+        "https://app.cohlth.com/g/api/ai/creatormanager/history",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
